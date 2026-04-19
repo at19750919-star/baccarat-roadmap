@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>百家樂板路單</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="title-bar">
+      <div class="brand">正版路單</div>
+      <div class="welcome">歡迎光臨 Welcome</div>
+      <div class="stats-inline">
+        <span>局數：<b id="totalCount">0</b></span>
+      </div>
+    </header>
+
+    <!-- 珠盤路 -->
+    <section class="panel bead-panel">
+      <h3 class="panel-title">珠盤路</h3>
+      <div id="beadBoard" class="grid-board bead-board"></div>
+    </section>
+
+    <!-- 大路 -->
+    <section class="panel big-panel">
+      <h3 class="panel-title">大路</h3>
+      <div id="bigRoad" class="grid-board big-road"></div>
+    </section>
+
+    <!-- 三條衍生路 -->
+    <section class="derived-row">
+      <div class="panel derived-panel">
+        <h3 class="panel-title">大眼仔</h3>
+        <div id="bigEye" class="grid-board derived-road"></div>
+      </div>
+      <div class="panel derived-panel">
+        <h3 class="panel-title">小路</h3>
+        <div id="smallRoad" class="grid-board derived-road"></div>
+      </div>
+      <div class="panel derived-panel">
+        <h3 class="panel-title">甲由路</h3>
+        <div id="cockroachRoad" class="grid-board derived-road"></div>
+      </div>
+    </section>
+
+    <!-- 統計 + 預測 + 控制 -->
+    <section class="bottom-row">
+      <div class="panel stats-panel">
+        <h3 class="panel-title">統計</h3>
+        <ul class="stats-list">
+          <li><span class="k banker">莊</span><b id="cntB">0</b></li>
+          <li><span class="k player">閒</span><b id="cntP">0</b></li>
+          <li><span class="k tie">和</span><b id="cntT">0</b></li>
+          <li><span class="k banker-pair">莊對</span><b id="cntBP">0</b></li>
+          <li><span class="k player-pair">閒對</span><b id="cntPP">0</b></li>
+        </ul>
+      </div>
+
+      <div class="panel predict-panel">
+        <h3 class="panel-title">下局預測</h3>
+        <div class="predict-grid">
+          <div class="predict-head"></div>
+          <div class="predict-head">大眼仔</div>
+          <div class="predict-head">小路</div>
+          <div class="predict-head">甲由路</div>
+
+          <div class="predict-row-head banker">若為莊</div>
+          <div class="dot-cell"><span id="pBE_B" class="dot"></span></div>
+          <div class="dot-cell"><span id="pSR_B" class="dot"></span></div>
+          <div class="dot-cell"><span id="pCR_B" class="dot"></span></div>
+
+          <div class="predict-row-head player">若為閒</div>
+          <div class="dot-cell"><span id="pBE_P" class="dot"></span></div>
+          <div class="dot-cell"><span id="pSR_P" class="dot"></span></div>
+          <div class="dot-cell"><span id="pCR_P" class="dot"></span></div>
+        </div>
+      </div>
+
+      <div class="panel control-panel">
+        <h3 class="panel-title">操作</h3>
+        <div class="main-buttons">
+          <button class="btn btn-banker" data-action="B">莊</button>
+          <button class="btn btn-player" data-action="P">閒</button>
+          <button class="btn btn-tie" data-action="T">和</button>
+        </div>
+        <div class="pair-toggles">
+          <label class="toggle"><input type="checkbox" id="bpToggle"> <span class="banker-pair">莊對</span></label>
+          <label class="toggle"><input type="checkbox" id="ppToggle"> <span class="player-pair">閒對</span></label>
+          <div class="hint">勾選後按下莊/閒/和會一起記錄,按完自動清空</div>
+        </div>
+        <div class="util-buttons">
+          <button class="btn btn-undo" id="undoBtn">悔棋</button>
+          <button class="btn btn-clear" id="clearBtn">清盤</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

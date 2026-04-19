@@ -1,0 +1,355 @@
+/* 百家樂板路單 — 樣式 */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  background: #7a0b0b;
+  color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* 標題列 */
+.title-bar {
+  background: linear-gradient(90deg, #8b0000, #b22222);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.title-bar .brand {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 2px;
+}
+.title-bar .welcome {
+  font-size: 18px;
+  color: #ffef9f;
+  font-weight: 700;
+}
+.title-bar .stats-inline {
+  color: #fff;
+  font-size: 15px;
+}
+
+/* 面板 */
+.panel {
+  background: rgba(255, 255, 255, 0.96);
+  color: #222;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 8px;
+  position: relative;
+}
+.panel-title {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: rgba(120, 120, 120, 0.35);
+  pointer-events: none;
+  letter-spacing: 4px;
+}
+
+/* 網格底板通用 */
+.grid-board {
+  display: grid;
+  background:
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell, 28px),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / var(--cell, 28px) 100%,
+    #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* 珠盤路:6 列 x N 欄,較大格 */
+.bead-board {
+  --cell: 32px;
+  grid-template-rows: repeat(6, var(--cell));
+  grid-auto-columns: var(--cell);
+  grid-auto-flow: column;
+  min-height: calc(6 * 32px);
+}
+
+/* 大路:6 列 x N 欄 */
+.big-road {
+  --cell: 28px;
+  grid-template-rows: repeat(6, var(--cell));
+  grid-auto-columns: var(--cell);
+  grid-auto-flow: column;
+  min-height: calc(6 * 28px);
+}
+
+/* 衍生路 */
+.derived-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.derived-road {
+  --cell: 20px;
+  grid-template-rows: repeat(6, var(--cell));
+  grid-auto-columns: var(--cell);
+  grid-auto-flow: column;
+  min-height: calc(6 * 20px);
+}
+
+/* 單格 */
+.cell {
+  position: relative;
+  width: var(--cell, 28px);
+  height: var(--cell, 28px);
+}
+
+/* 珠盤路圓點 */
+.bead {
+  width: 78%;
+  height: 78%;
+  margin: 11%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 14px;
+  position: relative;
+}
+.bead.B { background: #d62121; }
+.bead.P { background: #1e5ec9; }
+.bead.T { background: #2ea94a; }
+
+/* 珠盤路角標(對子):左上紅 = 莊對,右下藍 = 閒對 */
+.pair-bp::before,
+.pair-pp::after {
+  content: "";
+  position: absolute;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+}
+.pair-bp::before {
+  top: 0; left: 0;
+  background: #d62121;
+  border: 1px solid #fff;
+}
+.pair-pp::after {
+  bottom: 0; right: 0;
+  background: #1e5ec9;
+  border: 1px solid #fff;
+}
+
+/* 大路圓圈(空心) */
+.big-circle {
+  width: 78%;
+  height: 78%;
+  margin: 11%;
+  border-radius: 50%;
+  border: 2.5px solid #d62121;
+  background: transparent;
+  position: relative;
+  box-sizing: border-box;
+}
+.big-circle.B { border-color: #d62121; }
+.big-circle.P { border-color: #1e5ec9; }
+
+/* 大路和局斜線 */
+.big-circle.tie-mark::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background: #2ea94a;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}
+
+/* 大路對子角標 */
+.big-circle.pair-bp::before {
+  /* 與 tie-mark 共用 ::before 的情況不會同時出現(此局是和,就不會有莊對);放心使用 */
+}
+.big-circle.pair-bp {
+  box-shadow: inset 6px 6px 0 -3px #d62121;
+}
+.big-circle.pair-pp {
+  box-shadow: inset -6px -6px 0 -3px #1e5ec9;
+}
+.big-circle.pair-bp.pair-pp {
+  box-shadow: inset 6px 6px 0 -3px #d62121, inset -6px -6px 0 -3px #1e5ec9;
+}
+
+/* 衍生路小圓點 */
+.derived-dot {
+  width: 70%;
+  height: 70%;
+  margin: 15%;
+  border-radius: 50%;
+  border: 2px solid #d62121;
+  background: transparent;
+  box-sizing: border-box;
+}
+.derived-dot.blue {
+  border-color: #1e5ec9;
+}
+
+/* 統計 / 預測 / 控制 */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1.4fr;
+  gap: 10px;
+}
+
+.stats-panel .stats-list {
+  list-style: none;
+  padding: 4px 8px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+.stats-panel .stats-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 4px;
+  font-size: 16px;
+}
+.stats-panel .k {
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+}
+.stats-panel .k.banker, .banker { color: #d62121; }
+.stats-panel .k.player, .player { color: #1e5ec9; }
+.stats-panel .k.tie, .tie { color: #2ea94a; }
+.banker-pair { color: #d62121; }
+.player-pair { color: #1e5ec9; }
+.stats-panel .k.banker { background: #d62121; color: #fff; }
+.stats-panel .k.player { background: #1e5ec9; color: #fff; }
+.stats-panel .k.tie { background: #2ea94a; color: #fff; }
+.stats-panel .k.banker-pair { background: #fff; color: #d62121; border: 1.5px solid #d62121; }
+.stats-panel .k.player-pair { background: #fff; color: #1e5ec9; border: 1.5px solid #1e5ec9; }
+
+/* 預測面板 */
+.predict-panel .predict-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+}
+.predict-head {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #555;
+  padding: 4px 0;
+}
+.predict-row-head {
+  font-weight: 800;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 15px;
+}
+.dot-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  min-height: 34px;
+}
+.predict-panel .dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid #ccc;
+  box-sizing: border-box;
+}
+.predict-panel .dot.red { border-color: #d62121; }
+.predict-panel .dot.blue { border-color: #1e5ec9; }
+
+/* 控制面板 */
+.control-panel .main-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 6px 4px;
+}
+.btn {
+  padding: 14px 8px;
+  font-size: 18px;
+  font-weight: 900;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.05s, filter 0.1s;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(1px); }
+.btn-banker { background: #d62121; }
+.btn-player { background: #1e5ec9; }
+.btn-tie    { background: #2ea94a; }
+.btn-undo   { background: #555; }
+.btn-clear  { background: #222; }
+
+.pair-toggles {
+  padding: 6px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 15px;
+  border-top: 1px dashed #ccc;
+  border-bottom: 1px dashed #ccc;
+  margin: 4px 0;
+}
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pair-toggles .hint {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: #777;
+  font-weight: 400;
+}
+.util-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 6px 4px;
+}
+
+/* 響應式:窄螢幕時三區塊直排 */
+@media (max-width: 900px) {
+  .derived-row, .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
