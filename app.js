@@ -196,8 +196,8 @@ function buildDerivedRoad(bigGrid, offset, bigCols, bigRows) {
 }
 
 // 把 marks(線性序列)排成 6xN 網格:同色往下,不同色換欄,拖尾
-function layoutDerivedMarks(marks) {
-  const rows = 6;
+function layoutDerivedMarks(marks, rows) {
+  rows = rows || 6;
   const grid = [];
   for (let r = 0; r < rows; r++) grid.push({});
   let curCol = -1, curRow = -1, curMark = null, maxCol = -1;
@@ -246,8 +246,7 @@ function renderBead() {
   const el = document.getElementById('beadBoard');
   el.innerHTML = '';
   const rows = 6;
-  const cols = Math.max(12, Math.ceil(state.rounds.length / rows));
-  el.style.gridTemplateRows = `repeat(${rows}, var(--cell))`;
+  const cols = 14;
   // 依序填入:每欄 6 格,填滿才換欄
   const cells = rows * cols;
   for (let i = 0; i < cells; i++) {
@@ -265,19 +264,52 @@ function renderBead() {
       bead.className = `bead ${rd.r}`;
       if (rd.bp) bead.classList.add('pair-bp');
       if (rd.pp) bead.classList.add('pair-pp');
-      bead.textContent = rd.r === 'B' ? '莊' : rd.r === 'P' ? '閒' : '和';
+      if (rd.l6) {
+        bead.classList.add('l6');
+        bead.textContent = '6';
+      } else {
+        bead.textContent = rd.r === 'B' ? '莊' : rd.r === 'P' ? '閒' : '和';
+      }
       cell.appendChild(bead);
     }
     el.appendChild(cell);
   }
 }
 
+// 只對「當前進行中的連勝」做動畫:
+// 從頭走訪累積 buf(遇到和局不打斷、遇到對色重置),走完後若最後一段 >= minLen 才點亮;
+// 一旦出現對色,buf 立刻重置 → 歷史龍段不再閃爍
+function computeDragonIdxs(rounds, minLen) {
+  minLen = minLen || 6;
+  const dragonIdxs = new Set();
+  const dragonSeq = new Map(); // idx -> 該格在龍內的序位(0-based,用於動畫波浪延遲)
+  let buf = [];
+  let color = null;
+  for (let i = 0; i < rounds.length; i++) {
+    const rd = rounds[i];
+    if (rd.r === 'T') continue;
+    if (rd.r === color) {
+      buf.push(i);
+    } else {
+      color = rd.r;
+      buf = [i];
+    }
+  }
+  if (buf.length >= minLen) {
+    buf.forEach((i, k) => {
+      dragonIdxs.add(i);
+      dragonSeq.set(i, k);
+    });
+  }
+  return { dragonIdxs, dragonSeq };
+}
+
 function renderBigRoad(big) {
   const el = document.getElementById('bigRoad');
   el.innerHTML = '';
   const rows = 6;
-  const cols = Math.max(20, big.cols + 2);
-  el.style.gridTemplateRows = `repeat(${rows}, var(--cell))`;
+  const cols = 42;
+  const { dragonIdxs, dragonSeq } = computeDragonIdxs(state.rounds, 6);
   for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
       const cell = document.createElement('div');
@@ -289,8 +321,22 @@ function renderBigRoad(big) {
         const circle = document.createElement('div');
         circle.className = `big-circle ${src.r}`;
         if (src.tie && src.tie > 0) circle.classList.add('tie-mark');
-        if (src.pairB) circle.classList.add('pair-bp');
-        if (src.pairP) circle.classList.add('pair-pp');
+        if (dragonIdxs.has(src.idx)) {
+          circle.classList.add('dragon');
+          const seq = dragonSeq.get(src.idx) || 0;
+          // 波浪延遲:每顆差 0.12s,形成由頭延伸到尾的脈動
+          circle.style.setProperty('--dragon-delay', `${seq * 0.12}s`);
+        }
+        if (src.pairB) {
+          const m = document.createElement('span');
+          m.className = 'mark-bp';
+          circle.appendChild(m);
+        }
+        if (src.pairP) {
+          const m = document.createElement('span');
+          m.className = 'mark-pp';
+          circle.appendChild(m);
+        }
         cell.appendChild(circle);
       }
       el.appendChild(cell);
@@ -298,13 +344,13 @@ function renderBigRoad(big) {
   }
 }
 
-function renderDerived(idPrefix, marks) {
+function renderDerived(idPrefix, marks, shape) {
   const el = document.getElementById(idPrefix);
   el.innerHTML = '';
-  const laid = layoutDerivedMarks(marks);
   const rows = 6;
-  const cols = Math.max(20, laid.cols + 2);
-  el.style.gridTemplateRows = `repeat(${rows}, var(--cell))`;
+  const cols = 42;
+  const laid = layoutDerivedMarks(marks, rows);
+  const shapeClass = shape || 'hollow';
   for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
       const cell = document.createElement('div');
@@ -314,7 +360,7 @@ function renderDerived(idPrefix, marks) {
       const m = laid.grid[r] && laid.grid[r][c];
       if (m) {
         const dot = document.createElement('div');
-        dot.className = 'derived-dot' + (m === 'B' ? ' blue' : '');
+        dot.className = `derived-dot shape-${shapeClass}` + (m === 'B' ? ' blue' : '');
         cell.appendChild(dot);
       }
       el.appendChild(cell);
@@ -323,19 +369,21 @@ function renderDerived(idPrefix, marks) {
 }
 
 function renderStats() {
-  let cB = 0, cP = 0, cT = 0, cBP = 0, cPP = 0;
+  let cB = 0, cP = 0, cT = 0, cBP = 0, cPP = 0, cL6 = 0;
   for (const rd of state.rounds) {
     if (rd.r === 'B') cB++;
     else if (rd.r === 'P') cP++;
     else if (rd.r === 'T') cT++;
     if (rd.bp) cBP++;
     if (rd.pp) cPP++;
+    if (rd.l6) cL6++;
   }
   document.getElementById('cntB').textContent = cB;
   document.getElementById('cntP').textContent = cP;
   document.getElementById('cntT').textContent = cT;
   document.getElementById('cntBP').textContent = cBP;
   document.getElementById('cntPP').textContent = cPP;
+  document.getElementById('cntL6').textContent = cL6;
   document.getElementById('totalCount').textContent = state.rounds.length;
 }
 
@@ -347,12 +395,12 @@ function renderPredict() {
   ];
   for (const s of sets) {
     for (const color of ['B', 'P']) {
-      const m = predictNextMark(state.rounds, color, s.offset);
       const dot = document.getElementById(`p${s.key}_${color}`);
+      if (!dot) continue;
+      const m = predictNextMark(state.rounds, color, s.offset);
       dot.classList.remove('red', 'blue');
       if (m === 'R') dot.classList.add('red');
       else if (m === 'B') dot.classList.add('blue');
-      // null 保持灰色
     }
   }
 }
@@ -361,22 +409,23 @@ function renderAll() {
   const big = buildBigRoad(state.rounds);
   renderBead();
   renderBigRoad(big);
-  renderDerived('bigEye', buildDerivedRoad(big.grid, 1, big.cols, big.rows));
-  renderDerived('smallRoad', buildDerivedRoad(big.grid, 2, big.cols, big.rows));
-  renderDerived('cockroachRoad', buildDerivedRoad(big.grid, 3, big.cols, big.rows));
+  renderDerived('bigEye', buildDerivedRoad(big.grid, 1, big.cols, big.rows), 'hollow');
+  renderDerived('smallRoad', buildDerivedRoad(big.grid, 2, big.cols, big.rows), 'solid');
+  renderDerived('cockroachRoad', buildDerivedRoad(big.grid, 3, big.cols, big.rows), 'slash');
   renderStats();
   renderPredict();
   saveState();
 }
 
 // ---------- 互動 ----------
-function addRound(r) {
-  const bp = document.getElementById('bpToggle').checked;
-  const pp = document.getElementById('ppToggle').checked;
-  state.rounds.push({ r, bp, pp });
-  // 按完清空對子勾選
-  document.getElementById('bpToggle').checked = false;
-  document.getElementById('ppToggle').checked = false;
+function addRound(r, mods) {
+  mods = mods || {};
+  state.rounds.push({
+    r,
+    bp: !!mods.bp,
+    pp: !!mods.pp,
+    l6: !!mods.l6,
+  });
   renderAll();
 }
 
@@ -392,13 +441,237 @@ function clearAll() {
   renderAll();
 }
 
+// ---------- 語音播報 (Web Speech API) ----------
+const SOUND_KEY = 'baccarat_sound_enabled_v1';
+const speech = {
+  enabled: true,           // 由音效圖示按鈕切換,localStorage 持久化
+  lang: 'zh-TW',
+  rate: 0.95,              // 略低於預設,字清楚又不會拖
+  pitch: 1.0,
+  volume: 1.0,
+  voice: null,             // 啟動後挑一個中文聲音
+};
+function loadSoundPref() {
+  try {
+    const v = localStorage.getItem(SOUND_KEY);
+    speech.enabled = v !== '0';
+  } catch (_) { speech.enabled = true; }
+}
+const VOLUME_KEY = 'baccarat_sound_volume_v1';
+function loadVolumePref() {
+  try {
+    const v = parseFloat(localStorage.getItem(VOLUME_KEY));
+    if (!isNaN(v) && v >= 0 && v <= 1) speech.volume = v;
+  } catch (_) {}
+}
+function changeVolume(delta) {
+  let v = +(speech.volume + delta).toFixed(2);
+  if (v < 0.1) v = 0.1;
+  if (v > 1.0) v = 1.0;
+  speech.volume = v;
+  try { localStorage.setItem(VOLUME_KEY, String(v)); } catch (_) {}
+  // 試聽當前音量
+  if (speech.enabled) {
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance('音量');
+    utt.lang = speech.lang;
+    utt.rate = speech.rate;
+    utt.pitch = speech.pitch;
+    utt.volume = speech.volume;
+    if (speech.voice) utt.voice = speech.voice;
+    speechSynthesis.speak(utt);
+  }
+}
+function applySoundUI() {
+  const btn = document.getElementById('soundToggleBtn');
+  if (!btn) return;
+  btn.classList.toggle('muted', !speech.enabled);
+  const label = speech.enabled ? '音效:開啟(點擊關閉)' : '音效:關閉(點擊開啟)';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+}
+function toggleSound() {
+  speech.enabled = !speech.enabled;
+  try { localStorage.setItem(SOUND_KEY, speech.enabled ? '1' : '0'); } catch (_) {}
+  applySoundUI();
+  if (!speech.enabled && 'speechSynthesis' in window) speechSynthesis.cancel();
+}
+// 與百家3.0 assistant.html 同一套 voice 優先順序;
+// Google 系列通常輸出比 Microsoft 大聲很多
+const SPEECH_VOICE_HINTS = [
+  'Google 國語',
+  'Google',
+  'Mei-Jia',
+  'Ting-Ting',
+  'Sin-ji',
+  'Microsoft HsiaoChen',
+  'Microsoft Yating',
+  'Microsoft Zhiwei',
+  'Microsoft Hanhan',
+];
+function pickChineseVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const voices = speechSynthesis.getVoices();
+  if (!voices || voices.length === 0) return;
+  const lower = s => String(s || '').toLowerCase();
+  for (const hint of SPEECH_VOICE_HINTS) {
+    const found = voices.find(v => lower(v.name).includes(lower(hint)));
+    if (found) { speech.voice = found; break; }
+  }
+  if (!speech.voice) {
+    speech.voice =
+      voices.find(v => /zh.?TW/i.test(v.lang)) ||
+      voices.find(v => /zh.?HK/i.test(v.lang)) ||
+      voices.find(v => /zh.?CN/i.test(v.lang)) ||
+      voices.find(v => /^zh/i.test(v.lang)) ||
+      null;
+  }
+  if (speech.voice) {
+    console.log('[TTS] 選用 voice:', speech.voice.name, '|', speech.voice.lang);
+  }
+}
+function speak(text) {
+  if (!speech.enabled || !text) return;
+  if (!('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel(); // 中斷上一句,避免疊聲
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = speech.lang;
+    utt.rate = speech.rate;
+    utt.pitch = speech.pitch;
+    utt.volume = speech.volume;
+    if (speech.voice) utt.voice = speech.voice;
+    speechSynthesis.speak(utt);
+  } catch (_) {}
+}
+function speakAction(action, mod) {
+  let text = '';
+  if (mod === 'l6') text = '恭喜眾幸運六';
+  else if (mod === 'bp') text = '莊對莊贏';
+  else if (mod === 'pp') text = '閒對閒贏';
+  else if (action === 'B') text = '莊贏';
+  else if (action === 'P') text = '閒贏';
+  else if (action === 'T') text = '和贏';
+  speak(text);
+}
+
+// ---------- 截圖:把整個 .app 轉成 PNG 下載 ----------
+async function takeScreenshot() {
+  if (typeof html2canvas !== 'function') {
+    alert('截圖套件載入失敗,請檢查網路連線。');
+    return;
+  }
+  const target = document.querySelector('.app');
+  if (!target) return;
+  try {
+    const canvas = await html2canvas(target, {
+      backgroundColor: '#7a0b0b',
+      scale: window.devicePixelRatio > 1 ? 2 : 1.5,
+      useCORS: true,
+      logging: false,
+    });
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const fname = `baccarat_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.png`;
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+  } catch (err) {
+    console.error(err);
+    alert('截圖失敗:' + err.message);
+  }
+}
+
 // ---------- 初始化 ----------
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
+  loadSoundPref();
+  loadVolumePref();
+  applySoundUI();
+  const soundBtn = document.getElementById('soundToggleBtn');
+  if (soundBtn) soundBtn.addEventListener('click', toggleSound);
+  const volUpBtn = document.getElementById('volumeUpBtn');
+  if (volUpBtn) volUpBtn.addEventListener('click', () => changeVolume(0.2));
+  const volDownBtn = document.getElementById('volumeDownBtn');
+  if (volDownBtn) volDownBtn.addEventListener('click', () => changeVolume(-0.2));
+  // 啟動 TTS:有些瀏覽器 voices 是非同步載入,綁 onvoiceschanged 後再選一次
+  pickChineseVoice();
+  if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = pickChineseVoice;
+  }
   document.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', () => addRound(btn.dataset.action));
+    btn.addEventListener('click', () => {
+      const mods = {};
+      if (btn.dataset.mod) mods[btn.dataset.mod] = true;
+      speakAction(btn.dataset.action, btn.dataset.mod);
+      addRound(btn.dataset.action, mods);
+    });
   });
   document.getElementById('undoBtn').addEventListener('click', undo);
   document.getElementById('clearBtn').addEventListener('click', clearAll);
+  const shotBtn = document.getElementById('screenshotBtn');
+  if (shotBtn) shotBtn.addEventListener('click', takeScreenshot);
+  const confirmBtn = document.getElementById('confirmBtn');
+  if (confirmBtn) confirmBtn.addEventListener('click', () => {
+    // TODO: 確定按鈕功能待使用者指定
+  });
+
+  // 鍵盤快捷(模擬專用百家樂鍵盤):
+  //   1=莊  2=閒  3=和  4=莊對  5=閒對  6=Lucky6
+  //   累積按鍵 → Enter 提交(順序不限,重複按同鍵無效)
+  //   範例:1→Enter = 莊;1→4→Enter = 莊對莊贏;2→4→5→Enter = 閒贏兼見莊對+閒對
+  const pendingKeys = new Set();
+  function codeToDigit(code) {
+    if (!code) return null;
+    if (/^Numpad[0-9]$/.test(code)) return code.slice(6);
+    if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+    return null;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const d = codeToDigit(e.code);
+    if (d && '123456'.includes(d)) {
+      pendingKeys.add(d);
+      e.preventDefault();
+      return;
+    }
+    if (e.code === 'NumpadEnter' || e.code === 'Enter') {
+      if (pendingKeys.size === 0) return;
+      let r = null;
+      if (pendingKeys.has('1')) r = 'B';
+      else if (pendingKeys.has('2')) r = 'P';
+      else if (pendingKeys.has('3')) r = 'T';
+      else if (pendingKeys.has('6')) r = 'B'; // 幸運6 必為莊贏 → 不需再按 1
+      if (!r) { pendingKeys.clear(); e.preventDefault(); return; }
+      const mods = {
+        bp: pendingKeys.has('4'),
+        pp: pendingKeys.has('5'),
+        l6: pendingKeys.has('6'),
+      };
+      // 多個 modifier 同時出現時,既有 speakAction 只吃單一 mod,
+      // 為避免誤播(例如 閒贏+莊對 不該播「莊對莊贏」),只有在 outcome 與單一 mod 自然匹配時才帶 mod
+      const modCount = (mods.bp ? 1 : 0) + (mods.pp ? 1 : 0) + (mods.l6 ? 1 : 0);
+      let speakMod = null;
+      if (modCount === 1) {
+        if (mods.bp && r === 'B') speakMod = 'bp';
+        else if (mods.pp && r === 'P') speakMod = 'pp';
+        else if (mods.l6 && r === 'B') speakMod = 'l6';
+      }
+      speakAction(r, speakMod);
+      addRound(r, mods);
+      pendingKeys.clear();
+      e.preventDefault();
+    }
+  });
+
   renderAll();
 });

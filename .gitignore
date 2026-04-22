@@ -1,0 +1,6 @@
+# 本機 IDE / MCP 設定
+.claude/
+.playwright-mcp/
+
+# 開發用截圖(Playwright MCP / 手動測試)
+*.png

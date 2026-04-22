@@ -1,21 +1,36 @@
-/* 百家樂板路單 — 樣式 */
+/* 百家樂板路單 — 樣式 (比照正版路單截圖排版) */
 * { box-sizing: border-box; }
 html, body {
   margin: 0;
   padding: 0;
-  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  /* Art Deco 奢華賭場:中文用 Noto Serif TC 展示襯線,英文/輔助用 Cormorant Garamond */
+  font-family: "Noto Serif TC", "Cormorant Garamond", "Microsoft JhengHei", "PingFang TC", serif;
+  font-weight: 500;
   background: #7a0b0b;
   color: #f5f5f5;
   min-height: 100vh;
+  font-feature-settings: "palt" 1;
+}
+/* 數字統一用 Cinzel(羅馬碑刻感,搭配 tabular-nums 對齊) */
+.title-bar .stats-inline b,
+.stats-panel .stats-list li b,
+.limit-input,
+#totalCount {
+  font-family: "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .app {
-  max-width: 1280px;
+  width: 100%;
+  max-width: 100vw;
   margin: 0 auto;
-  padding: 12px;
+  padding: 10px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* 標題列 */
@@ -23,253 +38,715 @@ html, body {
   background: linear-gradient(90deg, #8b0000, #b22222);
   border: 2px solid #ffd700;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 6px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 .title-bar .brand {
-  font-size: 22px;
+  font-family: "Noto Serif TC", "Cinzel", serif;
+  font-size: 26px;
   font-weight: 900;
   color: #ffd700;
-  letter-spacing: 2px;
-}
-.title-bar .welcome {
-  font-size: 18px;
-  color: #ffef9f;
-  font-weight: 700;
+  letter-spacing: 10px;
+  padding-left: 6px;
+  text-shadow:
+    0 1px 0 rgba(255, 236, 140, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.55);
 }
 .title-bar .stats-inline {
   color: #fff;
+  font: size 20px;x;
+  display: flex;
+  gap: 14px;
+}
+.title-bar .stats-inline b { color: #ffd700; }
+
+/* 標題列內嵌的操作控制 */
+.title-controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.title-controls .action-buttons,
+.title-controls .util-buttons {
+  display: flex;
+  gap: 6px;
+}
+.title-controls .btn {
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #fff;
+  padding: 6px 14px;
+}
+/* 前六顆動作按鈕大小一致 */
+.title-controls .action-btn {
+  width: 60px;
+  height: 34px;
+  padding: 0;
+  font-family: "Noto Serif TC", "Cinzel", serif;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.2),
+    0 2px 3px rgba(0, 0, 0, 0.3);
+}
+/* 莊對/閒對 顏色與「莊」「閒」區別:桃紫 / 靛紫 */
+.title-controls .btn-banker-pair { background: #a4307a; }
+.title-controls .btn-player-pair { background: #5747b8; }
+.title-controls .btn-lucky6 { background: #e0a800; }
+.title-controls .btn-confirm {
+  background: linear-gradient(180deg, #0f9a9a, #076868);
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+/* 退/清 改圓形,並與前六顆保持水平距離 */
+.title-controls .util-buttons {
+  margin-left: 24px;
+  gap: 10px;
+}
+.title-controls .btn-undo,
+.title-controls .btn-clear {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0;
   font-size: 15px;
 }
+.title-controls .btn:hover { filter: brightness(1.1); }
 
-/* 面板 */
+/* 面板通用 */
 .panel {
   background: rgba(255, 255, 255, 0.96);
   color: #222;
   border: 2px solid #ffd700;
   border-radius: 8px;
-  padding: 8px;
+  padding: 0px;
   position: relative;
 }
-.panel-title {
-  position: absolute;
-  right: 10px;
-  bottom: 6px;
-  margin: 0;
-  font-size: 26px;
-  font-weight: 900;
-  color: rgba(120, 120, 120, 0.35);
-  pointer-events: none;
-  letter-spacing: 4px;
-}
-
 /* 網格底板通用 */
 .grid-board {
   display: grid;
-  background:
-    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell, 28px),
-    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / var(--cell, 28px) 100%,
-    #fff;
+  background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
   overflow: hidden;
+  width: 100%;
+  position: relative;
+  container-type: size;
 }
 
-/* 珠盤路:6 列 x N 欄,較大格 */
-.bead-board {
-  --cell: 32px;
-  grid-template-rows: repeat(6, var(--cell));
-  grid-auto-columns: var(--cell);
-  grid-auto-flow: column;
-  min-height: calc(6 * 32px);
+/* 浮水印式標題:放在格子右下角,灰字浮雕感;
+   ::before 在 tree order 為第一個定位後代,繪製在 cell(marks)之前,
+   因此符號會自動覆蓋在標籤之上 */
+.grid-board::before {
+  content: attr(data-label);
+  position: absolute;
+  right: clamp(6px, 1.6cqi, 18px);
+  bottom: clamp(2px, 1cqh, 8px);
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  color: rgba(120, 120, 120, 0.45);
+  letter-spacing: clamp(2px, 1cqi, 10px);
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 0 rgba(0, 0, 0, 0.18);
 }
+.big-road::before { font-size: 40cqh; }
+.derived-road::before { font-size: 42cqh; }
+.bead-board::before { font-size: 22cqh; letter-spacing: clamp(2px, 0.8cqi, 6px); }
 
-/* 大路:6 列 x N 欄 */
+/* 大路:42 欄 x 6 列 */
+.big-panel { padding: 6px; }
 .big-road {
-  --cell: 28px;
-  grid-template-rows: repeat(6, var(--cell));
-  grid-auto-columns: var(--cell);
-  grid-auto-flow: column;
-  min-height: calc(6 * 28px);
+  grid-template-columns: repeat(42, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  aspect-ratio: 42 / 6;
+  background:
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 42) 100%,
+    #fff;
 }
 
-/* 衍生路 */
-.derived-row {
+/* 中間兩欄:左(大眼仔+小路) / 右(甲由路+公告欄) */
+.mid-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mid-col {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  gap: 8px;
+}
+.mid-col > .derived-panel {
+  align-self: start;
 }
 .derived-road {
-  --cell: 20px;
-  grid-template-rows: repeat(6, var(--cell));
-  grid-auto-columns: var(--cell);
-  grid-auto-flow: column;
-  min-height: calc(6 * 20px);
+  grid-template-columns: repeat(42, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  aspect-ratio: 42 / 6;
+  background:
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 42) 100%,
+    #fff;
 }
 
-/* 單格 */
+/* 公告欄 */
+.notice-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+  overflow: hidden;
+}
+.notice-win {
+  font-family: "Cinzel", "Cormorant Garamond", serif;
+  font-size: 42px;
+  font-weight: 900;
+  color: #333;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 0 rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* 公告欄 — Art Deco 手繪圖示 */
+.notice-icons {
+  display: flex;
+  gap: clamp(8px, 3cqh, 24px);
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  padding: 2px 8px;
+  width: 100%;
+  height: 100%;
+}
+.deco-icon-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #6b0f0f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+.deco-icon-btn svg {
+  /* 以公告欄自身高度為基準,不會反推撐大父層 */
+  width: clamp(32px, 88cqh, 72px);
+  height: clamp(32px, 88cqh, 72px);
+  display: block;
+}
+.deco-icon-btn:hover {
+  color: #c8941f;
+  transform: translateY(-2px);
+  filter: drop-shadow(0 2px 3px rgba(200, 148, 31, 0.45));
+}
+.deco-icon-btn:active {
+  transform: translateY(0);
+}
+/* 靜音斜線:預設隱藏 */
+.deco-icon-btn .mute-slash {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+/* 音效關閉狀態:icon 變灰 + 顯示斜線 */
+.deco-icon-btn.muted {
+  color: #8a8a8a;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+.deco-icon-btn.muted:hover {
+  color: #666;
+  transform: translateY(-2px);
+  filter: drop-shadow(0 2px 3px rgba(120, 120, 120, 0.45));
+}
+.deco-icon-btn.muted .mute-slash {
+  opacity: 1;
+}
+
+/* 單格:由 grid 自動配置,寬高填滿 */
 .cell {
   position: relative;
-  width: var(--cell, 28px);
-  height: var(--cell, 28px);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* 珠盤路圓點 */
 .bead {
-  width: 78%;
-  height: 78%;
-  margin: 11%;
+  width: 92%;
+  height: 92%;
+  margin: 4%;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
+  font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  font-size: 14px;
+  /* 字型隨 .bead-board 寬度等比縮放 */
+  font-size: 3.4cqi;
+  line-height: 1;
   position: relative;
+  /* 立體感:內部頂部亮光 + 外部底部投影 */
+  box-shadow:
+    inset 0 0.8cqi 1.2cqi rgba(255, 255, 255, 0.45),
+    inset 0 -0.6cqi 1cqi rgba(0, 0, 0, 0.25),
+    0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 .bead.B { background: #d62121; }
 .bead.P { background: #1e5ec9; }
 .bead.T { background: #2ea94a; }
 
-/* 珠盤路角標(對子):左上紅 = 莊對,右下藍 = 閒對 */
-.pair-bp::before,
-.pair-pp::after {
+/* 幸運 6:紅底白色「6」字 + 金色脈動光暈 + 旋轉星芒 */
+.bead.l6 {
+  background: radial-gradient(circle at 30% 28%, #ff5a5a 0%, #d62121 45%, #7a0000 100%);
+  color: #fff;
+  font-family: "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  font-weight: 900;
+  font-size: 5cqi;
+  font-feature-settings: "lnum" 1;
+  text-shadow:
+    0 0 0.3cqi #ffffff,
+    0 0 0.7cqi #ffd700,
+    0 0 1.2cqi rgba(255, 200, 60, 0.9),
+    0 1px 1px rgba(0, 0, 0, 0.55);
+  animation: l6-halo 1.6s ease-in-out infinite;
+  z-index: 1;
+}
+/* 外層金色旋轉星芒:以 conic-gradient 做出 4 道金光,再用 radial-gradient 遮罩切出環狀 */
+.bead.l6::after {
   content: "";
   position: absolute;
-  width: 26%;
-  height: 26%;
+  inset: -14%;
   border-radius: 50%;
-}
-.pair-bp::before {
-  top: 0; left: 0;
-  background: #d62121;
-  border: 1px solid #fff;
-}
-.pair-pp::after {
-  bottom: 0; right: 0;
-  background: #1e5ec9;
-  border: 1px solid #fff;
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(255, 215, 0, 0.9) 12deg,
+      transparent 30deg,
+      transparent 90deg,
+      rgba(255, 215, 0, 0.9) 102deg,
+      transparent 120deg,
+      transparent 180deg,
+      rgba(255, 215, 0, 0.9) 192deg,
+      transparent 210deg,
+      transparent 270deg,
+      rgba(255, 215, 0, 0.9) 282deg,
+      transparent 300deg
+    );
+  -webkit-mask: radial-gradient(circle, transparent 52%, #000 54%, #000 64%, transparent 66%);
+          mask: radial-gradient(circle, transparent 52%, #000 54%, #000 64%, transparent 66%);
+  animation: l6-spin 3.2s linear infinite;
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* 大路圓圈(空心) */
-.big-circle {
-  width: 78%;
-  height: 78%;
-  margin: 11%;
+@keyframes l6-halo {
+  0%, 100% {
+    box-shadow:
+      inset 0 0.8cqi 1.2cqi rgba(255, 220, 120, 0.55),
+      inset 0 -0.6cqi 1cqi rgba(90, 0, 0, 0.45),
+      0 0 0 0.25cqi #ffd700,
+      0 0 1.2cqi rgba(255, 215, 0, 0.75),
+      0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.45);
+  }
+  50% {
+    box-shadow:
+      inset 0 0.8cqi 1.2cqi rgba(255, 235, 150, 0.75),
+      inset 0 -0.6cqi 1cqi rgba(90, 0, 0, 0.45),
+      0 0 0 0.4cqi #ffee55,
+      0 0 2.6cqi rgba(255, 215, 0, 1),
+      0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.45);
+  }
+}
+@keyframes l6-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 珠盤路角標:加大 + 白框 + 陰影,更醒目 */
+.pair-bp::before, .pair-pp::after {
+  content: "";
+  position: absolute;
+  width: 38%;
+  height: 38%;
   border-radius: 50%;
-  border: 2.5px solid #d62121;
-  background: transparent;
-  position: relative;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
 }
-.big-circle.B { border-color: #d62121; }
-.big-circle.P { border-color: #1e5ec9; }
+.pair-bp::before {
+  top: -4%; left: -4%;
+  background: #d62121;
+}
+.pair-pp::after {
+  bottom: -4%; right: -4%;
+  background: #1e5ec9;
+}
 
-/* 大路和局斜線 */
+/* 大路圓圈 — 漸層淡出效果 (原蟑螂路效果移植):對角兩端淡,中間實,帶陰影 */
+.big-circle {
+  width: 92%;
+  height: 92%;
+  margin: 4%;
+  border-radius: 50%;
+  border: 4px solid #d62121;
+  background: linear-gradient(-45deg, transparent 0%, rgba(214,33,33,0.08) 25%, rgba(214,33,33,0.18) 50%, rgba(214,33,33,0.08) 75%, transparent 100%);
+  position: relative;
+  box-sizing: border-box;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+}
+.big-circle.B {
+  border-color: #d62121;
+  background: linear-gradient(-45deg, transparent 0%, rgba(214,33,33,0.08) 25%, rgba(214,33,33,0.18) 50%, rgba(214,33,33,0.08) 75%, transparent 100%);
+}
+.big-circle.P {
+  border-color: #1e5ec9;
+  background: linear-gradient(-45deg, transparent 0%, rgba(30,94,201,0.08) 25%, rgba(30,94,201,0.18) 50%, rgba(30,94,201,0.08) 75%, transparent 100%);
+}
 .big-circle.tie-mark::before {
   content: "";
   position: absolute;
   top: 50%;
   left: -10%;
   width: 120%;
-  height: 2px;
+  height: 2.5px;
   background: #2ea94a;
   transform: rotate(-45deg);
   transform-origin: center;
 }
+/* 大路裡的莊對/閒對小實心圓:加大 + 白框 + 陰影,更醒目 */
+.big-circle .mark-bp,
+.big-circle .mark-pp {
+  position: absolute;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.big-circle .mark-bp {
+  top: -10%;
+  left: -10%;
+  width: 58%;
+  height: 58%;
+  background: #d62121;
+}
+.big-circle .mark-pp {
+  bottom: -10%;
+  right: -10%;
+  width: 58%;
+  height: 58%;
+  background: #1e5ec9;
+}
 
-/* 大路對子角標 */
-.big-circle.pair-bp::before {
-  /* 與 tie-mark 共用 ::before 的情況不會同時出現(此局是和,就不會有莊對);放心使用 */
+/* 長龍(連續同色 >= 6)動畫:脈動光暈 + 金色外環呼吸 + 微縮放,
+   --dragon-delay 由 JS 依序設定,形成由頭到尾的波浪漣漪 */
+.big-circle.dragon {
+  animation-duration: 1.6s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-delay: var(--dragon-delay, 0s);
+  will-change: transform, box-shadow, border-color;
 }
-.big-circle.pair-bp {
-  box-shadow: inset 6px 6px 0 -3px #d62121;
+.big-circle.dragon.B { animation-name: dragon-breath-b; }
+.big-circle.dragon.P { animation-name: dragon-breath-p; }
+
+@keyframes dragon-breath-b {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 215, 0, 0),
+      0 0 4px rgba(214, 33, 33, 0.35);
+    border-color: #d62121;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(255, 215, 0, 0.6),
+      0 0 14px rgba(255, 90, 90, 0.95),
+      0 0 22px rgba(255, 60, 60, 0.55);
+    border-color: #ff5252;
+    transform: scale(1.06);
+  }
 }
-.big-circle.pair-pp {
-  box-shadow: inset -6px -6px 0 -3px #1e5ec9;
-}
-.big-circle.pair-bp.pair-pp {
-  box-shadow: inset 6px 6px 0 -3px #d62121, inset -6px -6px 0 -3px #1e5ec9;
+@keyframes dragon-breath-p {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 215, 0, 0),
+      0 0 4px rgba(30, 94, 201, 0.35);
+    border-color: #1e5ec9;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(255, 215, 0, 0.6),
+      0 0 14px rgba(80, 160, 255, 0.95),
+      0 0 22px rgba(40, 120, 255, 0.55);
+    border-color: #4a8cff;
+    transform: scale(1.06);
+  }
 }
 
-/* 衍生路小圓點 */
+/* 衍生路記號:大眼仔=空心圓、小路=實心圓、甲由路=斜線 */
 .derived-dot {
-  width: 70%;
-  height: 70%;
-  margin: 15%;
+  width: 92%;
+  height: 92%;
+  margin: 4%;
+  box-sizing: border-box;
+  position: relative;
+}
+/* 大眼仔:空心圓 — 雙層邊框,內淺外深,凹陷感 */
+.derived-dot.shape-hollow {
   border-radius: 50%;
   border: 2px solid #d62121;
   background: transparent;
-  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.25);
 }
-.derived-dot.blue {
-  border-color: #1e5ec9;
+.derived-dot.shape-hollow.blue { border-color: #1e5ec9; }
+/* 小路:實心圓 — 漸層球體,亮點偏右上,質感與珠子路不同 */
+.derived-dot.shape-solid {
+  border-radius: 50%;
+  background: radial-gradient(circle at 70% 28%, #ff8a8a 0%, #e23a3a 35%, #9a0d0d 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+}
+.derived-dot.shape-solid.blue {
+  background: radial-gradient(circle at 70% 28%, #8ab6ff 0%, #3070d6 35%, #0d3a8a 100%);
+}
+/* 蟑螂路:斜線 — 沿用小路漸層球效果,改成條狀 */
+.derived-dot.shape-slash::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8%;
+  width: 116%;
+  height: 3px;
+  border-radius: 2px;
+  background: radial-gradient(circle at 70% 28%, #ff8a8a 0%, #e23a3a 35%, #9a0d0d 100%);
+  transform: translateY(-50%) rotate(-45deg);
+  transform-origin: center;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+}
+.derived-dot.shape-slash.blue::before {
+  background: radial-gradient(circle at 70% 28%, #8ab6ff 0%, #3070d6 35%, #0d3a8a 100%);
 }
 
-/* 統計 / 預測 / 控制 */
+/* 底部四欄:統計 | 珠盤路 | 下局指示 | 限額 */
 .bottom-row {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1.4fr;
-  gap: 10px;
+  grid-template-columns: 150px 16fr 115px 7fr;
+  gap: 8px;
 }
 
+/* 統計 — 六格等分佔滿卡片高度,字級隨卡片高度縮放 */
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+}
 .stats-panel .stats-list {
   list-style: none;
-  padding: 4px 8px;
+  padding: 2px;
   margin: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4px;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
+  /* 設為 size container,讓 cqh 以自身高度為基準 */
+  container-type: size;
 }
 .stats-panel .stats-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
-  background: rgba(0,0,0,0.04);
+  padding: 0 8px;
   border-radius: 4px;
-  font-size: 16px;
+  font-weight: 900;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #fff;
+  min-height: 0;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.2),
+    0 2px 3px rgba(0, 0, 0, 0.3);
+}
+.stats-panel .stats-list li b {
+  color: #fff;
+  font-size: clamp(13px, 7cqh, 26px);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
 }
 .stats-panel .k {
+  font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: clamp(12px, 6.5cqh, 24px);
+  letter-spacing: 2px;
   color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
 }
-.stats-panel .k.banker, .banker { color: #d62121; }
-.stats-panel .k.player, .player { color: #1e5ec9; }
-.stats-panel .k.tie, .tie { color: #2ea94a; }
-.banker-pair { color: #d62121; }
-.player-pair { color: #1e5ec9; }
-.stats-panel .k.banker { background: #d62121; color: #fff; }
-.stats-panel .k.player { background: #1e5ec9; color: #fff; }
-.stats-panel .k.tie { background: #2ea94a; color: #fff; }
-.stats-panel .k.banker-pair { background: #fff; color: #d62121; border: 1.5px solid #d62121; }
-.stats-panel .k.player-pair { background: #fff; color: #1e5ec9; border: 1.5px solid #1e5ec9; }
+/* 六格底色對應六顆按鈕 */
+.stats-panel .stat-banker { background: #d62121; }
+.stats-panel .stat-player { background: #1e5ec9; }
+.stats-panel .stat-tie { background: #2ea94a; }
+.stats-panel .stat-banker-pair { background: #a4307a; }
+.stats-panel .stat-player-pair { background: #5747b8; }
+.stats-panel .stat-lucky6 { background: #e0a800; }
+/* 其他地方仍沿用的色彩類別 */
+.banker { color: #ff4444; }
+.player { color: #4da3ff; }
+.tie { color: #44cc66; }
+.banker-pair { color: #ff4444; }
+.player-pair { color: #4da3ff; }
+.lucky6 { color: #e8a800; }
 
-/* 預測面板 */
+/* 珠盤路:14 欄 x 6 列 */
+.bead-panel { padding: 4px; display: flex; align-items: center; justify-content: center; }
+.bead-board {
+  grid-template-columns: repeat(14, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  aspect-ratio: 14 / 6;
+  /* 設為 container(size)讓 bead 用 cqi 隨寬度縮放、標籤用 cqh 隨高度縮放 */
+  container-type: size;
+  background:
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 14) 100%,
+    #fff;
+}
+
+/* 下局指示 */
+.predict-panel {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.predict-title {
+  text-align: center;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  color: #222;
+  font-size: 15px;
+  letter-spacing: 4px;
+  padding: 2px 0;
+  border-bottom: 1px solid #ccc;
+}
+.predict-legend {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px 8px;
+  justify-items: center;
+  align-items: center;
+  padding: 2px;
+  /* 設為 size container,讓內部圖示用 cqh 隨卡片高度縮放 */
+  container-type: size;
+}
+.leg-row {
+  display: contents;
+}
+.leg-tag {
+  display: inline-flex;
+  width: clamp(20px, 22cqh, 36px);
+  height: clamp(20px, 22cqh, 36px);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: clamp(11px, 10cqh, 18px);
+  /* 立體陰影 */
+  box-shadow:
+    inset 0 3px 4px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.25),
+    0 2px 3px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+.leg-tag.banker { background: #d62121; }
+.leg-tag.player { background: #1e5ec9; }
+.leg-mark {
+  display: inline-block;
+  width: clamp(16px, 20cqh, 32px);
+  height: clamp(16px, 20cqh, 32px);
+  position: relative;
+}
+.leg-mark.circle {
+  border-radius: 50%;
+  border: 2.5px solid #d62121;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+.leg-mark.circle.blue { border-color: #1e5ec9; }
+.leg-mark.solid {
+  border-radius: 50%;
+  background: #d62121;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.25),
+    0 2px 3px rgba(0, 0, 0, 0.35);
+}
+.leg-mark.solid.blue { background: #1e5ec9; }
+.leg-mark.slash::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: -4px;
+  width: 130%; height: 2.5px;
+  background: #d62121;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}
+.leg-mark.slash.blue::before { background: #1e5ec9; }
+
+.predict-dots { margin-top: auto; }
 .predict-panel .predict-grid {
   display: grid;
-  grid-template-columns: 80px 1fr 1fr 1fr;
-  gap: 4px;
-  padding: 4px;
+  grid-template-columns: 30px 1fr 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
 }
 .predict-head {
   text-align: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   color: #555;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 .predict-row-head {
-  font-weight: 800;
+  font-weight: 900;
   text-align: center;
-  padding: 8px 0;
-  font-size: 15px;
+  padding: 6px 0;
+  font-size: 14px;
 }
 .dot-cell {
   display: flex;
@@ -278,12 +755,12 @@ html, body {
   background: #fafafa;
   border: 1px solid #eee;
   border-radius: 4px;
-  min-height: 34px;
+  min-height: 28px;
 }
 .predict-panel .dot {
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 2.5px solid #ccc;
   box-sizing: border-box;
@@ -291,16 +768,104 @@ html, body {
 .predict-panel .dot.red { border-color: #d62121; }
 .predict-panel .dot.blue { border-color: #1e5ec9; }
 
-/* 控制面板 */
+/* 限額面板:保留原顏色,改成橫向「標籤 | 最高/最低」排列 */
+.limit-panel {
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.limit-row-item {
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  align-items: stretch;
+  border-radius: 4px;
+  overflow: hidden;
+  color: #fff;
+  flex: 1;
+}
+.limit-row-item.banker-box { background: #c41e1e; }
+.limit-row-item.tie-box { background: #2a8f3a; }
+.limit-row-item.pair-box { background: #1e5ec9; }
+.limit-row-item.lucky-box { background: #d99a00; }
+.limit-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.limit-values {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 6px;
+  min-width: 0;
+}
+.limit-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  font-family: "Noto Serif TC", serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.limit-key {
+  display: inline-block;
+}
+.limit-input {
+  min-width: 0;
+  width: 100%;
+  padding: 2px 4px;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  font-family: inherit;
+}
+.limit-input:focus {
+  outline: none;
+  background: #fff;
+  color: #222;
+  border-color: #ffd700;
+}
+.limit-input::-webkit-outer-spin-button,
+.limit-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.limit-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* 操作列 */
+.control-panel {
+  display: grid;
+  grid-template-columns: 2fr 3fr 2fr;
+  gap: 8px;
+  align-items: center;
+}
 .control-panel .main-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 6px 4px;
+  gap: 6px;
 }
 .btn {
-  padding: 14px 8px;
-  font-size: 18px;
+  padding: 10px 8px;
+  font-size: 16px;
   font-weight: 900;
   border: none;
   border-radius: 6px;
@@ -317,15 +882,13 @@ html, body {
 .btn-clear  { background: #222; }
 
 .pair-toggles {
-  padding: 6px 8px;
+  padding: 4px 6px;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  font-size: 15px;
-  border-top: 1px dashed #ccc;
-  border-bottom: 1px dashed #ccc;
-  margin: 4px 0;
+  font-size: 14px;
+  color: #222;
 }
 .toggle {
   display: inline-flex;
@@ -336,20 +899,22 @@ html, body {
 }
 .pair-toggles .hint {
   flex-basis: 100%;
-  font-size: 12px;
+  font-size: 11px;
   color: #777;
   font-weight: 400;
 }
 .util-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 6px 4px;
+  gap: 6px;
 }
 
-/* 響應式:窄螢幕時三區塊直排 */
-@media (max-width: 900px) {
-  .derived-row, .bottom-row {
+/* 響應式 */
+@media (max-width: 1000px) {
+  .mid-row, .bottom-row, .control-panel {
     grid-template-columns: 1fr;
+  }
+  .mid-col {
+    grid-template-rows: auto auto;
   }
 }
