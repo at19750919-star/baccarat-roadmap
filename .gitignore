@@ -4,3 +4,5 @@
 
 # 開發用截圖(Playwright MCP / 手動測試)
 *.png
+# 頁面使用的圖片資源不排除
+!dragon_transparent.png

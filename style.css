@@ -1,6 +1,10 @@
 /* 百家樂板路單 — 樣式 (比照正版路單截圖排版) */
-* { box-sizing: border-box; }
-html, body {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
   /* Art Deco 奢華賭場:中文用 Noto Serif TC 展示襯線,英文/輔助用 Cormorant Garamond */
@@ -11,6 +15,7 @@ html, body {
   min-height: 100vh;
   font-feature-settings: "palt" 1;
 }
+
 /* 數字統一用 Cinzel(羅馬碑刻感,搭配 tabular-nums 對齊) */
 .title-bar .stats-inline b,
 .stats-panel .stats-list li b,
@@ -44,6 +49,7 @@ html, body {
   justify-content: space-between;
   gap: 16px;
 }
+
 .title-bar .brand {
   font-family: "Noto Serif TC", "Cinzel", serif;
   font-size: 26px;
@@ -55,13 +61,18 @@ html, body {
     0 1px 0 rgba(255, 236, 140, 0.6),
     0 2px 4px rgba(0, 0, 0, 0.55);
 }
+
 .title-bar .stats-inline {
   color: #fff;
-  font: size 20px;x;
+  font: size 20px;
+  x;
   display: flex;
   gap: 14px;
 }
-.title-bar .stats-inline b { color: #ffd700; }
+
+.title-bar .stats-inline b {
+  color: #ffd700;
+}
 
 /* 標題列內嵌的操作控制 */
 .title-controls {
@@ -72,11 +83,13 @@ html, body {
   gap: 12px;
   flex-wrap: wrap;
 }
+
 .title-controls .action-buttons,
 .title-controls .util-buttons {
   display: flex;
   gap: 6px;
 }
+
 .title-controls .btn {
   font-size: 14px;
   font-weight: 600;
@@ -86,6 +99,7 @@ html, body {
   color: #fff;
   padding: 6px 14px;
 }
+
 /* 前六顆動作按鈕大小一致 */
 .title-controls .action-btn {
   width: 60px;
@@ -104,20 +118,32 @@ html, body {
     inset 0 -2px 3px rgba(0, 0, 0, 0.2),
     0 2px 3px rgba(0, 0, 0, 0.3);
 }
+
 /* 莊對/閒對 顏色與「莊」「閒」區別:桃紫 / 靛紫 */
-.title-controls .btn-banker-pair { background: #a4307a; }
-.title-controls .btn-player-pair { background: #5747b8; }
-.title-controls .btn-lucky6 { background: #e0a800; }
+.title-controls .btn-banker-pair {
+  background: #a4307a;
+}
+
+.title-controls .btn-player-pair {
+  background: #5747b8;
+}
+
+.title-controls .btn-lucky6 {
+  background: #e0a800;
+}
+
 .title-controls .btn-confirm {
   background: linear-gradient(180deg, #0f9a9a, #076868);
   font-size: 18px;
   letter-spacing: 2px;
 }
+
 /* 退/清 改圓形,並與前六顆保持水平距離 */
 .title-controls .util-buttons {
   margin-left: 24px;
   gap: 10px;
 }
+
 .title-controls .btn-undo,
 .title-controls .btn-clear {
   width: 36px;
@@ -126,7 +152,10 @@ html, body {
   padding: 0;
   font-size: 15px;
 }
-.title-controls .btn:hover { filter: brightness(1.1); }
+
+.title-controls .btn:hover {
+  filter: brightness(1.1);
+}
 
 /* 面板通用 */
 .panel {
@@ -137,6 +166,7 @@ html, body {
   padding: 0px;
   position: relative;
 }
+
 /* 網格底板通用 */
 .grid-board {
   display: grid;
@@ -168,12 +198,25 @@ html, body {
     0 -1px 0 rgba(255, 255, 255, 0.85),
     0 1px 0 rgba(0, 0, 0, 0.18);
 }
-.big-road::before { font-size: 40cqh; }
-.derived-road::before { font-size: 42cqh; }
-.bead-board::before { font-size: 22cqh; letter-spacing: clamp(2px, 0.8cqi, 6px); }
+
+.big-road::before {
+  font-size: 40cqh;
+}
+
+.derived-road::before {
+  font-size: 42cqh;
+}
+
+.bead-board::before {
+  font-size: 22cqh;
+  letter-spacing: clamp(2px, 0.8cqi, 6px);
+}
 
 /* 大路:42 欄 x 6 列 */
-.big-panel { padding: 6px; }
+.big-panel {
+  padding: 6px;
+}
+
 .big-road {
   grid-template-columns: repeat(42, 1fr);
   grid-template-rows: repeat(6, 1fr);
@@ -190,15 +233,18 @@ html, body {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+
 .mid-col {
   display: grid;
   grid-template-rows: auto 1fr;
   align-content: start;
   gap: 8px;
 }
-.mid-col > .derived-panel {
+
+.mid-col>.derived-panel {
   align-self: start;
 }
+
 .derived-road {
   grid-template-columns: repeat(42, 1fr);
   grid-template-rows: repeat(6, 1fr);
@@ -217,6 +263,7 @@ html, body {
   container-type: size;
   overflow: hidden;
 }
+
 .notice-win {
   font-family: "Cinzel", "Cormorant Garamond", serif;
   font-size: 42px;
@@ -241,6 +288,7 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
 .deco-icon-btn {
   background: transparent;
   border: none;
@@ -253,35 +301,42 @@ html, body {
   transition: color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
 }
+
 .deco-icon-btn svg {
   /* 以公告欄自身高度為基準,不會反推撐大父層 */
   width: clamp(32px, 88cqh, 72px);
   height: clamp(32px, 88cqh, 72px);
   display: block;
 }
+
 .deco-icon-btn:hover {
   color: #c8941f;
   transform: translateY(-2px);
   filter: drop-shadow(0 2px 3px rgba(200, 148, 31, 0.45));
 }
+
 .deco-icon-btn:active {
   transform: translateY(0);
 }
+
 /* 靜音斜線:預設隱藏 */
 .deco-icon-btn .mute-slash {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
+
 /* 音效關閉狀態:icon 變灰 + 顯示斜線 */
 .deco-icon-btn.muted {
   color: #8a8a8a;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
 }
+
 .deco-icon-btn.muted:hover {
   color: #666;
   transform: translateY(-2px);
   filter: drop-shadow(0 2px 3px rgba(120, 120, 120, 0.45));
 }
+
 .deco-icon-btn.muted .mute-slash {
   opacity: 1;
 }
@@ -318,80 +373,141 @@ html, body {
     0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.35);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
-.bead.B { background: #d62121; }
-.bead.P { background: #1e5ec9; }
-.bead.T { background: #2ea94a; }
 
-/* 幸運 6:紅底白色「6」字 + 金色脈動光暈 + 旋轉星芒 */
+.bead.B {
+  background: #d62121;
+}
+
+.bead.P {
+  background: #1e5ec9;
+}
+
+.bead.T {
+  background: #2ea94a;
+}
+
+/* 幸運 6:紅寶石質感 + 香檳金「6」+ 金環六芒緩轉 + 慢呼吸光暈
+   分層:
+     background(寶石本體:多層 radial-gradient,左上高光、右下熱焰、中央深紅過渡)
+     ::before(寶石頂部珍珠高光,位於底色與文字之間)
+     「6」文字(香檳金 + 浮雕陰影)
+     box-shadow(金邊 + 暖色脈動外暈)
+     ::after(六芒緩慢旋轉的金色光環,位於珠子外圈) */
 .bead.l6 {
-  background: radial-gradient(circle at 30% 28%, #ff5a5a 0%, #d62121 45%, #7a0000 100%);
-  color: #fff;
+  background:
+    radial-gradient(ellipse 38% 28% at 30% 22%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 235, 210, 0.2) 45%, transparent 75%),
+    radial-gradient(circle at 72% 80%, rgba(255, 130, 80, 0.45) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, #ff3434 0%, #c41414 45%, #4a0000 100%);
+  color: #fff4c2;
   font-family: "Cinzel", "Cormorant Garamond", "Georgia", serif;
   font-weight: 900;
-  font-size: 5cqi;
+  font-size: 5.2cqi;
   font-feature-settings: "lnum" 1;
+  letter-spacing: -0.1cqi;
   text-shadow:
-    0 0 0.3cqi #ffffff,
-    0 0 0.7cqi #ffd700,
-    0 0 1.2cqi rgba(255, 200, 60, 0.9),
-    0 1px 1px rgba(0, 0, 0, 0.55);
-  animation: l6-halo 1.6s ease-in-out infinite;
+    /* 浮雕:上亮下暗 */
+    0 -0.08cqi 0 rgba(255, 240, 180, 0.9),
+    0 0.1cqi 0 rgba(90, 30, 0, 0.55),
+    /* 金色光暈 */
+    0 0 0.35cqi rgba(255, 240, 180, 0.95),
+    0 0 0.9cqi rgba(255, 190, 80, 0.75),
+    0 0 1.8cqi rgba(255, 130, 50, 0.35);
+  animation: l6-breathe 2.6s ease-in-out infinite;
   z-index: 1;
+  will-change: box-shadow;
 }
-/* 外層金色旋轉星芒:以 conic-gradient 做出 4 道金光,再用 radial-gradient 遮罩切出環狀 */
-.bead.l6::after {
+
+/* 寶石頂部高光:柔暈橢圓,位於底色之上、文字之下(z-index: -1 在 .bead.l6 的堆疊脈絡內) */
+.bead.l6::before {
   content: "";
   position: absolute;
-  inset: -14%;
+  top: 6%;
+  left: 16%;
+  width: 42%;
+  height: 26%;
   border-radius: 50%;
-  background:
-    conic-gradient(
-      from 0deg,
-      transparent 0deg,
-      rgba(255, 215, 0, 0.9) 12deg,
-      transparent 30deg,
-      transparent 90deg,
-      rgba(255, 215, 0, 0.9) 102deg,
-      transparent 120deg,
-      transparent 180deg,
-      rgba(255, 215, 0, 0.9) 192deg,
-      transparent 210deg,
-      transparent 270deg,
-      rgba(255, 215, 0, 0.9) 282deg,
-      transparent 300deg
-    );
-  -webkit-mask: radial-gradient(circle, transparent 52%, #000 54%, #000 64%, transparent 66%);
-          mask: radial-gradient(circle, transparent 52%, #000 54%, #000 64%, transparent 66%);
-  animation: l6-spin 3.2s linear infinite;
+  background: radial-gradient(ellipse at center,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 245, 220, 0.35) 45%,
+      transparent 85%);
+  transform: rotate(-18deg);
+  filter: blur(0.25cqi);
   pointer-events: none;
   z-index: -1;
 }
 
-@keyframes l6-halo {
-  0%, 100% {
+/* 八顆寶石圓點:均分 45 度排列,以 8 層 radial-gradient 繪出獨立小圓,
+   位於 bead 內部環繞「6」字,整體低透明以柔化存在感;::after 旋轉 → 圓點繞「6」公轉 */
+.bead.l6::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* 圓點中心分布於半徑 35%(以 bead 中心為圓心)的圓周上,每 45 度一顆;
+     每顆以 core 4% + halo 淡出至 11% 呈現柔邊小圓 */
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 225, 120, 0.7) 0%, rgba(255, 225, 120, 0.28) 4%, transparent 11%),
+    /* 0° 香檳金 */
+    radial-gradient(circle at 74.7% 25.3%, rgba(255, 140, 175, 0.7) 0%, rgba(255, 140, 175, 0.28) 4%, transparent 11%),
+    /* 45° 玫瑰 */
+    radial-gradient(circle at 85% 50%, rgba(255, 160, 120, 0.7) 0%, rgba(255, 160, 120, 0.28) 4%, transparent 11%),
+    /* 90° 珊瑚 */
+    radial-gradient(circle at 74.7% 74.7%, rgba(130, 235, 180, 0.7) 0%, rgba(130, 235, 180, 0.28) 4%, transparent 11%),
+    /* 135° 祖母綠 */
+    radial-gradient(circle at 50% 85%, rgba(120, 230, 230, 0.7) 0%, rgba(120, 230, 230, 0.28) 4%, transparent 11%),
+    /* 180° 翠湖藍 */
+    radial-gradient(circle at 25.3% 74.7%, rgba(140, 180, 255, 0.7) 0%, rgba(140, 180, 255, 0.28) 4%, transparent 11%),
+    /* 225° 藍寶石 */
+    radial-gradient(circle at 15% 50%, rgba(210, 150, 255, 0.7) 0%, rgba(210, 150, 255, 0.28) 4%, transparent 11%),
+    /* 270° 紫水晶 */
+    radial-gradient(circle at 25.3% 25.3%, rgba(255, 200, 120, 0.7) 0%, rgba(255, 200, 120, 0.28) 4%, transparent 11%);
+  /* 315° 琥珀金 */
+  animation: l6-spin 8s linear infinite;
+  filter: blur(0.08cqi);
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.85;
+}
+
+@keyframes l6-breathe {
+
+  0%,
+  100% {
     box-shadow:
-      inset 0 0.8cqi 1.2cqi rgba(255, 220, 120, 0.55),
-      inset 0 -0.6cqi 1cqi rgba(90, 0, 0, 0.45),
-      0 0 0 0.25cqi #ffd700,
-      0 0 1.2cqi rgba(255, 215, 0, 0.75),
-      0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.45);
+      /* 內層:寶石面的高光與底暗 */
+      inset 0 0.3cqi 0.6cqi rgba(255, 235, 195, 0.3),
+      inset 0 -0.4cqi 0.8cqi rgba(40, 0, 0, 0.5),
+      /* 細金邊 */
+      0 0 0 0.1cqi rgba(255, 215, 130, 0.7),
+      /* 小範圍暖金暈 */
+      0 0 0.4cqi rgba(255, 180, 80, 0.4),
+      /* 底部投影 */
+      0 0.3cqi 0.6cqi rgba(0, 0, 0, 0.4);
   }
+
   50% {
     box-shadow:
-      inset 0 0.8cqi 1.2cqi rgba(255, 235, 150, 0.75),
-      inset 0 -0.6cqi 1cqi rgba(90, 0, 0, 0.45),
-      0 0 0 0.4cqi #ffee55,
-      0 0 2.6cqi rgba(255, 215, 0, 1),
-      0 0.4cqi 0.8cqi rgba(0, 0, 0, 0.45);
+      inset 0 0.3cqi 0.6cqi rgba(255, 240, 210, 0.4),
+      inset 0 -0.4cqi 0.8cqi rgba(40, 0, 0, 0.5),
+      0 0 0 0.14cqi rgba(255, 225, 150, 0.85),
+      0 0 0.8cqi rgba(255, 200, 100, 0.6),
+      0 0.3cqi 0.6cqi rgba(0, 0, 0, 0.4);
   }
 }
+
 @keyframes l6-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 珠盤路角標:加大 + 白框 + 陰影,更醒目 */
-.pair-bp::before, .pair-pp::after {
+.pair-bp::before,
+.pair-pp::after {
   content: "";
   position: absolute;
   width: 38%;
@@ -401,12 +517,16 @@ html, body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
 }
+
 .pair-bp::before {
-  top: -4%; left: -4%;
+  top: -4%;
+  left: -4%;
   background: #d62121;
 }
+
 .pair-pp::after {
-  bottom: -4%; right: -4%;
+  bottom: -4%;
+  right: -4%;
   background: #1e5ec9;
 }
 
@@ -417,19 +537,22 @@ html, body {
   margin: 4%;
   border-radius: 50%;
   border: 4px solid #d62121;
-  background: linear-gradient(-45deg, transparent 0%, rgba(214,33,33,0.08) 25%, rgba(214,33,33,0.18) 50%, rgba(214,33,33,0.08) 75%, transparent 100%);
+  background: linear-gradient(-45deg, transparent 0%, rgba(214, 33, 33, 0.08) 25%, rgba(214, 33, 33, 0.18) 50%, rgba(214, 33, 33, 0.08) 75%, transparent 100%);
   position: relative;
   box-sizing: border-box;
   filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
 }
+
 .big-circle.B {
   border-color: #d62121;
-  background: linear-gradient(-45deg, transparent 0%, rgba(214,33,33,0.08) 25%, rgba(214,33,33,0.18) 50%, rgba(214,33,33,0.08) 75%, transparent 100%);
+  background: linear-gradient(-45deg, transparent 0%, rgba(214, 33, 33, 0.08) 25%, rgba(214, 33, 33, 0.18) 50%, rgba(214, 33, 33, 0.08) 75%, transparent 100%);
 }
+
 .big-circle.P {
   border-color: #1e5ec9;
-  background: linear-gradient(-45deg, transparent 0%, rgba(30,94,201,0.08) 25%, rgba(30,94,201,0.18) 50%, rgba(30,94,201,0.08) 75%, transparent 100%);
+  background: linear-gradient(-45deg, transparent 0%, rgba(30, 94, 201, 0.08) 25%, rgba(30, 94, 201, 0.18) 50%, rgba(30, 94, 201, 0.08) 75%, transparent 100%);
 }
+
 .big-circle.tie-mark::before {
   content: "";
   position: absolute;
@@ -441,6 +564,7 @@ html, body {
   transform: rotate(-45deg);
   transform-origin: center;
 }
+
 /* 大路裡的莊對/閒對小實心圓:加大 + 白框 + 陰影,更醒目 */
 .big-circle .mark-bp,
 .big-circle .mark-pp {
@@ -450,6 +574,7 @@ html, body {
   border: 2px solid #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 .big-circle .mark-bp {
   top: -10%;
   left: -10%;
@@ -457,6 +582,7 @@ html, body {
   height: 58%;
   background: #d62121;
 }
+
 .big-circle .mark-pp {
   bottom: -10%;
   right: -10%;
@@ -474,17 +600,26 @@ html, body {
   animation-delay: var(--dragon-delay, 0s);
   will-change: transform, box-shadow, border-color;
 }
-.big-circle.dragon.B { animation-name: dragon-breath-b; }
-.big-circle.dragon.P { animation-name: dragon-breath-p; }
+
+.big-circle.dragon.B {
+  animation-name: dragon-breath-b;
+}
+
+.big-circle.dragon.P {
+  animation-name: dragon-breath-p;
+}
 
 @keyframes dragon-breath-b {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       0 0 0 0 rgba(255, 215, 0, 0),
       0 0 4px rgba(214, 33, 33, 0.35);
     border-color: #d62121;
     transform: scale(1);
   }
+
   50% {
     box-shadow:
       0 0 0 2px rgba(255, 215, 0, 0.6),
@@ -494,14 +629,18 @@ html, body {
     transform: scale(1.06);
   }
 }
+
 @keyframes dragon-breath-p {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       0 0 0 0 rgba(255, 215, 0, 0),
       0 0 4px rgba(30, 94, 201, 0.35);
     border-color: #1e5ec9;
     transform: scale(1);
   }
+
   50% {
     box-shadow:
       0 0 0 2px rgba(255, 215, 0, 0.6),
@@ -520,6 +659,7 @@ html, body {
   box-sizing: border-box;
   position: relative;
 }
+
 /* 大眼仔:空心圓 — 雙層邊框,內淺外深,凹陷感 */
 .derived-dot.shape-hollow {
   border-radius: 50%;
@@ -529,7 +669,11 @@ html, body {
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.9),
     0 1px 2px rgba(0, 0, 0, 0.25);
 }
-.derived-dot.shape-hollow.blue { border-color: #1e5ec9; }
+
+.derived-dot.shape-hollow.blue {
+  border-color: #1e5ec9;
+}
+
 /* 小路:實心圓 — 漸層球體,亮點偏右上,質感與珠子路不同 */
 .derived-dot.shape-solid {
   border-radius: 50%;
@@ -538,9 +682,11 @@ html, body {
     0 1px 2px rgba(0, 0, 0, 0.4),
     inset 0 -1px 2px rgba(0, 0, 0, 0.25);
 }
+
 .derived-dot.shape-solid.blue {
   background: radial-gradient(circle at 70% 28%, #8ab6ff 0%, #3070d6 35%, #0d3a8a 100%);
 }
+
 /* 蟑螂路:斜線 — 沿用小路漸層球效果,改成條狀 */
 .derived-dot.shape-slash::before {
   content: "";
@@ -557,6 +703,7 @@ html, body {
     0 1px 2px rgba(0, 0, 0, 0.4),
     inset 0 -1px 2px rgba(0, 0, 0, 0.25);
 }
+
 .derived-dot.shape-slash.blue::before {
   background: radial-gradient(circle at 70% 28%, #8ab6ff 0%, #3070d6 35%, #0d3a8a 100%);
 }
@@ -573,6 +720,7 @@ html, body {
   display: flex;
   flex-direction: column;
 }
+
 .stats-panel .stats-list {
   list-style: none;
   padding: 2px;
@@ -586,6 +734,7 @@ html, body {
   /* 設為 size container,讓 cqh 以自身高度為基準 */
   container-type: size;
 }
+
 .stats-panel .stats-list li {
   display: flex;
   justify-content: space-between;
@@ -601,36 +750,80 @@ html, body {
     inset 0 -2px 3px rgba(0, 0, 0, 0.2),
     0 2px 3px rgba(0, 0, 0, 0.3);
 }
+
 .stats-panel .stats-list li b {
   color: #fff;
   font-size: clamp(13px, 7cqh, 26px);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
+
 .stats-panel .k {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
   font-size: clamp(12px, 6.5cqh, 24px);
   letter-spacing: 2px;
   color: #fff;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
+
 /* 六格底色對應六顆按鈕 */
-.stats-panel .stat-banker { background: #d62121; }
-.stats-panel .stat-player { background: #1e5ec9; }
-.stats-panel .stat-tie { background: #2ea94a; }
-.stats-panel .stat-banker-pair { background: #a4307a; }
-.stats-panel .stat-player-pair { background: #5747b8; }
-.stats-panel .stat-lucky6 { background: #e0a800; }
+.stats-panel .stat-banker {
+  background: #d62121;
+}
+
+.stats-panel .stat-player {
+  background: #1e5ec9;
+}
+
+.stats-panel .stat-tie {
+  background: #2ea94a;
+}
+
+.stats-panel .stat-banker-pair {
+  background: #a4307a;
+}
+
+.stats-panel .stat-player-pair {
+  background: #5747b8;
+}
+
+.stats-panel .stat-lucky6 {
+  background: #e0a800;
+}
+
 /* 其他地方仍沿用的色彩類別 */
-.banker { color: #ff4444; }
-.player { color: #4da3ff; }
-.tie { color: #44cc66; }
-.banker-pair { color: #ff4444; }
-.player-pair { color: #4da3ff; }
-.lucky6 { color: #e8a800; }
+.banker {
+  color: #ff4444;
+}
+
+.player {
+  color: #4da3ff;
+}
+
+.tie {
+  color: #44cc66;
+}
+
+.banker-pair {
+  color: #ff4444;
+}
+
+.player-pair {
+  color: #4da3ff;
+}
+
+.lucky6 {
+  color: #e8a800;
+}
 
 /* 珠盤路:14 欄 x 6 列 */
-.bead-panel { padding: 4px; display: flex; align-items: center; justify-content: center; }
+.bead-panel {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .bead-board {
   grid-template-columns: repeat(14, 1fr);
   grid-template-rows: repeat(6, 1fr);
@@ -650,6 +843,7 @@ html, body {
   flex-direction: column;
   gap: 4px;
 }
+
 .predict-title {
   text-align: center;
   font-family: "Noto Serif TC", serif;
@@ -660,6 +854,7 @@ html, body {
   padding: 2px 0;
   border-bottom: 1px solid #ccc;
 }
+
 .predict-legend {
   flex: 1;
   min-height: 0;
@@ -673,9 +868,11 @@ html, body {
   /* 設為 size container,讓內部圖示用 cqh 隨卡片高度縮放 */
   container-type: size;
 }
+
 .leg-row {
   display: contents;
 }
+
 .leg-tag {
   display: inline-flex;
   width: clamp(20px, 22cqh, 36px);
@@ -694,20 +891,32 @@ html, body {
     0 2px 3px rgba(0, 0, 0, 0.35);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
-.leg-tag.banker { background: #d62121; }
-.leg-tag.player { background: #1e5ec9; }
+
+.leg-tag.banker {
+  background: #d62121;
+}
+
+.leg-tag.player {
+  background: #1e5ec9;
+}
+
 .leg-mark {
   display: inline-block;
   width: clamp(16px, 20cqh, 32px);
   height: clamp(16px, 20cqh, 32px);
   position: relative;
 }
+
 .leg-mark.circle {
   border-radius: 50%;
   border: 2.5px solid #d62121;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
 }
-.leg-mark.circle.blue { border-color: #1e5ec9; }
+
+.leg-mark.circle.blue {
+  border-color: #1e5ec9;
+}
+
 .leg-mark.solid {
   border-radius: 50%;
   background: #d62121;
@@ -716,25 +925,38 @@ html, body {
     inset 0 -2px 3px rgba(0, 0, 0, 0.25),
     0 2px 3px rgba(0, 0, 0, 0.35);
 }
-.leg-mark.solid.blue { background: #1e5ec9; }
+
+.leg-mark.solid.blue {
+  background: #1e5ec9;
+}
+
 .leg-mark.slash::before {
   content: "";
   position: absolute;
-  top: 50%; left: -4px;
-  width: 130%; height: 2.5px;
+  top: 50%;
+  left: -4px;
+  width: 130%;
+  height: 2.5px;
   background: #d62121;
   transform: rotate(-45deg);
   transform-origin: center;
 }
-.leg-mark.slash.blue::before { background: #1e5ec9; }
 
-.predict-dots { margin-top: auto; }
+.leg-mark.slash.blue::before {
+  background: #1e5ec9;
+}
+
+.predict-dots {
+  margin-top: auto;
+}
+
 .predict-panel .predict-grid {
   display: grid;
   grid-template-columns: 30px 1fr 1fr 1fr;
   gap: 3px;
   padding: 3px;
 }
+
 .predict-head {
   text-align: center;
   font-weight: 700;
@@ -742,12 +964,14 @@ html, body {
   color: #555;
   padding: 2px 0;
 }
+
 .predict-row-head {
   font-weight: 900;
   text-align: center;
   padding: 6px 0;
   font-size: 14px;
 }
+
 .dot-cell {
   display: flex;
   align-items: center;
@@ -757,6 +981,7 @@ html, body {
   border-radius: 4px;
   min-height: 28px;
 }
+
 .predict-panel .dot {
   display: inline-block;
   width: 14px;
@@ -765,8 +990,14 @@ html, body {
   border: 2.5px solid #ccc;
   box-sizing: border-box;
 }
-.predict-panel .dot.red { border-color: #d62121; }
-.predict-panel .dot.blue { border-color: #1e5ec9; }
+
+.predict-panel .dot.red {
+  border-color: #d62121;
+}
+
+.predict-panel .dot.blue {
+  border-color: #1e5ec9;
+}
 
 /* 限額面板:保留原顏色,改成橫向「標籤 | 最高/最低」排列 */
 .limit-panel {
@@ -775,6 +1006,7 @@ html, body {
   flex-direction: column;
   gap: 4px;
 }
+
 .limit-row-item {
   display: grid;
   grid-template-columns: 116px 1fr;
@@ -784,10 +1016,23 @@ html, body {
   color: #fff;
   flex: 1;
 }
-.limit-row-item.banker-box { background: #c41e1e; }
-.limit-row-item.tie-box { background: #2a8f3a; }
-.limit-row-item.pair-box { background: #1e5ec9; }
-.limit-row-item.lucky-box { background: #d99a00; }
+
+.limit-row-item.banker-box {
+  background: #c41e1e;
+}
+
+.limit-row-item.tie-box {
+  background: #2a8f3a;
+}
+
+.limit-row-item.pair-box {
+  background: #1e5ec9;
+}
+
+.limit-row-item.lucky-box {
+  background: #d99a00;
+}
+
 .limit-label {
   display: flex;
   align-items: center;
@@ -798,9 +1043,10 @@ html, body {
   font-weight: 900;
   letter-spacing: 3px;
   white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
+
 .limit-values {
   display: flex;
   flex-direction: column;
@@ -809,6 +1055,7 @@ html, body {
   padding: 4px 6px;
   min-width: 0;
 }
+
 .limit-row {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -821,32 +1068,37 @@ html, body {
   letter-spacing: 1px;
   white-space: nowrap;
 }
+
 .limit-key {
   display: inline-block;
 }
+
 .limit-input {
   min-width: 0;
   width: 100%;
   padding: 2px 4px;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 3px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-weight: 800;
   font-size: 18px;
   font-family: inherit;
 }
+
 .limit-input:focus {
   outline: none;
   background: #fff;
   color: #222;
   border-color: #ffd700;
 }
+
 .limit-input::-webkit-outer-spin-button,
 .limit-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 .limit-input[type=number] {
   -moz-appearance: textfield;
 }
@@ -858,11 +1110,13 @@ html, body {
   gap: 8px;
   align-items: center;
 }
+
 .control-panel .main-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 6px;
 }
+
 .btn {
   padding: 10px 8px;
   font-size: 16px;
@@ -873,13 +1127,34 @@ html, body {
   color: #fff;
   transition: transform 0.05s, filter 0.1s;
 }
-.btn:hover { filter: brightness(1.08); }
-.btn:active { transform: translateY(1px); }
-.btn-banker { background: #d62121; }
-.btn-player { background: #1e5ec9; }
-.btn-tie    { background: #2ea94a; }
-.btn-undo   { background: #555; }
-.btn-clear  { background: #222; }
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-banker {
+  background: #d62121;
+}
+
+.btn-player {
+  background: #1e5ec9;
+}
+
+.btn-tie {
+  background: #2ea94a;
+}
+
+.btn-undo {
+  background: #555;
+}
+
+.btn-clear {
+  background: #222;
+}
 
 .pair-toggles {
   padding: 4px 6px;
@@ -890,6 +1165,7 @@ html, body {
   font-size: 14px;
   color: #222;
 }
+
 .toggle {
   display: inline-flex;
   align-items: center;
@@ -897,12 +1173,14 @@ html, body {
   font-weight: 700;
   cursor: pointer;
 }
+
 .pair-toggles .hint {
   flex-basis: 100%;
   font-size: 11px;
   color: #777;
   font-weight: 400;
 }
+
 .util-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -911,10 +1189,237 @@ html, body {
 
 /* 響應式 */
 @media (max-width: 1000px) {
-  .mid-row, .bottom-row, .control-panel {
+
+  .mid-row,
+  .bottom-row,
+  .control-panel {
     grid-template-columns: 1fr;
   }
+
   .mid-col {
     grid-template-rows: auto auto;
+  }
+}
+
+/* ================== 特效：長龍金龍與霓虹外框 ================== */
+
+/* 1. 霓虹外框 (附加在大路的 .cell 內部) */
+.dragon-neon {
+  position: absolute;
+  inset: 0;
+  /* 剛好覆蓋整個 cell，因為大路沒有 gap，邊界會完美重合 */
+  box-sizing: border-box;
+  border: 0 solid #d82bd8;
+  /* 霓虹紫色 */
+  /* 發光效果：外陰影 + 內陰影 */
+  box-shadow: 0 0 10px #d82bd8, inset 0 0 8px #d82bd8;
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 4px;
+  /* 微小的圓角讓折角更好看 */
+  opacity: 0;
+  animation: neon-flash 0.5s forwards ease-in-out;
+}
+
+/* 只保留需要的邊，連接相鄰的 cell 形成一條完整的龍形 */
+.dragon-neon.t {
+  border-top-width: 3px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.dragon-neon.b {
+  border-bottom-width: 3px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.dragon-neon.l {
+  border-left-width: 3px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.dragon-neon.r {
+  border-right-width: 3px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* 若是閒龍，切換成霓虹藍色 */
+.dragon-neon.player-dragon {
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px #3b82f6, inset 0 0 8px #3b82f6;
+}
+
+@keyframes neon-flash {
+  0% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* 2. 滿版金龍飛出特效 */
+.dragon-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 讓龍在畫面正中央 */
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.dragon-overlay.active {
+  opacity: 1;
+}
+
+.golden-dragon-img {
+  height: 90vh;
+  /* 佔滿畫面高度的 90% */
+  object-fit: contain;
+  /* 加上真實的去背圖光暈 */
+  filter: drop-shadow(0 0 25px rgba(255, 200, 50, 0.85)) drop-shadow(0 0 50px rgba(255, 100, 0, 0.6)) brightness(1.2);
+  /* 初始隱藏在螢幕正下方 */
+  transform: translate(0, 100vh) scale(0.3);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* 觸發長龍時的螺旋升空與浮動動畫 */
+.dragon-overlay.active .golden-dragon-img {
+  /* 飛出動畫：2.5秒完成螺旋上升，之後無限循環浮動動畫 */
+  animation:
+    dragon-spiral-entrance 2.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards,
+    dragon-float 4s infinite ease-in-out 2.5s;
+}
+
+/* 螺旋上升 (S型/Z型) 的軌跡，模擬盤旋往上飛的立體感 */
+@keyframes dragon-spiral-entrance {
+  0% {
+    transform: translate(0vw, 100vh) scale(0.3) rotate(-20deg);
+    opacity: 0;
+  }
+
+  25% {
+    transform: translate(25vw, 50vh) scale(0.6) rotate(15deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(-25vw, 20vh) scale(0.8) rotate(-10deg);
+  }
+
+  75% {
+    transform: translate(15vw, 5vh) scale(0.95) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* 定位後的緩慢呼吸與盤旋浮動 */
+@keyframes dragon-float {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(0, -20px) scale(1.02) rotate(2deg);
+  }
+}
+
+/* 每次連擊增加時，讓整條龍也跟著震動放大的打擊感特效 */
+.dragon-overlay.hit {
+  animation: dragon-hit-pulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes dragon-hit-pulse {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+
+  30% {
+    transform: scale(1.15);
+    filter: brightness(1.6) drop-shadow(0 0 30px rgba(255, 255, 0, 0.8));
+  }
+
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* 3. 連勝數字特效 */
+.dragon-combo {
+  position: absolute;
+  /* 隨螢幕縮放的超大字體，使用跟標題相同的復古數字字型 */
+  font-size: 35vh;
+  font-family: "Cinzel", "Cormorant Garamond", serif;
+  font-weight: 900;
+  color: #fff;
+  /* 華麗的金色火焰多層陰影 */
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 30px #ffd700,
+    0 0 60px #ff8c00,
+    0 0 100px #ff0000;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* 每次數字更新時觸發強烈的 Pop 彈出特效 */
+.dragon-combo.pop {
+  animation: combo-pop 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes combo-pop {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+    filter: brightness(2);
+  }
+
+  30% {
+    transform: scale(1.3);
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+    filter: brightness(1);
   }
 }

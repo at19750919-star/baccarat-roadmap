@@ -310,13 +310,68 @@ function renderBigRoad(big) {
   const rows = 6;
   const cols = 42;
   const { dragonIdxs, dragonSeq } = computeDragonIdxs(state.rounds, 6);
+  const dragonLen = dragonIdxs.size;
+  const isSuperDragon = dragonLen >= 7; // 連七觸發大絕招
+
+  // 巨龍特效
+  const dragonOverlay = document.getElementById('dragonOverlay');
+  const dragonCombo = document.getElementById('dragonCombo');
+  if (dragonOverlay) {
+    if (isSuperDragon) {
+      dragonOverlay.classList.add('active');
+      if (dragonCombo && dragonCombo.textContent != dragonLen) {
+        dragonCombo.textContent = dragonLen;
+        
+        // 數字彈出動畫
+        dragonCombo.classList.remove('pop');
+        void dragonCombo.offsetWidth; // 強制重繪以重啟動畫
+        dragonCombo.classList.add('pop');
+
+        // 整條龍跟著打擊震動特效
+        dragonOverlay.classList.remove('hit');
+        void dragonOverlay.offsetWidth;
+        dragonOverlay.classList.add('hit');
+      }
+    } else {
+      dragonOverlay.classList.remove('active');
+      dragonOverlay.classList.remove('hit');
+      if (dragonCombo) dragonCombo.textContent = '';
+    }
+  }
+
+  // 輔助函式：判斷某格是否為現任長龍的一部份
+  const isDragonCell = (r, c) => {
+    if (r < 0 || r >= rows || c < 0 || c >= cols) return false;
+    const cell = big.grid[r] && big.grid[r][c];
+    return cell && dragonIdxs.has(cell.idx);
+  };
+
   for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.style.gridColumn = (c + 1);
       cell.style.gridRow = (r + 1);
+      
       const src = big.grid[r] && big.grid[r][c];
+
+      // 繪製霓虹外框 (當達到連七條件且此格屬於該長龍時)
+      if (isSuperDragon && src && dragonIdxs.has(src.idx)) {
+        const neon = document.createElement('div');
+        neon.className = 'dragon-neon';
+        if (src.r === 'P') neon.classList.add('player-dragon');
+        // 只繪製沒有與其他龍身相接的邊
+        if (!isDragonCell(r - 1, c)) neon.classList.add('t');
+        if (!isDragonCell(r + 1, c)) neon.classList.add('b');
+        if (!isDragonCell(r, c - 1)) neon.classList.add('l');
+        if (!isDragonCell(r, c + 1)) neon.classList.add('r');
+        
+        // 延遲動畫，從頭到尾亮起
+        const seq = dragonSeq.get(src.idx) || 0;
+        neon.style.animationDelay = `${seq * 0.08}s`;
+        cell.appendChild(neon);
+      }
+
       if (src) {
         const circle = document.createElement('div');
         circle.className = `big-circle ${src.r}`;
