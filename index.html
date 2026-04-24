@@ -147,6 +147,35 @@
               </svg>
             </button>
 
+            <!-- 全螢幕:Art Deco 四角外擴箭頭 + 中央雙重方框 -->
+            <button class="deco-icon-btn" id="fullscreenBtn" aria-label="全螢幕切換" title="全螢幕切換 (F)">
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polygon points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <polygon points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.55"/>
+                <!-- 四角外擴 L 形箭頭 -->
+                <g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="square">
+                  <polyline points="44,30 30,30 30,44"/>
+                  <polyline points="76,30 90,30 90,44"/>
+                  <polyline points="44,90 30,90 30,76"/>
+                  <polyline points="76,90 90,90 90,76"/>
+                </g>
+                <!-- 四角對角擴張短線 -->
+                <g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">
+                  <line x1="34" y1="34" x2="44" y2="44"/>
+                  <line x1="86" y1="34" x2="76" y2="44"/>
+                  <line x1="34" y1="86" x2="44" y2="76"/>
+                  <line x1="86" y1="86" x2="76" y2="76"/>
+                </g>
+                <!-- 中央雙重方框(螢幕邊界意象) -->
+                <rect x="48" y="48" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/>
+                <rect x="52" y="52" width="16" height="16" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                <circle cx="60" cy="6" r="1.6" fill="currentColor"/>
+                <circle cx="60" cy="114" r="1.6" fill="currentColor"/>
+                <circle cx="6" cy="60" r="1.6" fill="currentColor"/>
+                <circle cx="114" cy="60" r="1.6" fill="currentColor"/>
+              </svg>
+            </button>
+
             <!-- 截圖:Art Deco 四角 L 形框 + 中央十字準心 -->
             <button class="deco-icon-btn" id="screenshotBtn" aria-label="截圖" title="截圖">
               <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

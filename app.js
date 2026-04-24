@@ -246,7 +246,7 @@ function renderBead() {
   const el = document.getElementById('beadBoard');
   el.innerHTML = '';
   const rows = 6;
-  const cols = 14;
+  const cols = 20;
   // 依序填入:每欄 6 格,填滿才換欄
   const cells = rows * cols;
   for (let i = 0; i < cells; i++) {
@@ -308,7 +308,7 @@ function renderBigRoad(big) {
   const el = document.getElementById('bigRoad');
   el.innerHTML = '';
   const rows = 6;
-  const cols = 42;
+  const cols = 39;
   const { dragonIdxs, dragonSeq } = computeDragonIdxs(state.rounds, 6);
   const dragonLen = dragonIdxs.size;
   const isSuperDragon = dragonLen >= 7; // 連七觸發大絕招
@@ -403,7 +403,7 @@ function renderDerived(idPrefix, marks, shape) {
   const el = document.getElementById(idPrefix);
   el.innerHTML = '';
   const rows = 6;
-  const cols = 42;
+  const cols = 29;
   const laid = layoutDerivedMarks(marks, rows);
   const shapeClass = shape || 'hollow';
   for (let c = 0; c < cols; c++) {
@@ -658,8 +658,28 @@ async function takeScreenshot() {
   }
 }
 
+// ---------- 全螢幕切換 ----------
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    const root = document.documentElement;
+    const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+    if (req) req.call(root).catch(err => console.warn('無法進入全螢幕:', err));
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (exit) exit.call(document);
+  }
+}
+
+// ---------- 全螢幕等比縮放:保持 1920×1080 設計稿、視口變化時等比貼合 ----------
+function fitApp() {
+  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.documentElement.style.setProperty('--app-scale', scale);
+}
+window.addEventListener('resize', fitApp);
+
 // ---------- 初始化 ----------
 document.addEventListener('DOMContentLoaded', () => {
+  fitApp();
   loadState();
   loadSoundPref();
   loadVolumePref();
@@ -687,6 +707,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearBtn').addEventListener('click', clearAll);
   const shotBtn = document.getElementById('screenshotBtn');
   if (shotBtn) shotBtn.addEventListener('click', takeScreenshot);
+  const fsBtn = document.getElementById('fullscreenBtn');
+  if (fsBtn) fsBtn.addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    if (fsBtn) fsBtn.classList.toggle('active', !!document.fullscreenElement);
+  });
   const confirmBtn = document.getElementById('confirmBtn');
   if (confirmBtn) confirmBtn.addEventListener('click', () => {
     // TODO: 確定按鈕功能待使用者指定
@@ -707,6 +732,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.repeat) return;
     const tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.code === 'KeyF' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      toggleFullscreen();
+      e.preventDefault();
+      return;
+    }
     const d = codeToDigit(e.code);
     if (d && '123456'.includes(d)) {
       pendingKeys.add(d);

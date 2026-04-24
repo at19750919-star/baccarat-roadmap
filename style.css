@@ -1,4 +1,43 @@
-/* 百家樂板路單 — 樣式 (比照正版路單截圖排版) */
+/* 百家樂板路單 — 樣式 (1920×1080 固定全螢幕) */
+
+/* ===== Design Tokens =====
+   目標解析度:固定 1920×1080 全螢幕。所有尺寸為這個解析度設計。 */
+:root {
+  /* 8px spatial grid */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+
+  /* Type scale 1.25 (modular) */
+  --t-xs: 10px;
+  --t-sm: 12px;
+  --t-base: 14px;
+  --t-md: 18px;
+  --t-lg: 22px;
+  --t-xl: 28px;
+  --t-2xl: 36px;
+
+  /* 方格尺寸 (所有格子保證正方形,下三路 = 大路 × 2/3) */
+  --cell-big: 48px;
+  --cell-derived: 32px;    /* 48 × 2/3 */
+  --cell-bead: 46px;
+
+  /* 欄數 */
+  --cols-big: 39;          /* 39 × 48 = 1872 */
+  --cols-derived: 29;      /* 29 × 32 = 928 */
+  --cols-bead: 20;         /* 20 × 46 = 920 */
+
+  /* Layout rows */
+  --row-title: 80px;
+  --row-big: 288px;
+  --row-mid-panel: 192px;
+  --row-mid: 392px;
+  --row-bottom: 276px;
+  /* 80+288+392+276 + 3×8 gap + 2×10 padding = 1080 ✓ */
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,8 +51,15 @@ body {
   font-weight: 500;
   background: #7a0b0b;
   color: #f5f5f5;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   font-feature-settings: "palt" 1;
+}
+
+/* 讓固定 1920×1080 畫布在任何視口尺寸下等比縮放居中,避免截斷 */
+body {
+  display: grid;
+  place-items: center;
 }
 
 /* 數字統一用 Cinzel(羅馬碑刻感,搭配 tabular-nums 對齊) */
@@ -29,13 +75,18 @@ body {
 }
 
 .app {
-  width: 100%;
-  max-width: 100vw;
-  margin: 0 auto;
+  width: 1920px;
+  height: 1080px;
+  flex-shrink: 0;
   padding: 10px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  /* 大路 288 / 中段 392 / 底部 276,下三路格 = 大路格 × 2/3 */
+  grid-template-rows: var(--row-title) var(--row-big) var(--row-mid) var(--row-bottom);
+  gap: var(--sp-2);
+  transform-origin: center center;
+  /* --app-scale 由 JS 依視口比例動態設定 */
+  transform: scale(var(--app-scale, 1));
 }
 
 /* 標題列 */
@@ -64,8 +115,7 @@ body {
 
 .title-bar .stats-inline {
   color: #fff;
-  font: size 20px;
-  x;
+  font-size: 18px;
   display: flex;
   gap: 14px;
 }
@@ -167,6 +217,7 @@ body {
   position: relative;
 }
 
+
 /* 網格底板通用 */
 .grid-board {
   display: grid;
@@ -186,7 +237,7 @@ body {
   content: attr(data-label);
   position: absolute;
   right: clamp(6px, 1.6cqi, 18px);
-  bottom: clamp(2px, 1cqh, 8px);
+  bottom: clamp(6px, 3cqh, 20px);
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
   color: rgba(120, 120, 120, 0.45);
@@ -212,18 +263,23 @@ body {
   letter-spacing: clamp(2px, 0.8cqi, 6px);
 }
 
-/* 大路:42 欄 x 6 列 */
+/* 大路:39 欄 x 6 列,每格 48×48px */
 .big-panel {
-  padding: 6px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .big-road {
-  grid-template-columns: repeat(42, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  aspect-ratio: 42 / 6;
+  grid-template-columns: repeat(var(--cols-big), var(--cell-big));
+  grid-template-rows: repeat(6, var(--cell-big));
+  width: calc(var(--cols-big) * var(--cell-big));   /* 1872px */
+  height: calc(6 * var(--cell-big));                 /* 288px */
+  container-type: size;
   background:
-    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
-    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 42) 100%,
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell-big),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / var(--cell-big) 100%,
     #fff;
 }
 
@@ -231,28 +287,34 @@ body {
 .mid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--sp-2);
+  min-height: 0;
 }
 
 .mid-col {
   display: grid;
-  grid-template-rows: auto 1fr;
-  align-content: start;
-  gap: 8px;
-}
-
-.mid-col>.derived-panel {
-  align-self: start;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--sp-2);
+  min-height: 0;
 }
 
 .derived-road {
-  grid-template-columns: repeat(42, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  aspect-ratio: 42 / 6;
+  grid-template-columns: repeat(var(--cols-derived), var(--cell-derived));
+  grid-template-rows: repeat(6, var(--cell-derived));
+  width: calc(var(--cols-derived) * var(--cell-derived));  /* 928px */
+  height: calc(6 * var(--cell-derived));                    /* 192px */
+  margin: 0 auto;
+  container-type: size;
   background:
-    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
-    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 42) 100%,
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell-derived),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / var(--cell-derived) 100%,
     #fff;
+}
+
+.derived-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 公告欄 */
@@ -303,9 +365,8 @@ body {
 }
 
 .deco-icon-btn svg {
-  /* 以公告欄自身高度為基準,不會反推撐大父層 */
-  width: clamp(32px, 88cqh, 72px);
-  height: clamp(32px, 88cqh, 72px);
+  width: 90px;
+  height: 90px;
   display: block;
 }
 
@@ -711,8 +772,10 @@ body {
 /* 底部四欄:統計 | 珠盤路 | 下局指示 | 限額 */
 .bottom-row {
   display: grid;
-  grid-template-columns: 150px 16fr 115px 7fr;
-  gap: 8px;
+  grid-template-columns: 300px 940px 200px 436px;
+  gap: var(--sp-2);
+  /* 高度由 .app grid-template-rows 決定 */
+  min-height: 0;
 }
 
 /* 統計 — 六格等分佔滿卡片高度,字級隨卡片高度縮放 */
@@ -726,8 +789,9 @@ body {
   padding: 2px;
   margin: 0;
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-auto-flow: column;
   gap: 2px;
   flex: 1;
   min-height: 0;
@@ -753,14 +817,14 @@ body {
 
 .stats-panel .stats-list li b {
   color: #fff;
-  font-size: clamp(13px, 7cqh, 26px);
+  font-size: clamp(16px, 11cqh, 38px);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .stats-panel .k {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  font-size: clamp(12px, 6.5cqh, 24px);
+  font-size: clamp(15px, 9cqh, 32px);
   letter-spacing: 2px;
   color: #fff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
@@ -816,23 +880,23 @@ body {
   color: #e8a800;
 }
 
-/* 珠盤路:14 欄 x 6 列 */
+/* 珠盤路:20 欄 x 6 列,每格 46×46px */
 .bead-panel {
-  padding: 4px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .bead-board {
-  grid-template-columns: repeat(14, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  aspect-ratio: 14 / 6;
-  /* 設為 container(size)讓 bead 用 cqi 隨寬度縮放、標籤用 cqh 隨高度縮放 */
+  grid-template-columns: repeat(var(--cols-bead), var(--cell-bead));
+  grid-template-rows: repeat(6, var(--cell-bead));
+  width: calc(var(--cols-bead) * var(--cell-bead));   /* 920px */
+  height: calc(6 * var(--cell-bead));                  /* 276px */
   container-type: size;
   background:
-    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% calc(100% / 6),
-    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / calc(100% / 14) 100%,
+    linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell-bead),
+    linear-gradient(90deg, #d8d8d8 1px, transparent 1px) 0 0 / var(--cell-bead) 100%,
     #fff;
 }
 
@@ -1014,7 +1078,8 @@ body {
   border-radius: 4px;
   overflow: hidden;
   color: #fff;
-  flex: 1;
+  flex: 1;            /* 4 列均分限額面板 192px 高 */
+  min-height: 0;
 }
 
 .limit-row-item.banker-box {
@@ -1049,14 +1114,16 @@ body {
 
 .limit-values {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
   min-width: 0;
 }
 
 .limit-row {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
