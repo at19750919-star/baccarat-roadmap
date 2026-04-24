@@ -721,7 +721,32 @@ document.addEventListener('DOMContentLoaded', () => {
   //   1=莊  2=閒  3=和  4=莊對  5=閒對  6=Lucky6
   //   累積按鍵 → Enter 提交(順序不限,重複按同鍵無效)
   //   範例:1→Enter = 莊;1→4→Enter = 莊對莊贏;2→4→5→Enter = 閒贏兼見莊對+閒對
+  //   Numpad7 單擊 = 退(undo),連按兩下 = 設定金額(聚焦第一個限額輸入框)
+  //   Numpad9 連按兩下 = 清(clear)
+  //   Numpad8 連按兩下 = 全螢幕切換
   const pendingKeys = new Set();
+  const DOUBLE_PRESS_MS = 400;
+  const lastPressAt = new Map();
+  const pendingSingleTimer = new Map();
+  function focusFirstLimit() {
+    const input = document.querySelector('.limit-input');
+    if (input) { input.focus(); input.select(); }
+  }
+  // 限額輸入框內:Enter = 下一個輸入框(最後一個則失焦)、Esc = 失焦回主操作區
+  // 為了配合沒有 Tab 的小鍵盤
+  document.querySelectorAll('.limit-input').forEach((input, idx, list) => {
+    input.addEventListener('keydown', (e) => {
+      if (e.code === 'Escape') {
+        input.blur();
+        e.preventDefault();
+      } else if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+        const next = list[idx + 1];
+        if (next) { next.focus(); next.select(); }
+        else input.blur();
+        e.preventDefault();
+      }
+    });
+  });
   function codeToDigit(code) {
     if (!code) return null;
     if (/^Numpad[0-9]$/.test(code)) return code.slice(6);
@@ -732,8 +757,43 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.repeat) return;
     const tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-    if (e.code === 'KeyF' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    if ((e.code === 'KeyF' || e.code === 'NumpadDivide') && !e.ctrlKey && !e.altKey && !e.metaKey) {
       toggleFullscreen();
+      e.preventDefault();
+      return;
+    }
+    // Numpad7:單擊 undo、雙擊 設定金額
+    if (e.code === 'Numpad7') {
+      const now = performance.now();
+      const prev = lastPressAt.get(e.code) || 0;
+      if (now - prev <= DOUBLE_PRESS_MS) {
+        lastPressAt.delete(e.code);
+        const t = pendingSingleTimer.get(e.code);
+        if (t) { clearTimeout(t); pendingSingleTimer.delete(e.code); }
+        focusFirstLimit();
+      } else {
+        lastPressAt.set(e.code, now);
+        const t = setTimeout(() => {
+          pendingSingleTimer.delete(e.code);
+          lastPressAt.delete(e.code);
+          undo();
+        }, DOUBLE_PRESS_MS);
+        pendingSingleTimer.set(e.code, t);
+      }
+      e.preventDefault();
+      return;
+    }
+    // Numpad8 / Numpad9:只有雙擊動作
+    if (e.code === 'Numpad8' || e.code === 'Numpad9') {
+      const now = performance.now();
+      const prev = lastPressAt.get(e.code) || 0;
+      if (now - prev <= DOUBLE_PRESS_MS) {
+        lastPressAt.delete(e.code);
+        if (e.code === 'Numpad8') toggleFullscreen();
+        else clearAll();
+      } else {
+        lastPressAt.set(e.code, now);
+      }
       e.preventDefault();
       return;
     }
