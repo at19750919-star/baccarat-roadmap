@@ -599,15 +599,29 @@ function speak(text) {
     speechSynthesis.speak(utt);
   } catch (_) {}
 }
-function speakAction(action, mod) {
-  let text = '';
-  if (mod === 'l6') text = '恭喜眾幸運六';
-  else if (mod === 'bp') text = '莊對莊贏';
-  else if (mod === 'pp') text = '閒對閒贏';
-  else if (action === 'B') text = '莊贏';
-  else if (action === 'P') text = '閒贏';
-  else if (action === 'T') text = '和贏';
-  speak(text);
+// 依 action (B/P/T) 與 mods ({bp, pp, l6}) 組合語音
+// Lucky6 獨立:一律播「恭喜眾幸運六」(l6 只會綁莊,不再疊加對子語音)
+// 其他情況組合:[莊對][閒對] + (莊贏/閒贏/和贏)
+function speakAction(action, mods) {
+  // 向後相容:舊呼叫傳 string(如 'bp') → 轉成 mods 物件
+  if (typeof mods === 'string') {
+    const key = mods;
+    mods = {};
+    if (key) mods[key] = true;
+  }
+  mods = mods || {};
+  if (mods.l6) { speak('恭喜眾幸運六'); return; }
+
+  let prefix = '';
+  if (mods.bp) prefix += '莊對';
+  if (mods.pp) prefix += '閒對';
+
+  let outcome = '';
+  if (action === 'B') outcome = '莊贏';
+  else if (action === 'P') outcome = '閒贏';
+  else if (action === 'T') outcome = '和贏';
+
+  speak(prefix + outcome);
 }
 
 // ---------- 截圖:把整個 .app 轉成 PNG 下載 ----------
@@ -665,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const mods = {};
       if (btn.dataset.mod) mods[btn.dataset.mod] = true;
-      speakAction(btn.dataset.action, btn.dataset.mod);
+      speakAction(btn.dataset.action, mods);
       addRound(btn.dataset.action, mods);
     });
   });
@@ -712,16 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pp: pendingKeys.has('5'),
         l6: pendingKeys.has('6'),
       };
-      // 多個 modifier 同時出現時,既有 speakAction 只吃單一 mod,
-      // 為避免誤播(例如 閒贏+莊對 不該播「莊對莊贏」),只有在 outcome 與單一 mod 自然匹配時才帶 mod
-      const modCount = (mods.bp ? 1 : 0) + (mods.pp ? 1 : 0) + (mods.l6 ? 1 : 0);
-      let speakMod = null;
-      if (modCount === 1) {
-        if (mods.bp && r === 'B') speakMod = 'bp';
-        else if (mods.pp && r === 'P') speakMod = 'pp';
-        else if (mods.l6 && r === 'B') speakMod = 'l6';
-      }
-      speakAction(r, speakMod);
+      speakAction(r, mods);
       addRound(r, mods);
       pendingKeys.clear();
       e.preventDefault();
