@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //   Numpad9 連按兩下 = 清(clear)
   //   Numpad8 連按兩下 = 全螢幕切換
   const pendingKeys = new Set();
-  const DOUBLE_PRESS_MS = 400;
+  const DOUBLE_PRESS_MS = 250;
   const lastPressAt = new Map();
   const pendingSingleTimer = new Map();
   function focusFirstLimit() {
