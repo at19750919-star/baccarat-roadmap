@@ -723,7 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //   範例:1→Enter = 莊;1→4→Enter = 莊對莊贏;2→4→5→Enter = 閒贏兼見莊對+閒對
   //   Numpad7 單擊 = 退(undo),連按兩下 = 設定金額(聚焦第一個限額輸入框)
   //   Numpad9 連按兩下 = 清(clear)
-  //   Numpad8 連按兩下 = 全螢幕切換
+  //   Numpad8 連按兩下 = 隱藏/顯示頁面(老闆鍵,瀏覽器無法真正最小化視窗)
   const pendingKeys = new Set();
   const DOUBLE_PRESS_MS = 250;
   const lastPressAt = new Map();
@@ -731,6 +731,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function focusFirstLimit() {
     const input = document.querySelector('.limit-input');
     if (input) { input.focus(); input.select(); }
+  }
+  // 老闆鍵:把整個 .app 隱藏起來,留下純背景色,再按一次恢復
+  // 進入隱藏狀態時順便退出全螢幕,讓瀏覽器看起來只是一片底色
+  let pageHidden = false;
+  function togglePageHidden() {
+    const app = document.querySelector('.app');
+    if (!app) return;
+    pageHidden = !pageHidden;
+    app.style.display = pageHidden ? 'none' : '';
+    if (pageHidden && document.fullscreenElement) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+      if (exit) exit.call(document);
+    }
   }
   // 限額輸入框內:Enter = 下一個輸入框(最後一個則失焦)、Esc = 失焦回主操作區
   // 為了配合沒有 Tab 的小鍵盤
@@ -789,7 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const prev = lastPressAt.get(e.code) || 0;
       if (now - prev <= DOUBLE_PRESS_MS) {
         lastPressAt.delete(e.code);
-        if (e.code === 'Numpad8') toggleFullscreen();
+        if (e.code === 'Numpad8') togglePageHidden();
         else clearAll();
       } else {
         lastPressAt.set(e.code, now);
