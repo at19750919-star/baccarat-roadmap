@@ -563,7 +563,7 @@ body {
   color: #fff4c2;
   font-family: "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
   font-weight: 400;
-  font-size: 5.2cqi;
+  font-size: 3.6cqi;
   font-feature-settings: "lnum" 1;
   letter-spacing: -0.1cqi;
   text-shadow:
@@ -603,32 +603,33 @@ body {
 .bead.l6::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -6%;
   border-radius: 50%;
   /* 圓點中心分布於半徑 35%(以 bead 中心為圓心)的圓周上,每 45 度一顆;
      每顆以 core 4% + halo 淡出至 11% 呈現柔邊小圓 */
   background:
-    radial-gradient(circle at 50% 15%, rgba(255, 225, 120, 0.7) 0%, rgba(255, 225, 120, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 50% 15%, rgba(255, 235, 120, 0.95) 0%, rgba(255, 235, 120, 0.5) 5%, transparent 14%),
     /* 0° 香檳金 */
-    radial-gradient(circle at 74.7% 25.3%, rgba(255, 140, 175, 0.7) 0%, rgba(255, 140, 175, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 74.7% 25.3%, rgba(255, 140, 175, 0.95) 0%, rgba(255, 140, 175, 0.5) 5%, transparent 14%),
     /* 45° 玫瑰 */
-    radial-gradient(circle at 85% 50%, rgba(255, 160, 120, 0.7) 0%, rgba(255, 160, 120, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 85% 50%, rgba(255, 160, 120, 0.95) 0%, rgba(255, 160, 120, 0.5) 5%, transparent 14%),
     /* 90° 珊瑚 */
-    radial-gradient(circle at 74.7% 74.7%, rgba(130, 235, 180, 0.7) 0%, rgba(130, 235, 180, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 74.7% 74.7%, rgba(130, 235, 180, 0.95) 0%, rgba(130, 235, 180, 0.5) 5%, transparent 14%),
     /* 135° 祖母綠 */
-    radial-gradient(circle at 50% 85%, rgba(120, 230, 230, 0.7) 0%, rgba(120, 230, 230, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 50% 85%, rgba(120, 230, 230, 0.95) 0%, rgba(120, 230, 230, 0.5) 5%, transparent 14%),
     /* 180° 翠湖藍 */
-    radial-gradient(circle at 25.3% 74.7%, rgba(140, 180, 255, 0.7) 0%, rgba(140, 180, 255, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 25.3% 74.7%, rgba(140, 180, 255, 0.95) 0%, rgba(140, 180, 255, 0.5) 5%, transparent 14%),
     /* 225° 藍寶石 */
-    radial-gradient(circle at 15% 50%, rgba(210, 150, 255, 0.7) 0%, rgba(210, 150, 255, 0.28) 4%, transparent 11%),
+    radial-gradient(circle at 15% 50%, rgba(210, 150, 255, 0.95) 0%, rgba(210, 150, 255, 0.5) 5%, transparent 14%),
     /* 270° 紫水晶 */
-    radial-gradient(circle at 25.3% 25.3%, rgba(255, 200, 120, 0.7) 0%, rgba(255, 200, 120, 0.28) 4%, transparent 11%);
+    radial-gradient(circle at 25.3% 25.3%, rgba(255, 200, 120, 0.95) 0%, rgba(255, 200, 120, 0.5) 5%, transparent 14%);
   /* 315° 琥珀金 */
   animation: l6-spin 8s linear infinite;
-  filter: blur(0.08cqi);
+  filter: blur(0.04cqi);
+  mix-blend-mode: screen;
   pointer-events: none;
-  z-index: -2;
-  opacity: 0.85;
+  z-index: 0;
+  opacity: 1;
 }
 
 @keyframes l6-breathe {
@@ -640,9 +641,9 @@ body {
       inset 0 0.3cqi 0.6cqi rgba(255, 235, 195, 0.3),
       inset 0 -0.4cqi 0.8cqi rgba(40, 0, 0, 0.5),
       /* 細金邊 */
-      0 0 0 0.1cqi rgba(255, 215, 130, 0.7),
+      0 0 0 0.14cqi rgba(255, 220, 120, 0.9),
       /* 小範圍暖金暈 */
-      0 0 0.4cqi rgba(255, 180, 80, 0.4),
+      0 0 0.7cqi rgba(255, 190, 80, 0.65),
       /* 底部投影 */
       0 0.3cqi 0.6cqi rgba(0, 0, 0, 0.4);
   }
@@ -651,19 +652,19 @@ body {
     box-shadow:
       inset 0 0.3cqi 0.6cqi rgba(255, 240, 210, 0.4),
       inset 0 -0.4cqi 0.8cqi rgba(40, 0, 0, 0.5),
-      0 0 0 0.14cqi rgba(255, 225, 150, 0.85),
-      0 0 0.8cqi rgba(255, 200, 100, 0.6),
+      0 0 0 0.22cqi rgba(255, 235, 150, 0.95),
+      0 0 1.15cqi rgba(255, 210, 95, 0.85),
       0 0.3cqi 0.6cqi rgba(0, 0, 0, 0.4);
   }
 }
 
 @keyframes l6-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(0.98);
   }
 
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg) scale(1.08);
   }
 }
 
@@ -838,6 +839,13 @@ body {
 
 /* 小路:實心圓 — 漸層球體,亮點偏右上,質感與珠子路不同 */
 .derived-dot.shape-solid {
+  width: 78%;
+  height: 78%;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(circle at 70% 28%, #ff8a8a 0%, #e23a3a 35%, #9a0d0d 100%);
   box-shadow:
@@ -904,7 +912,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 4px 0 16px;
+  padding: 0 4px 0 12px;
   border-radius: 4px;
   font-weight: 900;
   border: 1px solid rgba(0, 0, 0, 0.15);
@@ -929,6 +937,12 @@ body {
   letter-spacing: 1px;
   color: #fff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.stats-panel .stat-banker-pair .k,
+.stats-panel .stat-player-pair .k,
+.stats-panel .stat-lucky6 .k {
+  font-size: clamp(16px, 11cqh, 34px);
 }
 
 /* 六格底色對應六顆按鈕 */
@@ -1470,6 +1484,14 @@ body {
   transform: scale(0.05);
   opacity: 0;
   transition: opacity 0.3s;
+}
+
+.dragon-overlay.player-dragon-overlay .golden-dragon-img {
+  filter: drop-shadow(0 0 25px rgba(70, 170, 255, 0.9)) drop-shadow(0 0 55px rgba(0, 80, 255, 0.7)) brightness(1.18);
+}
+
+.dragon-overlay.banker-dragon-overlay .golden-dragon-img {
+  filter: drop-shadow(0 0 25px rgba(255, 200, 50, 0.85)) drop-shadow(0 0 50px rgba(255, 100, 0, 0.6)) brightness(1.2);
 }
 
 /* 觸發長龍時的螺旋升空與浮動動畫 */

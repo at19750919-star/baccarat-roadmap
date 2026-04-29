@@ -20,6 +20,15 @@ const state = {
 };
 
 const LS_KEY = "baccarat_road_rounds_v1";
+const DRAGON_ASSETS = {
+  B: 'dragon_gold.apng',
+  P: 'dragon_blue.apng',
+};
+
+Object.values(DRAGON_ASSETS).forEach((src) => {
+  const img = new Image();
+  img.src = src;
+});
 
 // ---------- 持久化 ----------
 function saveState() {
@@ -324,10 +333,12 @@ function renderBigRoad(big) {
     if (isSuperDragon) {
       // 莊→金龍動畫 / 閒→藍龍動畫
       if (dragonImg) {
-        const desired = dragonColor === 'P' ? 'dragon_blue.apng' : 'dragon_gold.apng';
+        const desired = DRAGON_ASSETS[dragonColor] || DRAGON_ASSETS.B;
         const current = dragonImg.getAttribute('src');
         if (current !== desired) dragonImg.setAttribute('src', desired);
       }
+      dragonOverlay.classList.toggle('player-dragon-overlay', dragonColor === 'P');
+      dragonOverlay.classList.toggle('banker-dragon-overlay', dragonColor !== 'P');
       dragonOverlay.classList.add('active');
       if (dragonCombo && dragonCombo.textContent != dragonLen) {
         dragonCombo.textContent = dragonLen;
@@ -345,6 +356,7 @@ function renderBigRoad(big) {
     } else {
       dragonOverlay.classList.remove('active');
       dragonOverlay.classList.remove('hit');
+      dragonOverlay.classList.remove('player-dragon-overlay', 'banker-dragon-overlay');
       if (dragonCombo) dragonCombo.textContent = '';
     }
   }
