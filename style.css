@@ -1,5 +1,57 @@
 /* 百家樂板路單 — 樣式 (1920×1080 固定全螢幕) */
 
+/* ===== 老闆鍵:模仿 Windows 桌面 ===== */
+.boss-screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+  background:
+    radial-gradient(ellipse at 30% 35%, rgba(120, 200, 255, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 70%, rgba(140, 100, 255, 0.15) 0%, transparent 60%),
+    linear-gradient(135deg, #0a3a7a 0%, #062758 50%, #08306b 100%);
+}
+
+.boss-screen.active {
+  display: block;
+}
+
+.boss-screen .boss-taskbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 48px;
+  background: rgba(20, 24, 32, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.boss-screen .boss-start {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.boss-screen .boss-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif;
+  font-size: 12px;
+  color: #fff;
+  line-height: 1.2;
+}
+
+
+
 /* ===== Design Tokens =====
    目標解析度:固定 1920×1080 全螢幕。所有尺寸為這個解析度設計。 */
 :root {
@@ -22,20 +74,20 @@
   /* 方格尺寸 (所有格子保證正方形,下三路 = 大路 × 2/3) */
   --cell-big: 48px;
   --cell-derived: 32px;    /* 48 × 2/3 */
-  --cell-bead: 46px;
+  --cell-bead: 40px;
 
   /* 欄數 */
   --cols-big: 39;          /* 39 × 48 = 1872 */
   --cols-derived: 29;      /* 29 × 32 = 928 */
-  --cols-bead: 20;         /* 20 × 46 = 920 */
+  --cols-bead: 24;         /* 24 × 40 = 960 */
 
   /* Layout rows */
-  --row-title: 80px;
-  --row-big: 288px;
-  --row-mid-panel: 192px;
-  --row-mid: 392px;
-  --row-bottom: 276px;
-  /* 80+288+392+276 + 3×8 gap + 2×10 padding = 1080 ✓ */
+  --row-title: 56px;       /* 縮小讓出空間給下三路 */
+  --row-big: 294px;        /* road 288 + 6 (上下各 1px 留白) */
+  --row-mid-panel: 210px;  /* derived road 192 + 18 (上下各 7px 留白,跟左右 9px 一致) */
+  --row-mid: 428px;        /* 210 × 2 + 8 gap */
+  --row-bottom: 258px;     /* bead road 240 + 18 (上下各 7px 留白,跟左右 9px 一致) */
+  /* 56+294+428+258 + 3×8 gap + 2×10 padding = 1080 ✓ */
 }
 
 * {
@@ -56,10 +108,10 @@ body {
   font-feature-settings: "palt" 1;
 }
 
-/* 讓固定 1920×1080 畫布在任何視口尺寸下等比縮放居中,避免截斷 */
+/* 讓固定 1920×1080 畫布在任何視口尺寸下等比縮放居中,避免截斷
+   注意:不用 grid place-items: center,因為當 .app 比 viewport 大時,grid auto 軌道會放大成 .app 的尺寸,反而把 .app 黏在 (0,0) 沒置中。改用 absolute + translate(-50%) 才會真的置中。 */
 body {
-  display: grid;
-  place-items: center;
+  position: relative;
 }
 
 /* 數字統一用 Cinzel(羅馬碑刻感,搭配 tabular-nums 對齊) */
@@ -67,14 +119,17 @@ body {
 .stats-panel .stats-list li b,
 .limit-input,
 #totalCount {
-  font-family: "Cinzel", "Cormorant Garamond", "Georgia", serif;
-  font-weight: 700;
+  font-family: "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  font-weight: 400;
   letter-spacing: 1.5px;
   font-feature-settings: "tnum" 1, "lnum" 1;
   font-variant-numeric: tabular-nums lining-nums;
 }
 
 .app {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 1920px;
   height: 1080px;
   flex-shrink: 0;
@@ -85,8 +140,8 @@ body {
   grid-template-rows: var(--row-title) var(--row-big) var(--row-mid) var(--row-bottom);
   gap: var(--sp-2);
   transform-origin: center center;
-  /* --app-scale 由 JS 依視口比例動態設定 */
-  transform: scale(var(--app-scale, 1));
+  /* --app-scale 由 JS 依視口比例動態設定;translate 先把元素中心移到 viewport 中心 */
+  transform: translate(-50%, -50%) scale(var(--app-scale, 1));
 }
 
 /* 標題列 */
@@ -94,7 +149,7 @@ body {
   background: linear-gradient(90deg, #8b0000, #b22222);
   border: 2px solid #ffd700;
   border-radius: 8px;
-  padding: 6px 14px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,7 +158,7 @@ body {
 
 .title-bar .brand {
   font-family: "Noto Serif TC", "Cinzel", serif;
-  font-size: 26px;
+  font-size: 36px;
   font-weight: 900;
   color: #ffd700;
   letter-spacing: 10px;
@@ -115,9 +170,9 @@ body {
 
 .title-bar .stats-inline {
   color: #fff;
-  font-size: 18px;
+  font-size: 24px;
   display: flex;
-  gap: 14px;
+  gap: 18px;
 }
 
 .title-bar .stats-inline b {
@@ -152,11 +207,11 @@ body {
 
 /* 前六顆動作按鈕大小一致 */
 .title-controls .action-btn {
-  width: 60px;
-  height: 34px;
+  width: 78px;
+  height: 48px;
   padding: 0;
   font-family: "Noto Serif TC", "Cinzel", serif;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: 1px;
   display: inline-flex;
@@ -184,7 +239,7 @@ body {
 
 .title-controls .btn-confirm {
   background: linear-gradient(180deg, #0f9a9a, #076868);
-  font-size: 18px;
+  font-size: 24px;
   letter-spacing: 2px;
 }
 
@@ -196,11 +251,11 @@ body {
 
 .title-controls .btn-undo,
 .title-controls .btn-clear {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   padding: 0;
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .title-controls .btn:hover {
@@ -293,7 +348,8 @@ body {
 
 .mid-col {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  /* minmax(0, 1fr) 才會強制兩個 track 等高;單純 1fr 1fr 會被子元素的 min-content 拉歪 */
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--sp-2);
   min-height: 0;
 }
@@ -320,10 +376,55 @@ body {
 /* 公告欄 */
 .notice-panel {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   container-type: size;
   overflow: hidden;
+  padding: 6px 0 4px;
+  gap: 4px;
+}
+
+/* 鍵盤對照表(輔助提示,字級小、低對比) */
+.key-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 10px;
+  color: rgba(80, 80, 80, 0.55);
+  font-family: "Noto Serif TC", serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.key-legend .key-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 14px;
+}
+
+.key-legend .key-row span {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.key-legend b {
+  font-family: "Abril Fatface", "Cinzel", "Cormorant Garamond", serif;
+  font-weight: 400;
+  color: rgba(120, 60, 60, 0.7);
+  background: rgba(255, 215, 0, 0.18);
+  border: 1px solid rgba(120, 60, 60, 0.25);
+  border-radius: 3px;
+  padding: 0 4px;
+  min-width: 14px;
+  text-align: center;
+  line-height: 1.4;
+  font-size: 12px;
 }
 
 .notice-win {
@@ -424,7 +525,7 @@ body {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
   /* 字型隨 .bead-board 寬度等比縮放 */
-  font-size: 3.4cqi;
+  font-size: 2.8cqi;
   line-height: 1;
   position: relative;
   /* 立體感:內部頂部亮光 + 外部底部投影 */
@@ -460,8 +561,8 @@ body {
     radial-gradient(circle at 72% 80%, rgba(255, 130, 80, 0.45) 0%, transparent 55%),
     radial-gradient(circle at 50% 50%, #ff3434 0%, #c41414 45%, #4a0000 100%);
   color: #fff4c2;
-  font-family: "Cinzel", "Cormorant Garamond", "Georgia", serif;
-  font-weight: 900;
+  font-family: "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  font-weight: 400;
   font-size: 5.2cqi;
   font-feature-settings: "lnum" 1;
   letter-spacing: -0.1cqi;
@@ -772,7 +873,7 @@ body {
 /* 底部四欄:統計 | 珠盤路 | 下局指示 | 限額 */
 .bottom-row {
   display: grid;
-  grid-template-columns: 300px 940px 200px 436px;
+  grid-template-columns: 300px 978px 162px 436px;
   gap: var(--sp-2);
   /* 高度由 .app grid-template-rows 決定 */
   min-height: 0;
@@ -803,7 +904,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 4px 0 16px;
   border-radius: 4px;
   font-weight: 900;
   border: 1px solid rgba(0, 0, 0, 0.15);
@@ -824,8 +925,8 @@ body {
 .stats-panel .k {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  font-size: clamp(15px, 9cqh, 32px);
-  letter-spacing: 2px;
+  font-size: clamp(18px, 13cqh, 42px);
+  letter-spacing: 1px;
   color: #fff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
@@ -891,8 +992,8 @@ body {
 .bead-board {
   grid-template-columns: repeat(var(--cols-bead), var(--cell-bead));
   grid-template-rows: repeat(6, var(--cell-bead));
-  width: calc(var(--cols-bead) * var(--cell-bead));   /* 920px */
-  height: calc(6 * var(--cell-bead));                  /* 276px */
+  width: calc(var(--cols-bead) * var(--cell-bead));   /* 800px */
+  height: calc(6 * var(--cell-bead));                  /* 240px */
   container-type: size;
   background:
     linear-gradient(#d8d8d8 1px, transparent 1px) 0 0 / 100% var(--cell-bead),
@@ -913,7 +1014,7 @@ body {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
   color: #222;
-  font-size: 15px;
+  font-size: 20px;
   letter-spacing: 4px;
   padding: 2px 0;
   border-bottom: 1px solid #ccc;
@@ -939,15 +1040,15 @@ body {
 
 .leg-tag {
   display: inline-flex;
-  width: clamp(20px, 22cqh, 36px);
-  height: clamp(20px, 22cqh, 36px);
+  width: clamp(26px, 28cqh, 46px);
+  height: clamp(26px, 28cqh, 46px);
   border-radius: 50%;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  font-size: clamp(11px, 10cqh, 18px);
+  font-size: clamp(15px, 14cqh, 24px);
   /* 立體陰影 */
   box-shadow:
     inset 0 3px 4px rgba(255, 255, 255, 0.45),
@@ -966,8 +1067,8 @@ body {
 
 .leg-mark {
   display: inline-block;
-  width: clamp(16px, 20cqh, 32px);
-  height: clamp(16px, 20cqh, 32px);
+  width: clamp(26px, 28cqh, 46px);
+  height: clamp(26px, 28cqh, 46px);
   position: relative;
 }
 
@@ -1150,7 +1251,6 @@ body {
   color: #fff;
   font-weight: 800;
   font-size: 18px;
-  font-family: inherit;
 }
 
 .limit-input:focus {
@@ -1366,8 +1466,8 @@ body {
   object-fit: contain;
   /* 加上真實的去背圖光暈 */
   filter: drop-shadow(0 0 25px rgba(255, 200, 50, 0.85)) drop-shadow(0 0 50px rgba(255, 100, 0, 0.6)) brightness(1.2);
-  /* 初始隱藏在螢幕正下方 */
-  transform: translate(0, 100vh) scale(0.3);
+  /* 初始狀態:縮成極小、淡到看不見、定位在畫面正中 */
+  transform: scale(0.05);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -1380,42 +1480,34 @@ body {
     dragon-float 4s infinite ease-in-out 2.5s;
 }
 
-/* 螺旋上升 (S型/Z型) 的軌跡，模擬盤旋往上飛的立體感 */
+/* 中心點縮放浮現:從極小淡入,放到 1.0 同時淡到全顯 */
 @keyframes dragon-spiral-entrance {
   0% {
-    transform: translate(0vw, 100vh) scale(0.3) rotate(-20deg);
+    transform: scale(0.05);
     opacity: 0;
   }
 
-  25% {
-    transform: translate(25vw, 50vh) scale(0.6) rotate(15deg);
-    opacity: 1;
-  }
-
-  50% {
-    transform: translate(-25vw, 20vh) scale(0.8) rotate(-10deg);
-  }
-
-  75% {
-    transform: translate(15vw, 5vh) scale(0.95) rotate(5deg);
+  60% {
+    transform: scale(0.7);
+    opacity: 0.7;
   }
 
   100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
-/* 定位後的緩慢呼吸與盤旋浮動 */
+/* 定位後的緩慢呼吸 */
 @keyframes dragon-float {
 
   0%,
   100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+    transform: scale(1);
   }
 
   50% {
-    transform: translate(0, -20px) scale(1.02) rotate(2deg);
+    transform: scale(1.02);
   }
 }
 
@@ -1444,10 +1536,10 @@ body {
 /* 3. 連勝數字特效 */
 .dragon-combo {
   position: absolute;
-  /* 隨螢幕縮放的超大字體，使用跟標題相同的復古數字字型 */
+  /* 隨螢幕縮放的超大字體 */
   font-size: 35vh;
-  font-family: "Cinzel", "Cormorant Garamond", serif;
-  font-weight: 900;
+  font-family: "Abril Fatface", "Cinzel", "Cormorant Garamond", serif;
+  font-weight: 400;
   color: #fff;
   /* 華麗的金色火焰多層陰影 */
   text-shadow:

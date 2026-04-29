@@ -6,7 +6,7 @@
 <title>百家樂板路單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -209,6 +209,79 @@
                 <circle cx="114" cy="60" r="1.6" fill="currentColor"/>
               </svg>
             </button>
+
+            <!-- 設置金額:Art Deco 籌碼 + $ 符號 -->
+            <button class="deco-icon-btn" id="setAmountBtn" aria-label="設置金額" title="設置金額">
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polygon points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <polygon points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.55"/>
+                <!-- 籌碼外圈 -->
+                <circle cx="60" cy="60" r="28" fill="none" stroke="currentColor" stroke-width="2.2"/>
+                <!-- 籌碼內圈(細) -->
+                <circle cx="60" cy="60" r="23" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.55"/>
+                <!-- 籌碼八方分區裝飾點 -->
+                <g fill="currentColor" opacity="0.7">
+                  <circle cx="60" cy="36" r="1.4"/>
+                  <circle cx="77" cy="43" r="1.4"/>
+                  <circle cx="84" cy="60" r="1.4"/>
+                  <circle cx="77" cy="77" r="1.4"/>
+                  <circle cx="60" cy="84" r="1.4"/>
+                  <circle cx="43" cy="77" r="1.4"/>
+                  <circle cx="36" cy="60" r="1.4"/>
+                  <circle cx="43" cy="43" r="1.4"/>
+                </g>
+                <!-- 中央 $ 符號 -->
+                <g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="60" y1="46" x2="60" y2="74"/>
+                  <path d="M 70 52 C 66 48 54 48 51 53 C 48 58 53 60 60 61 C 67 62 72 64 69 69 C 66 73 54 73 50 69"/>
+                </g>
+                <circle cx="60" cy="6" r="1.6" fill="currentColor"/>
+                <circle cx="60" cy="114" r="1.6" fill="currentColor"/>
+                <circle cx="6" cy="60" r="1.6" fill="currentColor"/>
+                <circle cx="114" cy="60" r="1.6" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- 儲存:Art Deco 軟碟造型 (功能尚未實作) -->
+            <button class="deco-icon-btn" id="saveBtn" aria-label="儲存路單" title="儲存路單">
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polygon points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <polygon points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.55"/>
+                <!-- 軟碟外框 (右上角切角) -->
+                <path d="M 30 30 L 80 30 L 90 40 L 90 90 L 30 90 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+                <!-- 上方金屬滑片 -->
+                <rect x="40" y="30" width="36" height="14" fill="currentColor"/>
+                <!-- 滑片切口 -->
+                <rect x="62" y="34" width="4" height="6" fill="#fafafa"/>
+                <!-- 下方標籤(三條橫線) -->
+                <rect x="38" y="56" width="44" height="30" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.6"/>
+                <line x1="42" y1="64" x2="78" y2="64" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+                <line x1="42" y1="72" x2="78" y2="72" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+                <line x1="42" y1="80" x2="78" y2="80" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+                <!-- 切角次層細線 (Art Deco 階梯感) -->
+                <polyline points="80,30 80,40 90,40" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
+                <circle cx="60" cy="6" r="1.6" fill="currentColor"/>
+                <circle cx="60" cy="114" r="1.6" fill="currentColor"/>
+                <circle cx="6" cy="60" r="1.6" fill="currentColor"/>
+                <circle cx="114" cy="60" r="1.6" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <div class="key-legend" aria-hidden="true">
+            <div class="key-row">
+              <span><b>1</b>莊</span>
+              <span><b>2</b>閒</span>
+              <span><b>3</b>和</span>
+              <span><b>4</b>莊對</span>
+              <span><b>5</b>閒對</span>
+              <span><b>6</b>幸運6</span>
+              <span><b>⏎</b>確定</span>
+              <span><b>7</b>退</span>
+              <span>雙擊<b>7</b>金額</span>
+              <span>雙擊<b>8</b>隱藏</span>
+              <span>雙擊<b>9</b>清</span>
+              <span><b>F</b>全螢幕</span>
+            </div>
           </div>
         </div>
       </div>
@@ -291,6 +364,24 @@
   <div id="dragonOverlay" class="dragon-overlay">
     <img src="dragon_transparent.png" class="golden-dragon-img" alt="Golden Dragon">
     <div id="dragonCombo" class="dragon-combo"></div>
+  </div>
+
+  <!-- 老闆鍵:模仿 Windows 桌面 (雙擊 Numpad 8 切換) -->
+  <div id="bossScreen" class="boss-screen" aria-hidden="true">
+    <div class="boss-taskbar">
+      <div class="boss-start" title="開始">
+        <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+          <rect x="3" y="3" width="12" height="12" fill="#5DB8FF"/>
+          <rect x="17" y="3" width="12" height="12" fill="#5DB8FF"/>
+          <rect x="3" y="17" width="12" height="12" fill="#5DB8FF"/>
+          <rect x="17" y="17" width="12" height="12" fill="#5DB8FF"/>
+        </svg>
+      </div>
+      <div class="boss-tray">
+        <span id="bossClockTime">--:--</span>
+        <span id="bossClockDate">----/--/--</span>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>

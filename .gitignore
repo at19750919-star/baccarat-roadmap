@@ -1,6 +1,11 @@
 # 本機 IDE / MCP 設定
 .claude/
 .playwright-mcp/
+.vscode/
+.preview/
+
+# 影片來源檔(編成 APNG 後不需要)
+*.mp4
 
 # 開發用截圖(Playwright MCP / 手動測試)
 *.png
