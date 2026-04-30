@@ -20,15 +20,6 @@ const state = {
 };
 
 const LS_KEY = "baccarat_road_rounds_v1";
-const DRAGON_ASSETS = {
-  B: 'dragon_gold.apng',
-  P: 'dragon_blue.apng',
-};
-
-Object.values(DRAGON_ASSETS).forEach((src) => {
-  const img = new Image();
-  img.src = src;
-});
 
 // ---------- 持久化 ----------
 function saveState() {
@@ -328,15 +319,9 @@ function renderBigRoad(big) {
   // 巨龍特效
   const dragonOverlay = document.getElementById('dragonOverlay');
   const dragonCombo = document.getElementById('dragonCombo');
-  const dragonImg = dragonOverlay && dragonOverlay.querySelector('.golden-dragon-img');
   if (dragonOverlay) {
     if (isSuperDragon) {
-      // 莊→金龍動畫 / 閒→藍龍動畫
-      if (dragonImg) {
-        const desired = DRAGON_ASSETS[dragonColor] || DRAGON_ASSETS.B;
-        const current = dragonImg.getAttribute('src');
-        if (current !== desired) dragonImg.setAttribute('src', desired);
-      }
+      // 莊→金龍 / 閒→藍龍 (兩張 APNG 由 HTML 直接預載,靠 class 切換可見的那一張,避免冷快取時 src 換圖閃爍)
       dragonOverlay.classList.toggle('player-dragon-overlay', dragonColor === 'P');
       dragonOverlay.classList.toggle('banker-dragon-overlay', dragonColor !== 'P');
       dragonOverlay.classList.add('active');

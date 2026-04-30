@@ -1486,16 +1486,28 @@ body {
   transition: opacity 0.3s;
 }
 
-.dragon-overlay.player-dragon-overlay .golden-dragon-img {
+/* 兩張色龍 APNG 預先放在 DOM,預設都隱藏,避免 flex 並排佔位;靠 overlay class 切換顯示哪一張 */
+.dragon-banker-img,
+.dragon-player-img {
+  display: none;
+}
+
+.dragon-overlay.banker-dragon-overlay .dragon-banker-img,
+.dragon-overlay.player-dragon-overlay .dragon-player-img {
+  display: block;
+}
+
+.dragon-overlay.player-dragon-overlay .dragon-player-img {
   filter: drop-shadow(0 0 25px rgba(70, 170, 255, 0.9)) drop-shadow(0 0 55px rgba(0, 80, 255, 0.7)) brightness(1.18);
 }
 
-.dragon-overlay.banker-dragon-overlay .golden-dragon-img {
+.dragon-overlay.banker-dragon-overlay .dragon-banker-img {
   filter: drop-shadow(0 0 25px rgba(255, 200, 50, 0.85)) drop-shadow(0 0 50px rgba(255, 100, 0, 0.6)) brightness(1.2);
 }
 
-/* 觸發長龍時的螺旋升空與浮動動畫 */
-.dragon-overlay.active .golden-dragon-img {
+/* 觸發長龍時的螺旋升空與浮動動畫 (只跑當前對應色那張,另一張被 display:none 不會佔位也不顯) */
+.dragon-overlay.active.banker-dragon-overlay .dragon-banker-img,
+.dragon-overlay.active.player-dragon-overlay .dragon-player-img {
   /* 飛出動畫：2.5秒完成螺旋上升，之後無限循環浮動動畫 */
   animation:
     dragon-spiral-entrance 2.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards,
