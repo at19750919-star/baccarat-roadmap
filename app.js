@@ -771,7 +771,13 @@ document.addEventListener('DOMContentLoaded', () => {
     pageHidden = !pageHidden;
     app.style.display = pageHidden ? 'none' : '';
     if (boss) boss.classList.toggle('active', pageHidden);
-    if (pageHidden) updateBossClock();
+    if (pageHidden) {
+      updateBossClock();
+    } else if (!document.fullscreenElement) {
+      const root = document.documentElement;
+      const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+      if (req) req.call(root).catch(err => console.warn('無法進入全螢幕:', err));
+    }
   }
   // 限額輸入框內:Enter = 下一個輸入框(最後一個則失焦)、Esc = 失焦回主操作區
   // 為了配合沒有 Tab 的小鍵盤
