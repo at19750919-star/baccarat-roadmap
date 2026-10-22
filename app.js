@@ -20,6 +20,74 @@ const state = {
 };
 
 const LS_KEY = "baccarat_road_rounds_v1";
+const SAVED_ROADS_KEY = "at_baccarat_saved_roads_v1";
+
+function loadSavedRoadmaps() {
+  try {
+    const raw = localStorage.getItem(SAVED_ROADS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function nextDefaultRoadmapName(list) {
+  let max = 0;
+  for (const item of list) {
+    const m = String(item?.name || '').match(/^路單-(\d+)$/);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return `路單-${String(max + 1).padStart(3, '0')}`;
+}
+
+function saveRoadmap() {
+  if (!Array.isArray(state.rounds) || state.rounds.length === 0) {
+    alert('請先輸入路單紀錄再儲存！');
+    return null;
+  }
+  const list = loadSavedRoadmaps();
+  const defaultName = nextDefaultRoadmapName(list);
+  const rawName = prompt('請輸入路單名稱（將同時存入排牌共用清單並下載 .json 路單檔）：', defaultName);
+  if (rawName === null) return null;
+  const name = rawName.trim() || defaultName;
+  const outcomes = state.rounds.map(rd => rd.r === 'B' ? '莊' : rd.r === 'P' ? '閒' : '和');
+  const nonTieOutcomes = outcomes.filter(o => o === '莊' || o === '閒');
+  const banker = state.rounds.filter(rd => rd.r === 'B').length;
+  const player = state.rounds.filter(rd => rd.r === 'P').length;
+  const tie = state.rounds.filter(rd => rd.r === 'T').length;
+  const entry = {
+    id: `road-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    name,
+    createdAt: new Date().toISOString(),
+    counts: { banker, player, tie, total: state.rounds.length },
+    outcomes,
+    nonTieOutcomes,
+    rounds: state.rounds.map(rd => ({ r: rd.r, bp: !!rd.bp, pp: !!rd.pp, l6: !!rd.l6 }))
+  };
+  const filtered = list.filter(item => item && item.name !== name);
+  filtered.unshift(entry);
+  try {
+    localStorage.setItem(SAVED_ROADS_KEY, JSON.stringify(filtered));
+  } catch (err) {
+    console.warn('無法寫入 localStorage:', err);
+  }
+  try {
+    const blob = new Blob([JSON.stringify(entry, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeFile = name.replace(/[\\/:*?"<>|]/g, '_') || defaultName;
+    a.href = url;
+    a.download = `${safeFile}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    console.error('下載路單 JSON 失敗:', err);
+  }
+  return entry;
+}
 
 // ---------- 持久化 ----------
 function saveState() {
@@ -714,6 +782,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearBtn').addEventListener('click', clearAll);
   const shotBtn = document.getElementById('screenshotBtn');
   if (shotBtn) shotBtn.addEventListener('click', takeScreenshot);
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn) saveBtn.addEventListener('click', saveRoadmap);
   const setAmtBtn = document.getElementById('setAmountBtn');
   if (setAmtBtn) {
     let limitIdx = 0;
