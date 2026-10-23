@@ -1,0 +1,147 @@
+/* Appearance control is available in both skins. */
+.theme-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-shrink: 0;
+  color: #751313;
+  font: 600 16px "Noto Serif TC", serif;
+  letter-spacing: 2px;
+}
+.theme-control select {
+  padding: 5px 30px 5px 12px;
+  border: 1px solid #b48635;
+  border-radius: 6px;
+  background: #fffaf5;
+  color: #751313;
+  font: inherit;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.theme-control select:focus-visible { outline: 2px solid #b48635; outline-offset: 3px; }
+
+/* Reference: 百家3.0 index.html .gframe / .tool-btn / .tool-btn.active.
+   Metallic operation panels, serif labels and champagne gold; retain road geometry. */
+:root[data-theme="black-gold"] {
+  color-scheme: dark;
+  --skin-ink: #07090b;
+  --skin-txt: #e8e4d8;
+  --skin-dim: #9a9584;
+  --skin-gold: #d9b568;
+  --skin-light: #f4dfa4;
+  --skin-line: linear-gradient(135deg,#6b4c1d,#e8c97a,#8a6a2f,#f4dfa4,#6b4c1d);
+  --skin-panel: linear-gradient(160deg,#182021,#0b1113);
+  --skin-grid: #293136;
+  --skin-banker: #e05c4f;
+  --skin-player: #4fa3d8;
+  --skin-tie: #5cbf8a;
+}
+html[data-theme="black-gold"],
+[data-theme="black-gold"] body,
+[data-theme="black-gold"] .road-export-frame { background: var(--skin-ink); color: var(--skin-txt); }
+[data-theme="black-gold"] .title-bar,
+[data-theme="black-gold"] .panel,
+[data-theme="black-gold"] .backup-notice {
+  background: var(--skin-panel);
+  color: var(--skin-txt);
+  border: 1px solid #a67c35;
+  border-image: var(--skin-line) 1;
+  border-radius: 0;
+  box-shadow: 0 10px 30px #0008, inset 0 0 40px #0005;
+}
+[data-theme="black-gold"] .panel::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--skin-light),var(--skin-light)) left top / 14px 2px no-repeat,
+    linear-gradient(var(--skin-light),var(--skin-light)) left top / 2px 14px no-repeat,
+    linear-gradient(var(--skin-light),var(--skin-light)) right bottom / 14px 2px no-repeat,
+    linear-gradient(var(--skin-light),var(--skin-light)) right bottom / 2px 14px no-repeat;
+}
+[data-theme="black-gold"] .title-bar .brand {
+  font-family: "Cinzel", "Noto Serif TC", serif;
+  color: var(--skin-light);
+  background: linear-gradient(180deg,#f4dfa4,#d9b568 55%,#a67c35);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+[data-theme="black-gold"] .stats-inline { color: var(--skin-txt); }
+[data-theme="black-gold"] .title-bar .stats-inline b { color: var(--skin-gold); }
+[data-theme="black-gold"] :is(.stats-inline b,.stats-list li b,.limit-input) {
+  font-family: "Cinzel", "Noto Serif TC", serif;
+  font-weight: 700;
+}
+[data-theme="black-gold"] .grid-board {
+  --skin-cell: var(--cell-derived);
+  background:
+    linear-gradient(var(--skin-grid) 1px,transparent 1px) 0 0 / 100% var(--skin-cell),
+    linear-gradient(90deg,var(--skin-grid) 1px,transparent 1px) 0 0 / var(--skin-cell) 100%,#0d1417;
+  border-color: #374047;
+  border-radius: 0;
+}
+[data-theme="black-gold"] .big-road { --skin-cell: var(--cell-big); }
+[data-theme="black-gold"] .bead-board { --skin-cell: var(--cell-bead); }
+[data-theme="black-gold"] .grid-board::before { color: #d9b56830; text-shadow: none; }
+[data-theme="black-gold"] .theme-control { color: var(--skin-gold); }
+[data-theme="black-gold"] .theme-control select,
+[data-theme="black-gold"] .backup-notice :is(button,a) {
+  color: var(--skin-light);
+  background: var(--skin-panel);
+  border-color: #a67c35;
+}
+[data-theme="black-gold"] .theme-control option { background: #10171a; color: var(--skin-txt); }
+[data-theme="black-gold"] .deco-icon-btn { color: var(--skin-gold); filter: none; }
+[data-theme="black-gold"] .deco-icon-btn:hover { color: var(--skin-light); }
+[data-theme="black-gold"] .deco-icon-btn.muted { color: var(--skin-dim); }
+[data-theme="black-gold"] .key-legend { color: #b4ae9c; }
+[data-theme="black-gold"] .key-legend b { color: var(--skin-light); background: #d9b56818; border-color: #a67c3566; }
+[data-theme="black-gold"] .predict-title { color: var(--skin-gold); letter-spacing: 4px; }
+[data-theme="black-gold"] .btn {
+  background: var(--skin-panel);
+  border: 1px solid #6b4c1d;
+  color: var(--skin-txt);
+  font-family: "Noto Serif TC", serif;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff0d;
+}
+[data-theme="black-gold"] .btn-banker { color: var(--skin-banker); border-color: #e05c4f88; }
+[data-theme="black-gold"] .btn-player { color: var(--skin-player); border-color: #4fa3d888; }
+[data-theme="black-gold"] .btn-tie { color: var(--skin-tie); border-color: #5cbf8a88; }
+[data-theme="black-gold"] .btn-banker-pair { color: #d68cba; }
+[data-theme="black-gold"] .btn-player-pair { color: #a99de0; }
+[data-theme="black-gold"] .btn-lucky6 { color: var(--skin-light); }
+[data-theme="black-gold"] .btn-confirm { background: linear-gradient(135deg,#f4dfa4,#d9b568,#a67c35); color: #17140c; }
+[data-theme="black-gold"] .stats-list li,
+[data-theme="black-gold"] .limit-row-item {
+  background: var(--skin-panel);
+  border: 1px solid #d9b56830;
+  border-radius: 0;
+  color: var(--skin-txt);
+  box-shadow: none;
+}
+[data-theme="black-gold"] .stats-list li :is(.k,b) { color: inherit; text-shadow: none; }
+[data-theme="black-gold"] .stats-list .stat-banker { color: var(--skin-banker); }
+[data-theme="black-gold"] .stats-list .stat-player { color: var(--skin-player); }
+[data-theme="black-gold"] .stats-list .stat-tie { color: var(--skin-tie); }
+[data-theme="black-gold"] .stats-list .stat-banker-pair { color: #d68cba; }
+[data-theme="black-gold"] .stats-list .stat-player-pair { color: #a99de0; }
+[data-theme="black-gold"] .stats-list .stat-lucky6 { color: var(--skin-light); }
+[data-theme="black-gold"] .limit-row-item .limit-label { color: var(--skin-gold); }
+[data-theme="black-gold"] .limit-row { color: var(--skin-txt); }
+[data-theme="black-gold"] .limit-input { background: #07090b; color: var(--skin-light); border-color: #d9b56855; }
+[data-theme="black-gold"] .limit-input:focus { outline: 2px solid var(--skin-gold); background: #182021; color: var(--skin-light); }
+/* Brighter road outlines remain readable against the dark grid. */
+[data-theme="black-gold"] .big-circle.B { border-color: var(--skin-banker); }
+[data-theme="black-gold"] .big-circle.P { border-color: var(--skin-player); }
+[data-theme="black-gold"] .derived-dot.shape-hollow { box-shadow: inset 0 0 0 1px #ffffff18, 0 1px 2px #0004; }
+[data-theme="black-gold"] :is(.derived-dot.shape-hollow,.leg-mark.circle) { border-color: var(--skin-banker); }
+[data-theme="black-gold"] :is(.derived-dot.shape-hollow.blue,.leg-mark.circle.blue) { border-color: var(--skin-player); }
+[data-theme="black-gold"] .leg-mark.solid { background: var(--skin-banker); }
+[data-theme="black-gold"] .leg-mark.solid.blue { background: var(--skin-player); }
+[data-theme="black-gold"] .leg-mark.slash::before { background: var(--skin-banker); }
+[data-theme="black-gold"] .leg-mark.slash.blue::before { background: var(--skin-player); }

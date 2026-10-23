@@ -45,7 +45,7 @@
       await document.fonts?.ready;
       const w=view.offsetWidth,h=view.offsetHeight,scale=Math.min(1.5,11998/w,11998/h,Math.sqrt(23900000/(w*h)));
       if(scale<.3)throw Error('路單過長，圖片超出安全尺寸；JSON已保留，請分段儲存。');
-      const canvas=await html2canvas(view,{backgroundColor:'#7a0b0b',scale,useCORS:true,logging:false,width:w,height:h,windowWidth:Math.max(w,1920),windowHeight:Math.max(h,1080),onclone:doc=>{
+      const canvas=await html2canvas(view,{backgroundColor:getComputedStyle(view).backgroundColor,scale,useCORS:true,logging:false,width:w,height:h,windowWidth:Math.max(w,1920),windowHeight:Math.max(h,1080),onclone:doc=>{
         doc.body.style.overflow='visible';doc.body.style.height='auto';
       }});
       const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('PNG產生失敗，未傳送雲端備份。')),'image/png'));

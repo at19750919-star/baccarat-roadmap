@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="themes.css?v=1">
+<script src="themes.js?v=1"></script>
 </head>
 <body>
   <div class="app">
@@ -267,6 +269,12 @@
               </svg>
             </button>
           </div>
+          <label class="theme-control" for="themeSelect">造型
+            <select id="themeSelect" aria-label="路單造型">
+              <option value="classic">經典紅金</option>
+              <option value="black-gold">黑金</option>
+            </select>
+          </label>
           <div class="key-legend" aria-hidden="true">
             <div class="key-row">
               <span><b>1</b>莊</span>
@@ -393,7 +401,7 @@
     <button type="button" id="backupRetryBtn" hidden>重試雲端備份</button>
     <button type="button" id="backupCloseBtn" aria-label="關閉儲存結果">關閉</button>
   </aside>
-  <script src="road_backup.js?v=5"></script>
+  <script src="road_backup.js?v=6"></script>
   <script src="app.js?v=4"></script>
 </body>
 </html>

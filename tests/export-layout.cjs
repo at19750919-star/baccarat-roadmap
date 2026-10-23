@@ -11,6 +11,7 @@ async function main(){
   if(fixture)await page.route('https://cdn.jsdelivr.net/npm/html2canvas@*/dist/html2canvas.min.js',r=>r.fulfill({path:fixture,contentType:'text/javascript'}));
   await page.goto(process.env.ROADMAP_TEST_URL||pathToFileURL(path.join(__dirname,'../index.html')).href);
   await page.waitForFunction(()=>window.RoadBackup&&typeof html2canvas==='function');
+  if(process.env.ROADMAP_TEST_THEME)await page.selectOption('#themeSelect',process.env.ROADMAP_TEST_THEME);
   const cases=[{name:'whole-20',rounds:['B','B','B','B','B','B','P','P','P','P','P','P','B','B','B','B','B','B','B','B']},
     {name:'whole-long',rounds:Array.from({length:184},(_,i)=>i%13===0?'T':i%2?'P':'B')}];
   for(const sample of cases){
@@ -21,7 +22,7 @@ async function main(){
     const original=html2canvas;let layout;
     window.html2canvas=async(view,options)=>{
       const box=n=>{if(!n)return null;const b=n.getBoundingClientRect(),v=view.getBoundingClientRect();return{x:b.x-v.x,y:b.y-v.y,width:b.width,height:b.height};};
-      layout={wholeApp:view.classList.contains('app'),header:box(view.querySelector('.title-bar')),big:box(view.querySelector('.big-road')),
+      layout={background:options.backgroundColor,wholeApp:view.classList.contains('app'),header:box(view.querySelector('.title-bar')),big:box(view.querySelector('.big-road')),
        middle:box(view.querySelector('.mid-row')),bottom:box(view.querySelector('.bottom-row')),
        stats:box(view.querySelector('.stats-panel')),limits:box(view.querySelector('.limit-panel')),predict:box(view.querySelector('.predict-panel')),
        beads:view.querySelectorAll('.bead').length,total:view.querySelector('[data-export-id="totalCount"]')?.textContent,
@@ -35,6 +36,7 @@ async function main(){
    },sample);
    fs.writeFileSync(path.join(output,sample.name+'.png'),Buffer.from(result.data.split(',')[1],'base64'));delete result.data;
    assert(result.layout.wholeApp,'Export should preserve the complete app layout');
+   assert.equal(result.layout.background,process.env.ROADMAP_TEST_THEME==='black-gold'?'rgb(7, 9, 11)':'rgb(122, 11, 11)');
    assert(result.layout.header&&result.layout.stats&&result.layout.limits&&result.layout.predict,'Complete header and bottom panels required');
    assert(result.layout.big.y<result.layout.middle.y&&result.layout.middle.y<result.layout.bottom.y);
    assert.equal(result.layout.beads,sample.rounds.length);assert.equal(Number(result.layout.total),sample.rounds.length);assert.equal(result.current,sample.rounds.length+1);
