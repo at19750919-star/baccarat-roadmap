@@ -1,14 +1,14 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),crypto=require('crypto'),path=require('path');
 const code=fs.readFileSync(path.join(__dirname,'../backend/road_onedrive.gs'),'utf8');
 function env(mode='ok'){
- const config={clientId:'app-id',clientSecret:'secret',refreshToken:'refresh',rootId:'root'},props=new Map([['road_inbox_v1_onedrive_config',JSON.stringify(config)]]);
+ const config={clientId:'app-id',clientSecret:'secret',refreshToken:'refresh',rootId:'root'};if(mode.startsWith('full'))config.scope='Files.ReadWrite';if(mode==='unknownScope')config.scope='Files.ReadWrite.All';const props=new Map([['road_inbox_v1_onedrive_config',JSON.stringify(config)]]);
  const calls=[],names=[],uploads=[],sleeps=[];let posts=0,deleted=0;
  const blob=(b,type)=>({type,getBytes:()=>Array.from(Buffer.isBuffer(b)?b:typeof b==='string'?Buffer.from(b):Buffer.from(b))});
  const ctx={ROAD_KEY:'road_inbox_v1_',console:{log(){},error(){}},PropertiesService:{getScriptProperties:()=>({getProperty:k=>props.get(k),setProperty:(k,v)=>props.set(k,v)})},
   Utilities:{newBlob:blob,sleep:n=>sleeps.push(n),DigestAlgorithm:{SHA_1:'sha1'},computeDigest:(a,b)=>Array.from(crypto.createHash(a).update(Buffer.from(b)).digest())},
   roadFail_:s=>{throw Error('ROAD:'+s)},UrlFetchApp:{fetch(url,o){
    calls.push({url,method:o.method||'get'});let status=200,data;
-   if(url.includes('/oauth2/')){assert.equal(o.payload.scope,'Files.ReadWrite.AppFolder offline_access');data={access_token:'access',scope:'Files.ReadWrite.AppFolder',refresh_token:'rotated'};}
+   if(url.includes('/oauth2/')){assert.equal(o.payload.scope,(config.scope||'Files.ReadWrite.AppFolder')+' offline_access');data={access_token:'access',scope:mode==='full'?'Files.ReadWrite Files.ReadWrite.AppFolder':mode==='fullExcess'?'Files.ReadWrite Files.ReadWrite.All':mode==='legacyExcess'?'Files.ReadWrite Files.ReadWrite.AppFolder':'Files.ReadWrite.AppFolder',refresh_token:'rotated'};}
    else {
     assert(url.startsWith('https://graph.microsoft.com/v1.0/me/drive/'));assert.equal(o.followRedirects,false);assert.equal(o.headers.Authorization,'Bearer access');
     if(url.endsWith('/permissions'))data={value:mode==='shared'?[{roles:['read'],link:{scope:'anonymous'}}]:[{roles:['owner']}]};
@@ -40,4 +40,5 @@ test('Lost create response reconciles existing empty folder without another POST
 test('Persistent error bounded; missing/wrong/nonempty parent data fail closed',()=>{for(const mode of ['persistent','missingParent','wrongParent','nonempty']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.posts,mode==='persistent'?3:1);assert.equal(e.uploads.length,0);assert.equal(e.deleted,0);}});
 test('Unrelated HTTP errors and public sharing do not retry',()=>{for(const mode of ['http401','http403','http429','http503','shared']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.posts,mode==='shared'?0:1);assert.equal(e.uploads.length,0);assert.equal(e.sleeps.length,0);}});
 test('Partial write, mismatched size and hash fail and recycle only new folder',()=>{for(const mode of ['partial','badSize','badHash']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.deleted,1);}});
+test('Owner-consented Files.ReadWrite works; legacy scope stays narrow and unexpected scopes fail',()=>{const full=env('full');save(full);assert.equal(full.uploads.length,2);assert.equal(JSON.parse(full.props.get('road_inbox_v1_onedrive_config')).scope,'Files.ReadWrite');for(const mode of ['fullMissing','fullExcess','legacyExcess','unknownScope']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.uploads.length,0);assert.equal(e.posts,0);}});
 console.log('OneDrive adapter '+groups+' regression groups passed (mocked cloud).');

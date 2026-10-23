@@ -6,12 +6,20 @@
 
 ## 業主維護
 
-- 收件位置：OneDrive 的 `Apps/rclone/路單收件`（介面可能把 Apps 翻成「應用程式」）。資料夾須維持私人；不可建立公開分享連結。
-- 授權僅限 rclone 的應用程式資料夾及離線存取，不包含整個 OneDrive。授權由後端維護；網站不含密碼或更新權杖。
-- 後端為既有 Google Apps Script「百家樂語音」，現有部署更新至第 15 版；Excel 舊協定沿用 Google Drive，新路單改送 OneDrive。
-- 私人授權存於 Script Properties 的 `road_inbox_v1_onedrive_config`；`road_inbox_v1_provider` 設為 `onedrive`。不要將設定值放入 Git、前端或公開紀錄。
+- 收件位置：OneDrive「我的檔案」最外層的 `路單收件`（2026-10-24 從 Apps/rclone 搬移，原資料夾識別碼保留）。資料夾須維持私人；不可建立公開分享連結。
+- 業主於 2026-10-24 明確同意擴大為 `Files.ReadWrite` 加離線存取，以支援最外層收件；程式仍只操作指定收件資料夾。此授權可讀寫 OneDrive 檔案，不再是僅應用程式資料夾。授權由後端私人設定維護；網站不含密碼或更新權杖。
+- 後端為既有 Google Apps Script「百家樂語音」，現有部署更新至第 16 版；Excel 舊協定沿用 Google Drive，新路單改送 OneDrive。
+- 私人授權存於 Script Properties 的 `road_inbox_v1_onedrive_config`；`road_inbox_v1_provider` 設為 `onedrive`；config 的 `scope` 為 `Files.ReadWrite`。舊 config 缺省 scope 仍僅用 AppFolder，不可自行換成 `.All` 權限。不要將設定值放入 Git、前端或公開紀錄。
 - 若顯示授權失效，需由業主重新授權；不可把錯誤提示改成成功，也不可改用業主電腦的同步資料夾冒充雲端收件。
 - 後端只回傳無法猜中的收件碼及狀態，不回傳檔案識別碼或下載網址。既有查詢／下載介面不能讀取 OneDrive 收件內容。
+
+## 最外層收件（2026-10-24）
+
+業主要求免逐層進入 Apps/rclone，並明確同意擴大授權。原資料夾以同 drive 搬移到「我的檔案」最外層，未複製或刪除原檔，識別碼不變。搬移前後 24 個項目保留，其中 14 個檔案的 id/name/size/hash 全部一致；資料夾仍私人。
+
+搬移後已從正式 Pages 重新實測 20／184 局 JSON＋完整 PNG 收件，四檔從新位置下載逐位元一致，同收件碼重送不重複。OneDrive「我的檔案」頁面實際可直接看到「路單收件」。新授權和 token 僅存 GAS 私人 Script Properties，不放入這個 repo。
+
+來源及本機證據：`Documents/Codex/2026-10-24/onedrive-root-inbox`；`move-result.json`、`e2e-result.json`、`twenty-result.json`。前端網址和行為不需因此更改。
 
 ## PNG 版面
 
@@ -27,7 +35,7 @@
 
 新增 404 回歸測試可證明原版失敗、修正版恢復；13 組含舊協定的測試通過。這兩組實際成功未觀測到 404，不代表已證實 Microsoft 內部原因或根治所有服務故障。
 
-`backend/road_onedrive.gs` 是已部署 v15 的來源快照，`node tests/onedrive-receiver.cjs` 執行 6 組可攜回歸測試。GitHub Pages 不執行此後端；更新時須保留 GAS 原有程式碼和私人設定，另發布 GAS 版本。完整來源、原版備份與實檔證據在 `Documents/Codex/2026-10-24/onedrive-inbox-fix`；不得將私人授權放入 Git。
+`backend/road_onedrive.gs` 是已部署 v16 的來源快照，`node tests/onedrive-receiver.cjs` 執行 7 組可攜回歸測試。GitHub Pages 不執行此後端；更新時須保留 GAS 原有程式碼和私人設定，另發布 GAS 版本。完整來源、原版備份與實檔證據在 `Documents/Codex/2026-10-24/onedrive-inbox-fix`；不得將私人授權放入 Git。
 
 ## 驗證及限制
 

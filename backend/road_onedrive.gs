@@ -14,17 +14,22 @@ function roadOneDriveConfig_() {
 }
 
 function roadOneDriveToken_(config) {
+  // Broader access is opt-in only after owner consent; legacy app-folder configs remain valid.
+  const requestedScope=config.scope || 'Files.ReadWrite.AppFolder';
+  if (!['Files.ReadWrite.AppFolder','Files.ReadWrite'].includes(requestedScope)) roadFail_('onedrive_not_configured');
   const response = UrlFetchApp.fetch('https://login.microsoftonline.com/consumers/oauth2/v2.0/token', {
     method: 'post', muteHttpExceptions: true, followRedirects: false,
     payload: {client_id: config.clientId, client_secret: config.clientSecret,
       refresh_token: config.refreshToken, grant_type: 'refresh_token',
-      scope: 'Files.ReadWrite.AppFolder offline_access'}
+      scope: requestedScope + ' offline_access'}
   });
   if (response.getResponseCode() !== 200) roadFail_('onedrive_authorization_required');
   const token = JSON.parse(response.getContentText());
   const scopes = String(token.scope || '').toLowerCase().split(' ');
-  if (!token.access_token || !scopes.includes('files.readwrite.appfolder') ||
-      scopes.some(scope => /^files\./.test(scope) && scope !== 'files.readwrite.appfolder')) roadFail_('onedrive_authorization_required');
+  const requiredScope=requestedScope.toLowerCase();
+  const allowedFileScopes=requiredScope==='files.readwrite'?['files.readwrite','files.readwrite.appfolder']:['files.readwrite.appfolder'];
+  if (!token.access_token || !scopes.includes(requiredScope) ||
+      scopes.some(scope => /^files\./.test(scope) && !allowedFileScopes.includes(scope))) roadFail_('onedrive_authorization_required');
   if (token.refresh_token) {
     config.refreshToken = token.refresh_token;
     PropertiesService.getScriptProperties().setProperty(ROAD_KEY + 'onedrive_config', JSON.stringify(config));
