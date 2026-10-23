@@ -8,7 +8,7 @@
 
 - 收件位置：OneDrive 的 `Apps/rclone/路單收件`（介面可能把 Apps 翻成「應用程式」）。資料夾須維持私人；不可建立公開分享連結。
 - 授權僅限 rclone 的應用程式資料夾及離線存取，不包含整個 OneDrive。授權由後端維護；網站不含密碼或更新權杖。
-- 後端為既有 Google Apps Script「百家樂語音」，現有部署更新至第 14 版；Excel 舊協定沿用 Google Drive，新路單改送 OneDrive。
+- 後端為既有 Google Apps Script「百家樂語音」，現有部署更新至第 15 版；Excel 舊協定沿用 Google Drive，新路單改送 OneDrive。
 - 私人授權存於 Script Properties 的 `road_inbox_v1_onedrive_config`；`road_inbox_v1_provider` 設為 `onedrive`。不要將設定值放入 Git、前端或公開紀錄。
 - 若顯示授權失效，需由業主重新授權；不可把錯誤提示改成成功，也不可改用業主電腦的同步資料夾冒充雲端收件。
 - 後端只回傳無法猜中的收件碼及狀態，不回傳檔案識別碼或下載網址。既有查詢／下載介面不能讀取 OneDrive 收件內容。
@@ -16,6 +16,18 @@
 ## PNG 版面
 
 2026-10-24 改為沿用網站完整橫向版面，不再把五路直式堆疊；一般路單輸出 2880×1620，長路單會加寬以保留所有欄位。圖片不含儲存提示，雲端檔案與 PNG 下載使用同一份圖片。`node tests/export-layout.cjs` 可驗證 20／184 局的完整版面、快照一致及完整欄位；需安裝 Playwright 和 Chrome。離線測試可用 `HTML2CANVAS_TEST_FILE` 指定 html2canvas，`EXPORT_TEST_OUTPUT` 指定輸出目錄。
+
+## 本次收件修正（2026-10-24）
+
+後端私人診斷確認兩筆失敗都為 Microsoft Graph 建立子資料夾回 `404 itemNotFound`。原收件資料夾讀取和私人權限檢查成功，之後同一資料夾仍能建立檔案；不能由此推定容量不足，也尚無證據指出 Microsoft 內部為何間歇回 404。
+
+舊程式遇一次 404 即結束。v15 只在此錯誤時，先確認原收件資料夾仍存在，再查剛才同名子資料夾是否已建立；只可接續同 parent、同名且空白的資料夾。仍未建立時最多嘗試 3 次（400／1200ms 間隔），固定同名且不自動改名，避免重複建立。其他錯誤或持續失敗仍回報未收齊，絕不當作成功。
+
+正式網站已重新以匿名瀏覽器驗證 20 局（2880×1620）與 184 局（11998×1234）：各一份 JSON＋完整 PNG 真實寫入 OneDrive，下載逐位元與送出一致；原儲存/JSON下載、儲存期間快照、重複點擊和同收件碼重送均通過，四檔無公開分享。gpt-6-sol 唯讀獨立驗收亦直接讀回四檔並比對通過。
+
+新增 404 回歸測試可證明原版失敗、修正版恢復；13 組含舊協定的測試通過。這兩組實際成功未觀測到 404，不代表已證實 Microsoft 內部原因或根治所有服務故障。
+
+`backend/road_onedrive.gs` 是已部署 v15 的來源快照，`node tests/onedrive-receiver.cjs` 執行 6 組可攜回歸測試。GitHub Pages 不執行此後端；更新時須保留 GAS 原有程式碼和私人設定，另發布 GAS 版本。完整來源、原版備份與實檔證據在 `Documents/Codex/2026-10-24/onedrive-inbox-fix`；不得將私人授權放入 Git。
 
 ## 驗證及限制
 
