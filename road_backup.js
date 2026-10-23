@@ -14,29 +14,36 @@
   }
   async function png(entry){
     if(typeof html2canvas!=='function')throw Error('截圖套件未載入，JSON仍可下載；請恢復網路後重試儲存。');
-    const rounds=entry.rounds,big=buildBigRoad(rounds),host=document.createElement('div'),view=document.createElement('section');
-    host.style.cssText='position:absolute;left:0;top:0;z-index:-2147483647;pointer-events:none';host.setAttribute('aria-hidden','true');
-    view.className='road-export';host.append(view);
-    const heading=document.createElement('h2');heading.textContent=entry.name;view.append(heading);
-    const info=document.createElement('p');info.textContent=`${entry.createdAt}　共 ${rounds.length} 局｜莊 ${entry.counts.banker}／閒 ${entry.counts.player}／和 ${entry.counts.tie}`;view.append(info);
-    const boards=[];
-    const board=(title,cls,cols,size)=>{
-      const h=document.createElement('h3');h.textContent=title;view.append(h);
-      const grid=document.createElement('div');grid.className='grid-board '+cls;grid.dataset.label=title;
-      grid.style.cssText=`grid-template-columns:repeat(${cols},${size}px);grid-template-rows:repeat(6,${size}px);width:${cols*size}px;height:${6*size}px`;
-      grid.style.setProperty('--cell-big',size+'px');grid.style.setProperty('--cell-bead',size+'px');grid.style.setProperty('--cell-derived',size+'px');
-      view.append(grid);boards.push({title,cols,size,grid});return grid;
+    // Capture the complete board layout, then redraw its roads from the saved snapshot.
+    const rounds=entry.rounds,big=buildBigRoad(rounds),source=document.querySelector('.app');
+    const host=document.createElement('div'),view=source.cloneNode(true),boards=[];
+    host.className='road-export-host';host.style.cssText='position:absolute;left:0;top:0;z-index:-2147483647;pointer-events:none';
+    host.setAttribute('aria-hidden','true');host.inert=true;view.classList.add('road-export-frame');host.append(view);
+    const inputs=source.querySelectorAll('input');view.querySelectorAll('input').forEach((n,i)=>{n.value=inputs[i].value;n.setAttribute('value',n.value);});
+    view.querySelectorAll('[id]').forEach(n=>{n.dataset.exportId=n.id;n.removeAttribute('id');});
+    const target=id=>view.querySelector('[data-export-id="'+id+'"]');
+    const board=(id,title,cols,size)=>{
+      const grid=target(id);grid.style.cssText=`grid-template-columns:repeat(${cols},${size}px);grid-template-rows:repeat(6,${size}px);width:${cols*size}px;height:${6*size}px;flex-shrink:0`;
+      boards.push({title,cols,size});return grid;
     };
-    renderBigRoad(big,{target:board('大路','big-road',Math.max(big.cols,1),48),rounds,cols:Math.max(big.cols,1)});
-    for(const [label,offset,shape]of [['大眼仔',1,'hollow'],['小路',2,'solid'],['蟑螂路',3,'slash']]){
-      const marks=buildDerivedRoad(big.grid,offset,big.cols,big.rows),laid=layoutDerivedMarks(marks,6),cols=Math.max(laid.cols,1);
-      renderDerived('',marks,shape,{target:board(label,'derived-road',cols,32),cols});
+    const bigCols=Math.max(39,big.cols);renderBigRoad(big,{target:board('bigRoad','大路',bigCols,48),rounds,cols:bigCols});
+    let derivedCols=29;
+    for(const [id,label,offset,shape]of [['bigEye','大眼仔',1,'hollow'],['smallRoad','小路',2,'solid'],['cockroachRoad','蟑螂路',3,'slash']]){
+      const marks=buildDerivedRoad(big.grid,offset,big.cols,big.rows),laid=layoutDerivedMarks(marks,6),cols=Math.max(29,laid.cols);
+      derivedCols=Math.max(derivedCols,cols);renderDerived('',marks,shape,{target:board(id,label,cols,32),cols});
     }
-    const beadCols=Math.max(1,Math.ceil(rounds.length/6));renderBead(rounds,board('珠盤路','bead-board',beadCols,40),beadCols);
-    const width=Math.max(640,...boards.map(b=>b.cols*b.size));view.style.width=width+'px';document.body.append(host);
+    const beadCols=Math.max(24,Math.ceil(rounds.length/6));renderBead(rounds,board('beadBoard','珠子路',beadCols,40),beadCols);
+    for(const [id,count]of [['totalCount',rounds.length],['cntB',rounds.filter(r=>r.r==='B').length],['cntP',rounds.filter(r=>r.r==='P').length],['cntT',rounds.filter(r=>r.r==='T').length],['cntBP',rounds.filter(r=>r.bp).length],['cntPP',rounds.filter(r=>r.pp).length],['cntL6',rounds.filter(r=>r.l6).length]])target(id).textContent=count;
+    // Grow horizontally for long histories without clipping any of the five roads.
+    const width=Math.max(1920,bigCols*48+24,2*(derivedCols*32+18)+28,beadCols*40+960);
+    view.style.cssText=`position:relative;left:0;top:0;transform:none;width:${width}px;height:1080px`;
+    view.querySelector('.mid-row').style.gridTemplateColumns='minmax(0,1fr) minmax(0,1fr)';
+    view.querySelectorAll('.mid-col').forEach(n=>n.style.gridTemplateRows='minmax(0,1fr) minmax(0,1fr)');
+    view.querySelector('.bottom-row').style.gridTemplateColumns='300px minmax(0,1fr) 162px 436px';
+    document.body.append(host);
     try{
       await document.fonts?.ready;
-      const w=view.offsetWidth,h=view.offsetHeight,scale=Math.min(1.5,12000/w,Math.sqrt(24000000/(w*h)));
+      const w=view.offsetWidth,h=view.offsetHeight,scale=Math.min(1.5,11998/w,11998/h,Math.sqrt(23900000/(w*h)));
       if(scale<.3)throw Error('路單過長，圖片超出安全尺寸；JSON已保留，請分段儲存。');
       const canvas=await html2canvas(view,{backgroundColor:'#7a0b0b',scale,useCORS:true,logging:false,width:w,height:h,windowWidth:Math.max(w,1920),windowHeight:Math.max(h,1080),onclone:doc=>{
         doc.body.style.overflow='visible';doc.body.style.height='auto';

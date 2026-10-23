@@ -1620,7 +1620,8 @@ body {
 .backup-notice[hidden],.backup-notice [hidden]{display:none}
 .backup-notice button,.backup-notice a{font:inherit;color:#751313;background:#fff;border:1px solid #b48635;border-radius:4px;padding:3px 8px;text-decoration:none;cursor:pointer}
 .backup-notice button:disabled{cursor:wait;opacity:.6}
-.road-export{padding:16px;background:#7a0b0b;color:#fff;font-family:"Microsoft JhengHei",sans-serif;box-sizing:content-box}
-.road-export h2{margin:0 0 8px;font-size:24px}.road-export p{margin:0 0 12px;font-size:14px}
-.road-export h3{margin:12px 0 4px;font-size:18px}.road-export .grid-board{margin:0;border-radius:0}
-.road-export *{animation:none!important;transition:none!important}.road-export .dragon-neon{display:none!important}
+/* PNG uses the complete desktop layout, independently of the display zoom. */
+.road-export-frame{background:#7a0b0b}
+.road-export-frame *{animation:none!important;transition:none!important}
+.road-export-frame .bead,.road-export-frame .big-circle,.road-export-frame .derived-mark{opacity:1!important}
+.road-export-frame .dragon-neon{display:none!important}
