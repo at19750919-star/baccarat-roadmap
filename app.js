@@ -41,7 +41,9 @@ function nextDefaultRoadmapName(list) {
   return `路單-${String(max + 1).padStart(3, '0')}`;
 }
 
-function saveRoadmap() {
+async function saveRoadmap() {
+  const backup = window.RoadBackup;
+  if (backup?.busy) return null;
   if (!Array.isArray(state.rounds) || state.rounds.length === 0) {
     alert('請先輸入路單紀錄再儲存！');
     return null;
@@ -67,9 +69,11 @@ function saveRoadmap() {
   };
   const filtered = list.filter(item => item && item.name !== name);
   filtered.unshift(entry);
+  let listSaved = true;
   try {
     localStorage.setItem(SAVED_ROADS_KEY, JSON.stringify(filtered));
   } catch (err) {
+    listSaved = false;
     console.warn('無法寫入 localStorage:', err);
   }
   try {
@@ -86,6 +90,8 @@ function saveRoadmap() {
   } catch (err) {
     console.error('下載路單 JSON 失敗:', err);
   }
+  if (backup) await backup.save(entry, { listSaved });
+  else alert('已送出原本的 JSON 下載；備份模組未載入，未產生 PNG 或寫入備份資料夾。');
   return entry;
 }
 
@@ -313,11 +319,11 @@ function predictNextMark(rounds, nextColor, offset) {
 }
 
 // ---------- 渲染 ----------
-function renderBead() {
-  const el = document.getElementById('beadBoard');
+function renderBead(rounds = state.rounds, target = null, columns = 20) {
+  const el = target || document.getElementById('beadBoard');
   el.innerHTML = '';
   const rows = 6;
-  const cols = 20;
+  const cols = columns;
   // 依序填入:每欄 6 格,填滿才換欄
   const cells = rows * cols;
   for (let i = 0; i < cells; i++) {
@@ -329,8 +335,8 @@ function renderBead() {
     cell.style.gridRow = (row + 1);
     // rounds 依序填充
     const idx = col * rows + row;
-    if (idx < state.rounds.length) {
-      const rd = state.rounds[idx];
+    if (idx < rounds.length) {
+      const rd = rounds[idx];
       const bead = document.createElement('div');
       bead.className = `bead ${rd.r}`;
       if (rd.bp) bead.classList.add('pair-bp');
@@ -375,19 +381,19 @@ function computeDragonIdxs(rounds, minLen) {
   return { dragonIdxs, dragonSeq, color: buf.length >= minLen ? color : null };
 }
 
-function renderBigRoad(big) {
-  const el = document.getElementById('bigRoad');
+function renderBigRoad(big, options = {}) {
+  const el = options.target || document.getElementById('bigRoad');
   el.innerHTML = '';
   const rows = 6;
-  const cols = 39;
-  const { dragonIdxs, dragonSeq, color: dragonColor } = computeDragonIdxs(state.rounds, 6);
+  const cols = options.cols || 39;
+  const { dragonIdxs, dragonSeq, color: dragonColor } = computeDragonIdxs(options.rounds || state.rounds, 6);
   const dragonLen = dragonIdxs.size;
   const isSuperDragon = dragonLen >= 7; // 連七觸發大絕招
 
   // 巨龍特效
   const dragonOverlay = document.getElementById('dragonOverlay');
   const dragonCombo = document.getElementById('dragonCombo');
-  if (dragonOverlay) {
+  if (dragonOverlay && !options.target) {
     if (isSuperDragon) {
       // 莊→金龍 / 閒→藍龍 (兩張 APNG 由 HTML 直接預載,靠 class 切換可見的那一張,避免冷快取時 src 換圖閃爍)
       dragonOverlay.classList.toggle('player-dragon-overlay', dragonColor === 'P');
@@ -474,11 +480,11 @@ function renderBigRoad(big) {
   }
 }
 
-function renderDerived(idPrefix, marks, shape) {
-  const el = document.getElementById(idPrefix);
+function renderDerived(idPrefix, marks, shape, options = {}) {
+  const el = options.target || document.getElementById(idPrefix);
   el.innerHTML = '';
   const rows = 6;
-  const cols = 29;
+  const cols = options.cols || 29;
   const laid = layoutDerivedMarks(marks, rows);
   const shapeClass = shape || 'hollow';
   for (let c = 0; c < cols; c++) {
@@ -747,7 +753,9 @@ function toggleFullscreen() {
 
 // ---------- 全螢幕等比縮放:保持 1920×1080 設計稿、視口變化時等比貼合 ----------
 function fitApp() {
-  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  const reserve = (document.querySelector('.backup-tools')?.offsetHeight || 0) + 16;
+  const scale = Math.min(window.innerWidth / 1920, Math.max(1, window.innerHeight - reserve) / 1080);
+  document.documentElement.style.setProperty('--backup-space', reserve + 'px');
   document.documentElement.style.setProperty('--app-scale', scale);
 }
 window.addEventListener('resize', fitApp);
