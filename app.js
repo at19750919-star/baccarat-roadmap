@@ -50,7 +50,7 @@ async function saveRoadmap() {
   }
   const list = loadSavedRoadmaps();
   const defaultName = nextDefaultRoadmapName(list);
-  const rawName = prompt('請輸入路單名稱（將同時存入排牌共用清單並下載 .json 路單檔）：', defaultName);
+  const rawName = prompt('請輸入路單名稱（保留本機清單與 JSON 下載，並送出 JSON＋PNG 雲端備份）：', defaultName);
   if (rawName === null) return null;
   const name = rawName.trim() || defaultName;
   const outcomes = state.rounds.map(rd => rd.r === 'B' ? '莊' : rd.r === 'P' ? '閒' : '和');
@@ -91,7 +91,7 @@ async function saveRoadmap() {
     console.error('下載路單 JSON 失敗:', err);
   }
   if (backup) await backup.save(entry, { listSaved });
-  else alert('已送出原本的 JSON 下載；備份模組未載入，未產生 PNG 或寫入備份資料夾。');
+  else alert('已送出原本的 JSON 下載；備份模組未載入，未產生 PNG 或傳到雲端。');
   return entry;
 }
 
@@ -753,9 +753,7 @@ function toggleFullscreen() {
 
 // ---------- 全螢幕等比縮放:保持 1920×1080 設計稿、視口變化時等比貼合 ----------
 function fitApp() {
-  const reserve = (document.querySelector('.backup-tools')?.offsetHeight || 0) + 16;
-  const scale = Math.min(window.innerWidth / 1920, Math.max(1, window.innerHeight - reserve) / 1080);
-  document.documentElement.style.setProperty('--backup-space', reserve + 'px');
+  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
   document.documentElement.style.setProperty('--app-scale', scale);
 }
 window.addEventListener('resize', fitApp);

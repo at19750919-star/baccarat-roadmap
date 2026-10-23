@@ -1,20 +1,11 @@
-// No cloud API or fixed path: only a directory explicitly selected by the user.
 (function(root){
   'use strict';
-  let directory=null,busy=false,choosing=false,urls=[];
-  const el=id=>document.getElementById(id),status=text=>{el('backupStatus').textContent=text;};
-  const store=(mode,value)=>new Promise((resolve,reject)=>{
-    const open=indexedDB.open('baccarat-road-backup',1);
-    open.onupgradeneeded=()=>open.result.createObjectStore('handles');
-    open.onerror=()=>reject(open.error);open.onsuccess=()=>{
-      const db=open.result;try{const tx=db.transaction('handles',mode),s=tx.objectStore('handles');
-      const request=mode==='readonly'?s.get('directory'):s.put(value,'directory');let result;
-      request.onsuccess=()=>result=request.result;tx.oncomplete=()=>{db.close();resolve(result);};
-      tx.onerror=()=>{db.close();reject(tx.error);};tx.onabort=()=>{db.close();reject(tx.error);};
-      }catch(error){db.close();reject(error);}
-    };
-  });
-  const safeName=name=>(String(name).replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/[. ]+$/,'').slice(0,100)||'路單').replace(/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?=\.|$)/i,'_$1');
+  const ENDPOINT='https://script.google.com/macros/s/AKfycbypt3_PnEL5TgdDPaBwg1M5bWAjQMR9dD5Jslicn3eZCtuNSTtqO35RafhQpuX-l9_m/exec';
+  let busy=false,urls=[],pending=null;
+  const el=id=>document.getElementById(id);
+  const safeName=name=>(String(name).replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/[. ]+$/,'').slice(0,100)||'路單');
+  function status(text){el('backupNotice').hidden=false;el('backupStatus').textContent=text;}
+  function buttons(){el('saveBtn').disabled=busy;el('backupRetryBtn').disabled=busy;}
   function links(pack){
     urls.forEach(URL.revokeObjectURL);urls=[];
     for(const [id,blob,ext]of [['backupJsonLink',pack.json,'json'],['backupPngLink',pack.png,'png']]){
@@ -50,56 +41,48 @@
       const canvas=await html2canvas(view,{backgroundColor:'#7a0b0b',scale,useCORS:true,logging:false,width:w,height:h,windowWidth:Math.max(w,1920),windowHeight:Math.max(h,1080),onclone:doc=>{
         doc.body.style.overflow='visible';doc.body.style.height='auto';
       }});
-      const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('PNG產生失敗，未寫入備份資料夾。')),'image/png'));
+      const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('PNG產生失敗，未傳送雲端備份。')),'image/png'));
       return {blob,width:canvas.width,height:canvas.height,boards:boards.map(({title,cols})=>({title,cols}))};
     }finally{host.remove();}
   }
-  async function writePair(dir,pack){
-    const files=[];
-    try{
-      if(await dir.queryPermission({mode:'readwrite'})!=='granted')throw Error('資料夾權限失效，請按「選擇備份資料夾」重新授權。');
-      const exists=async name=>{try{await dir.getFileHandle(name);return true;}catch(e){if(e.name==='NotFoundError')return false;throw e;}};
-      let base;for(let i=0;i<1000;i++){const candidate=pack.name+(i?`-${i+1}`:'');if(!await exists(candidate+'.json')&&!await exists(candidate+'.png')){base=candidate;break;}}
-      if(!base)throw Error('同名備份過多，請修改路單名稱。');
-      for(const [ext,blob]of [['json',pack.json],['png',pack.png]]){
-        const item={name:base+'.'+ext,status:'writing'};files.push(item);
-        const handle=await dir.getFileHandle(item.name,{create:true}),writer=await handle.createWritable();
-        try{await writer.write(blob);await writer.close();item.status='saved';}catch(e){try{await writer.abort();}catch(_){}throw e;}
-      }
-      return {ok:true,files,cloudConfirmed:false};
-    }catch(error){if(files.at(-1)?.status==='writing')files.at(-1).status='failed';return {ok:false,files,error:error.message,cloudConfirmed:false};}
+
+  const messages={rate_limit:'收件暫時繁忙，請稍後再試。',daily_size_limit:'今天收件容量已滿，請保留下載檔案。',busy:'收件服務忙碌，請稍後重試。',invalid_png:'PNG 格式或尺寸不符合收件限制。',invalid_rounds:'路單局數超出收件限制（最多1000局）。',invalid_schema:'路單格式不符合收件要求。',invalid_counts:'路單統計與內容不一致。',json_too_large:'JSON 超出收件大小限制。',receipt_conflict:'提交識別碼衝突，未覆寫既有備份。',submission_incomplete:'上次收件未完成，請保留下載檔案。',storage_unavailable:'雲端收件未完成，請稍後再試。'};
+  Object.assign(messages,{onedrive_not_configured:'OneDrive 收件尚未啟用，請通知業主。',onedrive_authorization_required:'OneDrive 授權已失效，請通知業主重新授權。',folder_not_private:'收件資料夾的私人設定已改變，為保護資料已停止上傳；請通知業主。'});
+  function receipt(){if(!root.crypto?.getRandomValues)throw Error('此瀏覽器無法建立安全收件碼，請保留下載檔案。');return Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');}
+  async function request(url,options={},ms=40000){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),ms);
+    try{const response=await fetch(url,{...options,signal:controller.signal,credentials:'omit',redirect:'follow'});if(!response.ok)throw Error('HTTP '+response.status);const data=await response.json();if(!data||typeof data.success!=='boolean')throw Error('invalid response');return data;}finally{clearTimeout(timer);}
   }
-  async function choose(){
-    if(busy||choosing)return;
-    if(!root.showDirectoryPicker){status('此瀏覽器不能直接選資料夾；儲存後請使用 JSON／PNG 下載連結，再放入同步資料夾。');return;}
-    choosing=true;el('saveBtn').disabled=true;el('backupFolderBtn').disabled=true;
-    try{
-      // Invoke the picker directly in this click; no preceding asynchronous work.
-      const next=await root.showDirectoryPicker({id:'baccarat-road-backup',mode:'readwrite'});directory=next;
-      try{await store('readwrite',next);status(`已選擇：${next.name}。儲存時會另寫 JSON 與 PNG；雲端同步由桌面程式處理。`);}
-      catch(_){status(`已選擇：${next.name}；無法記住資料夾，下次開啟請重選。`);}
-    }catch(error){if(error.name==='AbortError')status(directory?`已取消選擇，保留：${directory.name}`:'已取消選擇；本機儲存仍可使用。');else status('無法選擇資料夾：'+error.message);}
-    finally{choosing=false;el('saveBtn').disabled=false;el('backupFolderBtn').disabled=false;}
+  async function body(pack){
+    if(pack.payload)return pack.payload;
+    if(pack.png.size>6291456||pack.json.size>262144)throw Error('備份檔案過大（PNG限6MB／JSON限256KB），請使用下載檔案。');
+    const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('PNG讀取失敗'));r.readAsDataURL(pack.png);});
+    pack.payload=JSON.stringify({action:'roadSubmit',receipt:pack.receipt,roadmap:pack.snapshot,pngBase64:data});return pack.payload;
+  }
+  async function send(pack){
+    const payload=await body(pack);let response;
+    try{response=await request(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:payload});}
+    catch(_){
+      // A timeout can occur after storage. Query the unguessable receipt rather than
+      // reporting success or automatically sending a second submission.
+      try{const check=await request(ENDPOINT+'?action=roadStatus&receipt='+pack.receipt,{},12000);if(check.success&&check.receipt===pack.receipt&&check.state==='complete')return check;if(check.state==='failed')throw Error('雲端收件失敗；請保留 JSON／PNG 下載檔案。');}catch(_){}
+      throw Error('尚無法確認雲端是否收齊；本機檔案已保留，可按重試查核同一筆提交。');
+    }
+    if(response.receipt===pack.receipt&&response.success&&response.state==='complete')return response;
+    throw Error(messages[response.error]||'雲端尚未確認兩個檔案均已儲存，請保留下載檔案。');
+  }
+  async function upload(pack,note){
+    try{const received=await send(pack);pending=null;el('backupRetryBtn').hidden=true;const provider=received.provider==='onedrive'?'OneDrive':'Google Drive';status(note+' '+provider+' 已收齊 JSON＋完整路單 PNG。');return {ok:true,pack};}
+    catch(error){pending={pack,note};el('backupRetryBtn').hidden=false;status(note+' '+error.message+' 可下載 JSON／PNG。');return {ok:false,error:error.message,pack};}
   }
   async function save(entry,{listSaved=true}={}){
-    if(busy||choosing)return {ok:false,error:'saving'};busy=true;el('saveBtn').disabled=true;el('backupFolderBtn').disabled=true;
-    const snapshot=JSON.parse(JSON.stringify(entry)),pack={name:safeName(snapshot.name),json:new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'})};
-    const target=directory,note=listSaved?'本機清單已儲存。':'本機清單寫入失敗。';links(pack);status(note+' 正在產生完整路單 PNG…');
-    try{
-      const image=await png(snapshot);pack.png=image.blob;pack.image=image;links(pack);
-      if(!target){status(note+' 已送出 JSON 下載；請下載完整 PNG。若要同步備份，先選擇 Google Drive（或 OneDrive）資料夾後再儲存。');return {ok:false,reason:'no-directory',pack};}
-      const result=await writePair(target,pack);
-      if(result.ok)status(note+` 已寫入同步資料夾「${target.name}」：${result.files.map(f=>f.name).join('、')}；未確認雲端同步完成。`);
-      else status(note+' 備份未完成：'+result.error+(result.files.length?'（可能有部分檔案，未回報成功）':'')+'；可使用 JSON／PNG 下載連結。');
-      return {...result,pack};
-    }catch(error){status(note+' 備份未完成：'+error.message);return {ok:false,error:error.message,pack};}
-    finally{busy=false;el('saveBtn').disabled=false;el('backupFolderBtn').disabled=false;}
+    if(busy)return {ok:false,error:'saving'};busy=true;buttons();el('backupRetryBtn').hidden=true;
+    const snapshot=JSON.parse(JSON.stringify(entry)),pack={snapshot,name:safeName(snapshot.name),json:new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'})},note=listSaved?'本機清單已儲存。':'本機清單寫入失敗。';pending=null;links(pack);status(note+' 正在產生完整路單 PNG…');
+    try{pack.receipt=receipt();const image=await png(snapshot);pack.png=image.blob;pack.image=image;links(pack);status(note+' 正在送出雲端備份…');return await upload(pack,note);}
+    catch(error){status(note+' '+error.message+' JSON仍可下載；未確認雲端備份。');return {ok:false,error:error.message,pack};}
+    finally{busy=false;buttons();}
   }
-  root.RoadBackup={save,writePair,png,choose,get busy(){return busy||choosing;}};
-  document.addEventListener('DOMContentLoaded',async()=>{
-    if(root.ResizeObserver)new ResizeObserver(()=>{if(typeof fitApp==='function')fitApp();}).observe(document.querySelector('.backup-tools'));
-    el('backupFolderBtn').addEventListener('click',choose);
-    if(!root.showDirectoryPicker)el('backupFolderBtn').textContent='備份下載說明';
-    try{const saved=await store('readonly');if(saved){directory=saved;status(await saved.queryPermission({mode:'readwrite'})==='granted'?`備份資料夾：${saved.name}`:'備份資料夾需要重新授權，請按「選擇備份資料夾」。');}}catch(_){}
-  });
+  async function retry(){if(busy||!pending)return;busy=true;buttons();const item=pending;status(item.note+' 正在重試同一筆雲端備份…');try{return await upload(item.pack,item.note);}finally{busy=false;buttons();}}
+  root.RoadBackup={save,png,send,retry,get busy(){return busy;}};
+  document.addEventListener('DOMContentLoaded',()=>{el('backupCloseBtn').addEventListener('click',()=>{el('backupNotice').hidden=true;});el('backupRetryBtn').addEventListener('click',retry);});
 })(window);

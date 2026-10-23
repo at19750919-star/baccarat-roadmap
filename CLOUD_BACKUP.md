@@ -1,0 +1,22 @@
+# 路單私人雲端備份
+
+目前使用 OneDrive。按「儲存」保留原有本機清單及 JSON 下載，另從同一份路單快照產生完整 PNG，將 JSON＋PNG 送到私人收件後端。無須使用者登入業主帳號或選同步資料夾。
+
+只有後端確認兩個檔案都寫入，畫面才顯示「OneDrive 已收齊」。拒絕、斷線或逾時不算成功；仍可下載 JSON／PNG，並以同一個收件碼重試，避免重複建立已完成的備份。
+
+## 業主維護
+
+- 收件位置：OneDrive 的 `Apps/rclone/路單收件`（介面可能把 Apps 翻成「應用程式」）。資料夾須維持私人；不可建立公開分享連結。
+- 授權僅限 rclone 的應用程式資料夾及離線存取，不包含整個 OneDrive。授權由後端維護；網站不含密碼或更新權杖。
+- 後端為既有 Google Apps Script「百家樂語音」，現有部署更新至第 13 版；Excel 舊協定沿用 Google Drive，新路單改送 OneDrive。
+- 私人授權存於 Script Properties 的 `road_inbox_v1_onedrive_config`；`road_inbox_v1_provider` 設為 `onedrive`。不要將設定值放入 Git、前端或公開紀錄。
+- 若顯示授權失效，需由業主重新授權；不可把錯誤提示改成成功，也不可改用業主電腦的同步資料夾冒充雲端收件。
+- 後端只回傳無法猜中的收件碼及狀態，不回傳檔案識別碼或下載網址。既有查詢／下載介面不能讀取 OneDrive 收件內容。
+
+## 驗證及限制
+
+2026-10-23 已以全新匿名瀏覽器測試 184 局快照，同時保留本機清單與 JSON 下載、阻止重複儲存；OneDrive 收到 JSON＋11871×2021 PNG，兩檔下載回來與送出內容逐位元一致，無公開權限。失敗／逾時／重試另有模擬測試。
+
+Google Drive 原先寫檔失敗已取得原始 `403 userRateLimitExceeded`；容量充足，空檔可建立，但內容上傳被拒。尚無證據能指定限制種類或恢復時間，因此改用 OneDrive。原 Excel 列表與下載實測正常，Excel 上傳程式未更動且模擬測試通過；Google 真實上傳限制未因此解除。
+
+本機後端來源、診斷及測試證據保留在業主電腦的 `Documents/Codex/2026-10-23/road-cloud-takeover`。其中 `.private` 為私人授權，不可公開。Google 授權／Apps Script 及 Microsoft OneDrive 必須持續有效；業主電腦無須開機。
