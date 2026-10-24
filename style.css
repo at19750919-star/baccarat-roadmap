@@ -1368,19 +1368,8 @@ body {
   gap: 6px;
 }
 
-/* 響應式 */
-@media (max-width: 1000px) {
-
-  .mid-row,
-  .bottom-row,
-  .control-panel {
-    grid-template-columns: 1fr;
-  }
-
-  .mid-col {
-    grid-template-rows: auto auto;
-  }
-}
+/* 固定 1920×1080 畫布由 fitApp() 整體等比縮放。
+   窄視口仍維持原本欄列，避免單欄重排超出固定列高、裁掉工具區。 */
 
 /* ================== 特效：長龍金龍與霓虹外框 ================== */
 

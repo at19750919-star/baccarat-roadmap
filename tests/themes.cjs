@@ -53,14 +53,34 @@ catch (_) { ({ chromium } = require(path.join(process.env.USERPROFILE, '.cache/c
       return captured;
     });
     assert.deepEqual(exported, { background: 'rgb(7, 9, 11)', beads: sample.length, theme: 'black-gold' });
-    for (const width of [1920, 1440, 390]) {
+    for (const width of [1920, 1440, 1000, 844, 390, 375]) {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 1080 });
       await page.waitForFunction(() => Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--app-scale')) - Math.min(innerWidth / 1920, innerHeight / 1080)) < 0.0001);
       const box = await page.locator('.app').boundingBox();
       assert(box.x >= -1 && box.y >= -1 && box.x + box.width <= width + 1, 'Canvas fits viewport');
       const control = await page.locator('#themeSelect').boundingBox();
       assert(control.width > 0 && control.height > 0);
+      for (const theme of ['classic', 'black-gold']) {
+        await page.selectOption('#themeSelect', theme);
+        const layout = await page.evaluate(() => {
+          const rect = selector => document.querySelector(selector).getBoundingClientRect();
+          const panel = rect('.notice-panel');
+          const inside = (a, b) => a.width > 0 && a.height > 0 && a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1;
+          const buttons = [...document.querySelectorAll('.notice-icons button')];
+          return {
+            buttonsVisible: buttons.length === 8 && buttons.every(b => inside(b.getBoundingClientRect(), panel)),
+            selectorVisible: inside(rect('#themeSelect'), panel),
+            panelsInside: [...document.querySelectorAll('.panel')].every(p => inside(p.getBoundingClientRect(), rect('.app'))),
+            bottomHorizontal: rect('.stats-panel').right <= rect('.bead-panel').left + 1 && rect('.bead-panel').right <= rect('.predict-panel').left + 1,
+          };
+        });
+        assert(layout.buttonsVisible, `${theme} ${width}px: all eight tool buttons must fit inside their panel`);
+        assert(layout.selectorVisible, `${theme} ${width}px: theme select must fit inside its panel`);
+        assert(layout.panelsInside && layout.bottomHorizontal, `${theme} ${width}px: retain complete horizontal board layout`);
+      }
     }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: path.join(__dirname, '../.preview/mobile-tools.png') });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.screenshot({ path: path.join(__dirname, '../.preview/black-gold.png') });
     await page.selectOption('#themeSelect', 'classic');
