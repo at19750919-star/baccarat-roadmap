@@ -17,18 +17,19 @@ function toRuns(outcomes) {
   return runs;
 }
 
-function getSequences(runs) {
-  const red = [], blue = [], green = [];
+// 綠依莊、閒分開記錄兩顆以上欄的顆數；firstSide 為第一欄是莊或閒。
+function getSequences(runs, firstSide = '莊') {
+  const red = [], blue = [], greenBanker = [], greenPlayer = [];
   let kind = null;
-  for (const length of runs) {
+  runs.forEach((length, i) => {
     if (!Number.isInteger(length) || length < 1) throw new Error('欄長必須為正整數。');
     const next = length === 1 ? red : blue;
     if (next === kind) next[next.length - 1]++;
     else next.push(1);
-    if (length >= 2) green.push(length);
+    if (length >= 2) ((i % 2 === 0) === (firstSide === '莊') ? greenBanker : greenPlayer).push(length);
     kind = next;
-  }
-  return { red, blue, green };
+  });
+  return { red, blue, greenBanker, greenPlayer };
 }
 
 function scoreSequence(seq) {
@@ -77,15 +78,17 @@ function scoreSequence(seq) {
 }
 
 function scoreRoad(outcomes) {
-  const sequences = getSequences(toRuns(outcomes));
-  const red = scoreSequence(sequences.red), blue = scoreSequence(sequences.blue), green = scoreSequence(sequences.green);
+  const sequences = getSequences(toRuns(outcomes), outcomes[0]);
+  const red = scoreSequence(sequences.red), blue = scoreSequence(sequences.blue);
+  const greenBanker = scoreSequence(sequences.greenBanker), greenPlayer = scoreSequence(sequences.greenPlayer);
   const reasons = [];
   for (const [key, limit, weight, label] of [['red', 3, WEIGHTS.longRed, '長段單跳'], ['blue', 4, WEIGHTS.longBlue, '長段兩顆以上']]) {
     const count = sequences[key].reduce((sum, n) => sum + Math.max(0, n - limit), 0);
     if (count) reasons.push({ label, count, points: count * weight });
   }
   const road = { total: reasons.reduce((sum, r) => sum + r.points, 0), reasons };
-  return { total: red.total + blue.total + green.total + road.total, red, blue, green, road, reasons };
+  return { total: red.total + blue.total + greenBanker.total + greenPlayer.total + road.total,
+    red, blue, greenBanker, greenPlayer, road, reasons };
 }
 
 function normalizeOptions(options = {}) {
@@ -185,7 +188,7 @@ function* roadSteps(options, rng) {
     if ((i + 1) % 25 === 0 || i + 1 === steps) yield (i + 1) / steps;
   }
   const nonTieOutcomes = outcomesFromRuns(best, first);
-  return { nonTieOutcomes, runs: best, sequences: getSequences(best), score: scoreRoad(nonTieOutcomes) };
+  return { nonTieOutcomes, runs: best, sequences: getSequences(best, first), score: scoreRoad(nonTieOutcomes) };
 }
 function generateRoad(options = {}, rng) {
   const iterator = roadSteps(options, rng || createRng(options.seed));
@@ -261,7 +264,7 @@ function initUI() {
       });
       grid.style.gridTemplateColumns = `repeat(${column}, 26px)`;
       scroll.append(grid); card.append(scroll);
-      for (const [key, label] of [['red', '紅'], ['blue', '藍'], ['green', '綠']]) {
+      for (const [key, label] of [['red', '紅'], ['blue', '藍'], ['greenBanker', '綠莊'], ['greenPlayer', '綠閒']]) {
         const section = element('div', `sequence ${key}`);
         section.append(element('strong', '', `${label}：${road.sequences[key].join('、') || '無'}　／ ${points(road.score[key].total)}分`),
           element('p', '', reasonText(road.score[key].reasons))); card.append(section);

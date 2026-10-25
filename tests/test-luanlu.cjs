@@ -13,7 +13,7 @@ function checkRoad(road, rounds = 82, difference = 4, maxRun = 6) {
   assert(Math.abs(values.filter(n => n === '莊').length * 2 - rounds) <= difference);
   assert(Math.max(...toRuns(values)) <= maxRun);
   assert.deepEqual(road.runs, toRuns(values));
-  assert.deepEqual(road.sequences, getSequences(road.runs));
+  assert.deepEqual(road.sequences, getSequences(road.runs, values[0]));
   assert.deepEqual(road.score, scoreRoad(values));
 }
 // 複製參考匯入器的 token 及 nonTieOutcomes 判斷；不執行或改動排牌程式。
@@ -38,8 +38,9 @@ function test(name, fn) { fn(); passed++; console.log(`通過 ${passed}：${name
 test('範例欄長的紅藍綠符合定義', () => {
   const runs = [1, 1, 3, 2, 1, 4, 2, 2, 1, 1, 1];
   assert.deepEqual(toRuns(outcomes(runs)), runs);
-  assert.deepEqual(getSequences(runs), { red: [2, 1, 3], blue: [2, 3], green: [3, 2, 4, 2, 2] });
-  assert.deepEqual(getSequences([]), { red: [], blue: [], green: [] });
+  assert.deepEqual(getSequences(runs), { red: [2, 1, 3], blue: [2, 3], greenBanker: [3, 2], greenPlayer: [2, 4, 2] });
+  assert.deepEqual(getSequences(runs, '閒'), { red: [2, 1, 3], blue: [2, 3], greenBanker: [2, 4, 2], greenPlayer: [3, 2] });
+  assert.deepEqual(getSequences([]), { red: [], blue: [], greenBanker: [], greenPlayer: [] });
 });
 test('規律計分與邊界逐項核對', () => {
   assert.equal(scoreSequence([]).total, 0);
