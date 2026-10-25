@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { WEIGHTS, toRuns, getSequences, scoreSequence, scoreRoad, generateRoad,
-  generateRoads, toImportJson, createRng } = require('../目標路單產生器/target_road_generator.js');
+  generateRoads, toImportJson, createRng } = require('../亂路/luanlu.js');
 
 function outcomes(runs, first = '莊') {
   return runs.flatMap((length, i) => Array(length).fill(i % 2 ? (first === '莊' ? '閒' : '莊') : first));
