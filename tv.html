@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>百家樂路單・電視版</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&amp;family=Cinzel:wght@500;700;900&amp;family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&amp;family=Noto+Serif+TC:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="style.css?v=6" rel="stylesheet"/>
+<link href="themes.css?v=1" rel="stylesheet"/>
+<script src="themes.js?v=1"></script>
+<link href="tv.css" rel="stylesheet"/></head>
+<body>
+<div class="app tv-app">
+<header class="title-bar"><div class="tv-shortcuts"><div class="key-legend">
+<div class="key-row">
+<span><b>1</b>莊</span>
+<span><b>2</b>閒</span>
+<span><b>3</b>和</span>
+<span><b>4</b>莊對</span>
+<span><b>5</b>閒對</span>
+<span><b>6</b>幸運6</span>
+<span><b>⏎</b>確定</span>
+<span><b>7</b>退</span>
+<span>雙擊<b>7</b>金額</span>
+<span>雙擊<b>8</b>隱藏</span>
+<span>雙擊<b>9</b>清</span>
+<span><b>F</b>全螢幕</span>
+</div>
+</div><div class="title-controls tv-hidden" aria-hidden="true">
+<div class="action-buttons">
+<button class="btn action-btn btn-banker" data-action="B">莊</button>
+<button class="btn action-btn btn-player" data-action="P">閒</button>
+<button class="btn action-btn btn-tie" data-action="T">和</button>
+<button class="btn action-btn btn-banker-pair" data-action="B" data-mod="bp">莊對</button>
+<button class="btn action-btn btn-player-pair" data-action="P" data-mod="pp">閒對</button>
+<button class="btn action-btn btn-lucky6" data-action="B" data-mod="l6">6</button>
+<button class="btn action-btn btn-confirm" id="confirmBtn">確定</button>
+</div>
+<div class="util-buttons">
+<button class="btn action-btn btn-undo" id="undoBtn">退</button>
+<button class="btn action-btn btn-clear" id="clearBtn">清</button>
+</div>
+</div></div><div class="panel limit-panel tv-limit">
+<div class="tv-limit-col tv-limit-keys"><span class="tv-limit-name"></span><span class="tv-limit-key">最高</span><span class="tv-limit-key">最低</span></div>
+<div class="tv-limit-col"><span class="tv-limit-name">莊&amp;閒</span><input aria-label="莊&閒最高" class="limit-input" data-k="bpMax" min="0" type="number" value="10000"/><input aria-label="莊&閒最低" class="limit-input" data-k="bpMin" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">和</span><input aria-label="和最高" class="limit-input" data-k="tMax" min="0" type="number" value="10000"/><input aria-label="和最低" class="limit-input" data-k="tMin" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">對子</span><input aria-label="對子最高" class="limit-input" data-k="pMax" min="0" type="number" value="10000"/><input aria-label="對子最低" class="limit-input" data-k="pMin" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">幸運6</span><input aria-label="幸運6最高" class="limit-input" data-k="l6Max" min="0" type="number" value="10000"/><input aria-label="幸運6最低" class="limit-input" data-k="l6Min" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">小老虎</span><input aria-label="小老虎最高" class="limit-input" data-k="stMax" min="0" type="number" value="10000"/><input aria-label="小老虎最低" class="limit-input" data-k="stMin" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">大老虎</span><input aria-label="大老虎最高" class="limit-input" data-k="btMax" min="0" type="number" value="10000"/><input aria-label="大老虎最低" class="limit-input" data-k="btMin" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">閒幸運7</span><input aria-label="閒幸運7最高" class="limit-input" data-k="l7Max" min="0" type="number" value="10000"/><input aria-label="閒幸運7最低" class="limit-input" data-k="l7Min" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">超級幸運7</span><input aria-label="超級幸運7最高" class="limit-input" data-k="s7Max" min="0" type="number" value="10000"/><input aria-label="超級幸運7最低" class="limit-input" data-k="s7Min" min="0" type="number" value="100"/></div>
+</div><div class="tv-identity"><div class="tv-tools tv-hidden" aria-hidden="true"><div class="notice-icons">
+<!-- 音效:幾何喇叭 + 三層弧形聲波(點擊開關 TTS) -->
+<button aria-label="音效" class="deco-icon-btn" id="soundToggleBtn" title="音效">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 喇叭本體:梯形錐 + 矩形箱 -->
+<polygon fill="currentColor" points="32,52 48,52 64,36 64,84 48,68 32,68"></polygon>
+<line opacity="0.7" stroke="#fafafa" stroke-width="0.8" x1="36" x2="44" y1="56" y2="56"></line>
+<line opacity="0.7" stroke="#fafafa" stroke-width="0.8" x1="36" x2="44" y1="64" y2="64"></line>
+<!-- 三層弧形聲波 -->
+<path d="M 72,48 A 14 14 0 0 1 72 72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.2"></path>
+<path d="M 80,41 A 20 20 0 0 1 80 79" fill="none" opacity="0.65" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"></path>
+<path d="M 88,34 A 26 26 0 0 1 88 86" fill="none" opacity="0.4" stroke="currentColor" stroke-linecap="round" stroke-width="1.1"></path>
+<!-- 靜音斜線(預設隱藏,muted 時顯示) -->
+<line class="mute-slash" stroke="currentColor" stroke-linecap="round" stroke-width="4" x1="22" x2="98" y1="22" y2="98"></line>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 音樂:幾何音符 + 扇形放射光束 -->
+<button aria-label="音樂" class="deco-icon-btn" title="音樂">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<g fill="none" opacity="0.32" stroke="currentColor" stroke-width="0.6">
+<line x1="60" x2="60" y1="92" y2="28"></line>
+<line x1="60" x2="42" y1="92" y2="32"></line>
+<line x1="60" x2="78" y1="92" y2="32"></line>
+<line x1="60" x2="26" y1="92" y2="44"></line>
+<line x1="60" x2="94" y1="92" y2="44"></line>
+<line x1="60" x2="16" y1="92" y2="62"></line>
+<line x1="60" x2="104" y1="92" y2="62"></line>
+</g>
+<ellipse cx="50" cy="80" fill="currentColor" rx="11" ry="8" transform="rotate(-25 50 80)"></ellipse>
+<rect fill="currentColor" height="48" width="3" x="58.5" y="32"></rect>
+<polygon fill="currentColor" points="61.5,32 82,40 82,48 61.5,40"></polygon>
+<polygon fill="currentColor" points="61.5,46 82,54 82,62 61.5,54"></polygon>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 增加音量:喇叭 + 階梯上升音量條 + 加號徽章 -->
+<button aria-label="增加音量" class="deco-icon-btn" id="volumeUpBtn" title="增加音量">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 喇叭 -->
+<polygon fill="currentColor" points="28,54 42,54 58,40 58,80 42,66 28,66"></polygon>
+<!-- 階梯音量條:短→中→高 -->
+<rect fill="currentColor" height="10" width="4" x="66" y="66"></rect>
+<rect fill="currentColor" height="20" opacity="0.85" width="4" x="76" y="56"></rect>
+<rect fill="currentColor" height="32" opacity="0.7" width="4" x="86" y="44"></rect>
+<!-- 加號徽章:圓框 + 十字 -->
+<circle cx="92" cy="30" fill="none" r="10" stroke="currentColor" stroke-width="1.4"></circle>
+<line stroke="currentColor" stroke-linecap="round" stroke-width="2" x1="92" x2="92" y1="24" y2="36"></line>
+<line stroke="currentColor" stroke-linecap="round" stroke-width="2" x1="86" x2="98" y1="30" y2="30"></line>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 減少音量:喇叭 + 階梯下降音量條 + 減號徽章 -->
+<button aria-label="減少音量" class="deco-icon-btn" id="volumeDownBtn" title="減少音量">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 喇叭 -->
+<polygon fill="currentColor" points="28,54 42,54 58,40 58,80 42,66 28,66"></polygon>
+<!-- 階梯音量條:高→中→短 -->
+<rect fill="currentColor" height="32" width="4" x="66" y="44"></rect>
+<rect fill="currentColor" height="20" opacity="0.85" width="4" x="76" y="56"></rect>
+<rect fill="currentColor" height="10" opacity="0.7" width="4" x="86" y="66"></rect>
+<!-- 減號徽章:圓框 + 橫線 -->
+<circle cx="92" cy="30" fill="none" r="10" stroke="currentColor" stroke-width="1.4"></circle>
+<line stroke="currentColor" stroke-linecap="round" stroke-width="2" x1="86" x2="98" y1="30" y2="30"></line>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 全螢幕:Art Deco 四角外擴箭頭 + 中央雙重方框 -->
+<button aria-label="全螢幕切換" class="deco-icon-btn" id="fullscreenBtn" title="全螢幕切換 (F 或 數字鍵盤 /)">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 四角外擴 L 形箭頭 -->
+<g fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2.2">
+<polyline points="44,30 30,30 30,44"></polyline>
+<polyline points="76,30 90,30 90,44"></polyline>
+<polyline points="44,90 30,90 30,76"></polyline>
+<polyline points="76,90 90,90 90,76"></polyline>
+</g>
+<!-- 四角對角擴張短線 -->
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5">
+<line x1="34" x2="44" y1="34" y2="44"></line>
+<line x1="86" x2="76" y1="34" y2="44"></line>
+<line x1="34" x2="44" y1="86" y2="76"></line>
+<line x1="86" x2="76" y1="86" y2="76"></line>
+</g>
+<!-- 中央雙重方框(螢幕邊界意象) -->
+<rect fill="none" height="24" opacity="0.7" stroke="currentColor" stroke-width="1.2" width="24" x="48" y="48"></rect>
+<rect fill="none" height="16" opacity="0.4" stroke="currentColor" stroke-width="0.8" width="16" x="52" y="52"></rect>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 截圖:Art Deco 四角 L 形框 + 中央十字準心 -->
+<button aria-label="截圖" class="deco-icon-btn" id="screenshotBtn" title="截圖">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 四角 L 形裝飾(階梯式) -->
+<g fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2.2">
+<!-- 左上 -->
+<polyline points="30,48 30,30 48,30"></polyline>
+<!-- 右上 -->
+<polyline points="72,30 90,30 90,48"></polyline>
+<!-- 左下 -->
+<polyline points="30,72 30,90 48,90"></polyline>
+<!-- 右下 -->
+<polyline points="72,90 90,90 90,72"></polyline>
+</g>
+<!-- 次層細 L(內縮,Art Deco 階梯感) -->
+<g fill="none" opacity="0.55" stroke="currentColor" stroke-linecap="square" stroke-width="0.9">
+<polyline points="36,50 36,36 50,36"></polyline>
+<polyline points="70,36 84,36 84,50"></polyline>
+<polyline points="36,70 36,84 50,84"></polyline>
+<polyline points="70,84 84,84 84,70"></polyline>
+</g>
+<!-- 中央十字準心 -->
+<line stroke="currentColor" stroke-linecap="round" stroke-width="1.4" x1="50" x2="70" y1="60" y2="60"></line>
+<line stroke="currentColor" stroke-linecap="round" stroke-width="1.4" x1="60" x2="60" y1="50" y2="70"></line>
+<circle cx="60" cy="60" fill="currentColor" r="2.2"></circle>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 設置金額:Art Deco 籌碼 + $ 符號 -->
+<button aria-label="設置金額" class="deco-icon-btn" id="setAmountBtn" title="設置金額">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 籌碼外圈 -->
+<circle cx="60" cy="60" fill="none" r="28" stroke="currentColor" stroke-width="2.2"></circle>
+<!-- 籌碼內圈(細) -->
+<circle cx="60" cy="60" fill="none" opacity="0.55" r="23" stroke="currentColor" stroke-width="0.8"></circle>
+<!-- 籌碼八方分區裝飾點 -->
+<g fill="currentColor" opacity="0.7">
+<circle cx="60" cy="36" r="1.4"></circle>
+<circle cx="77" cy="43" r="1.4"></circle>
+<circle cx="84" cy="60" r="1.4"></circle>
+<circle cx="77" cy="77" r="1.4"></circle>
+<circle cx="60" cy="84" r="1.4"></circle>
+<circle cx="43" cy="77" r="1.4"></circle>
+<circle cx="36" cy="60" r="1.4"></circle>
+<circle cx="43" cy="43" r="1.4"></circle>
+</g>
+<!-- 中央 $ 符號 -->
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2">
+<line x1="60" x2="60" y1="46" y2="74"></line>
+<path d="M 70 52 C 66 48 54 48 51 53 C 48 58 53 60 60 61 C 67 62 72 64 69 69 C 66 73 54 73 50 69"></path>
+</g>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+<!-- 儲存:Art Deco 軟碟造型 (儲存至共用清單並下載 .json 路單檔) -->
+<button aria-label="儲存路單" class="deco-icon-btn" id="saveBtn" title="儲存路單">
+<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
+<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
+<!-- 軟碟外框 (右上角切角) -->
+<path d="M 30 30 L 80 30 L 90 40 L 90 90 L 30 90 Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2.2"></path>
+<!-- 上方金屬滑片 -->
+<rect fill="currentColor" height="14" width="36" x="40" y="30"></rect>
+<!-- 滑片切口 -->
+<rect fill="#fafafa" height="6" width="4" x="62" y="34"></rect>
+<!-- 下方標籤(三條橫線) -->
+<rect fill="none" height="30" opacity="0.6" stroke="currentColor" stroke-width="0.9" width="44" x="38" y="56"></rect>
+<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="64" y2="64"></line>
+<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="72" y2="72"></line>
+<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="80" y2="80"></line>
+<!-- 切角次層細線 (Art Deco 階梯感) -->
+<polyline fill="none" opacity="0.5" points="80,30 80,40 90,40" stroke="currentColor" stroke-width="0.7"></polyline>
+<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
+<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
+<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
+<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
+</svg>
+</button>
+</div><label class="theme-control" for="themeSelect">造型
+            <select aria-label="路單造型" id="themeSelect">
+<option value="classic">經典紅金</option>
+<option value="black-gold">黑金</option>
+</select>
+</label></div><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo.png" width="130"/></div></header>
+<!-- 大路 (full width on top) -->
+<section class="panel big-panel">
+<div class="grid-board big-road" data-label="大路" id="bigRoad"></div>
+</section>
+<!-- 中間:左(大眼仔/小路) | 右(甲由路/公告欄) -->
+<section class="mid-row tv-road-row"><div class="panel derived-panel">
+<div class="grid-board derived-road" data-label="大眼仔" id="bigEye"></div>
+</div><div class="panel derived-panel">
+<div class="grid-board derived-road" data-label="蟑螂路" id="cockroachRoad"></div>
+</div></section><section class="mid-row tv-road-row"><div class="panel derived-panel">
+<div class="grid-board derived-road" data-label="小路" id="smallRoad"></div>
+</div><div class="panel derived-panel"><div aria-label="三星路（規則未定）" class="grid-board derived-road" data-label="三星路" id="starRoad"></div></div></section>
+<!-- 底部:統計 | 珠盤路 | 下局指示 | 貨幣限額 -->
+<section class="bottom-row">
+<div class="panel stats-panel tv-stats">
+<div class="tv-stat-head tv-stat-table">桌號：<b>001</b></div>
+<div class="tv-stat-head">靴號：<b>1</b></div><div class="tv-stat-head">局數：<b id="totalCount">0</b></div>
+<ul class="stats-list">
+<li class="stat-banker"><span class="k">莊贏</span><b id="cntB">0</b></li>
+<li class="stat-tie"><span class="k">和局</span><b id="cntT">0</b></li>
+<li class="stat-player"><span class="k">閒贏</span><b id="cntP">0</b></li>
+<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×4</small></span><b id="cntS74">0</b></li>
+<li class="stat-lucky6"><span class="k">幸運6</span><b id="cntL6">0</b></li>
+<li class="stat-banker-pair"><span class="k">莊對</span><b id="cntBP">0</b></li>
+<li class="tv-stat-blue"><span class="k">幸運7<small>×2</small></span><b id="cntL72">0</b></li>
+<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×5</small></span><b id="cntS75">0</b></li>
+<li class="stat-lucky6"><span class="k">幸運6<br>小老虎</span><b id="cntST">0</b></li>
+<li class="stat-player-pair"><span class="k">閒對</span><b id="cntPP">0</b></li>
+<li class="tv-stat-blue"><span class="k">幸運7<small>×3</small></span><b id="cntL73">0</b></li>
+<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×6</small></span><b id="cntS76">0</b></li>
+<li class="stat-lucky6"><span class="k">幸運6<br>大老虎</span><b id="cntBT">0</b></li>
+<li class="tv-stat-empty"></li>
+<li class="tv-stat-empty"></li>
+<li class="tv-stat-empty"></li>
+</ul>
+</div>
+<div class="panel bead-panel">
+<div class="grid-board bead-board" data-label="珠子路" id="beadBoard"></div>
+</div>
+<div class="panel predict-panel">
+<div class="predict-title">下局指示</div>
+<div class="predict-legend">
+<div class="leg-row">
+<span class="leg-tag banker">莊</span>
+<span class="leg-tag player">閒</span>
+</div>
+<div class="leg-row">
+<span class="leg-mark circle red" id="pBE_B"></span>
+<span class="leg-mark circle blue" id="pBE_P"></span>
+</div>
+<div class="leg-row">
+<span class="leg-mark solid red" id="pSR_B"></span>
+<span class="leg-mark solid blue" id="pSR_P"></span>
+</div>
+<div class="leg-row">
+<span class="leg-mark slash red" id="pCR_B"></span>
+<span class="leg-mark slash blue" id="pCR_P"></span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- 巨龍特效層 -->
+<div class="dragon-overlay" id="dragonOverlay">
+<img alt="Banker Dragon" class="golden-dragon-img dragon-banker-img" src="dragon_gold.apng"/>
+<img alt="Player Dragon" class="golden-dragon-img dragon-player-img" src="dragon_blue.apng"/>
+<div class="dragon-combo" id="dragonCombo"></div>
+</div>
+<!-- 老闆鍵:模仿 Windows 桌面 (雙擊 Numpad 8 切換) -->
+<div aria-hidden="true" class="boss-screen" id="bossScreen">
+<div class="boss-taskbar">
+<div class="boss-start" title="開始">
+<svg aria-hidden="true" height="22" viewbox="0 0 32 32" width="22">
+<rect fill="#5DB8FF" height="12" width="12" x="3" y="3"></rect>
+<rect fill="#5DB8FF" height="12" width="12" x="17" y="3"></rect>
+<rect fill="#5DB8FF" height="12" width="12" x="3" y="17"></rect>
+<rect fill="#5DB8FF" height="12" width="12" x="17" y="17"></rect>
+</svg>
+</div>
+<div class="boss-tray">
+<span id="bossClockTime">--:--</span>
+<span id="bossClockDate">----/--/--</span>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<aside aria-label="路單儲存結果" class="backup-notice" hidden="" id="backupNotice">
+<span id="backupStatus" role="status"></span>
+<a download="" hidden="" id="backupJsonLink">下載 JSON</a>
+<a download="" hidden="" id="backupPngLink">下載完整 PNG</a>
+<button hidden="" id="backupRetryBtn" type="button">重試雲端備份</button>
+<button aria-label="關閉儲存結果" id="backupCloseBtn" type="button">關閉</button>
+</aside>
+<script src="road_backup.js?v=6"></script>
+<script src="app.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+﻿/* 1920 × 1080 television layout, arranged like the reference road-display machine.
+   Components and interactions come from the original page (app.js); input is keyboard only. */
+.tv-app {
+  --cell-big: 41px;
+  --cell-derived: 20px;
+  --cell-bead: 68px;
+  --cols-big: 46;
+  --cols-derived: 47;
+  --cols-bead: 16;
+  grid-template-rows: 120px 252px 128px 124px 412px;
+  gap: 6px;
+}
+.tv-hidden { display: none !important; }
+
+/* ---------- 上方:快捷鍵說明 | 橫式限紅表 | AT 標誌 ---------- */
+.tv-app .title-bar {
+  display: grid;
+  grid-template-columns: 560px 1000px minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 10px;
+  align-items: stretch;
+}
+.tv-app .title-bar > * { min-height: 0; }
+.tv-shortcuts { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.tv-app .key-legend { padding: 0; color: #fff8e0; letter-spacing: 0; }
+.tv-app .key-row { display: grid; grid-template-columns: repeat(4, max-content); justify-content: space-between; gap: 6px 8px; }
+.tv-app .key-legend, .tv-app .key-legend b { font-size: 21px; line-height: 1.25; }
+.tv-app .key-legend b { color: #ffd700; background: rgba(255,215,0,.14); border-color: rgba(255,215,0,.5); }
+
+.tv-limit {
+  display: grid;
+  grid-template-columns: 64px repeat(8, minmax(0, 1fr));
+  gap: 0 4px;
+  padding: 4px 10px;
+  background: #160707;
+  border: 2px solid #d4a64a;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 215, 120, .25);
+  min-width: 0;
+}
+.tv-limit-col { display: grid; grid-template-rows: 1.5fr 1fr 1fr; align-items: center; min-width: 0; text-align: center; }
+.tv-limit-name {
+  font-family: "Noto Serif TC", serif;
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+.tv-limit-key { font-family: "Noto Serif TC", serif; font-size: 17px; font-weight: 700; color: #ffe296; white-space: nowrap; }
+.tv-limit .limit-input {
+  height: 26px;
+  padding: 0 2px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 19px;
+  line-height: 24px;
+  text-align: center;
+}
+.tv-limit .limit-input:nth-of-type(2) { color: #ffe296; }
+.tv-limit .limit-input:hover { border-color: rgba(255, 215, 120, .35); }
+.tv-limit .limit-input:focus { background: #fff; color: #222; border-color: #ffd700; }
+
+.tv-identity { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.tv-logo { width: 106px; height: 106px; object-fit: contain; flex-shrink: 0; }
+
+/* ---------- 各路 ---------- */
+.tv-app .tv-road-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+.tv-app .panel { min-width: 0; min-height: 0; }
+.tv-app .big-road, .tv-app .derived-road, .tv-app .bead-board { flex-shrink: 0; }
+
+/* ---------- 底部:統計 | 珠子路 | 下局指示 ---------- */
+.tv-app .bottom-row { grid-template-columns: 622px minmax(0, 1fr) 162px; gap: 6px; }
+
+.tv-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 62px 62px minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #9c1414, #5e0909);
+}
+.tv-stat-head {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, .25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+.tv-stat-head + .tv-stat-head { border-left: 1px solid rgba(255, 255, 255, .25); }
+.tv-stat-head b { color: #fff; font-weight: 900; }
+.tv-stat-table { grid-column: 1 / -1; }
+
+.tv-stats .stats-list {
+  grid-column: 1 / -1;
+  grid-auto-flow: row;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 1px;
+  padding: 0;
+  background: rgba(0, 0, 0, .35);
+}
+.tv-stats .stats-list li {
+  gap: 4px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  line-height: 1.05;
+}
+.tv-stats .stats-list .k { font-size: 22px; letter-spacing: 0; }
+.tv-stats .stats-list .k small { font-size: 14px; margin-left: 1px; }
+.tv-stats .stats-list .tv-k-num { margin-left: auto; margin-right: 6px; }
+.tv-stats .stats-list li b { font-size: 26px; }
+.tv-stats .stat-banker, .tv-stats .stat-lucky6 { background: #c62828; }
+.tv-stats .stat-tie { background: #2e9e3e; }
+.tv-stats .stat-player, .tv-stats .tv-stat-blue { background: #2a1fb0; }
+.tv-stats .stat-banker-pair { background: #7a2aa0; }
+.tv-stats .stat-player-pair { background: #2f6fd6; }
+.tv-stats .tv-stat-empty { background: #5a0d0d; box-shadow: none; }
+
+.tv-app .bead { font-size: 36px; box-shadow: inset 0 3px 4px #ffffff73, inset 0 -2px 3px #0004, 0 2px 3px #0005; }
+.tv-app .bead.l6 { font-size: 44px; }
+.tv-app .predict-legend { grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.tv-app .leg-mark, .tv-app .leg-tag { width: 44px; height: 44px; }
+.tv-app .leg-tag { font-size: 26px; }
+.tv-app .predict-title { font-size: 24px; }
+
+[data-theme="black-gold"] .tv-app .key-legend,
+[data-theme="black-gold"] .tv-app .key-legend b,
+[data-theme="black-gold"] .tv-app .tv-stat-head,
+[data-theme="black-gold"] .tv-app .tv-stat-head b { color: var(--skin-light); }
