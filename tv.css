@@ -136,3 +136,15 @@
 [data-theme="black-gold"] .tv-app .key-legend b,
 [data-theme="black-gold"] .tv-app .tv-stat-head,
 [data-theme="black-gold"] .tv-app .tv-stat-head b { color: var(--skin-light); }
+
+/* 三星路：空心圈，佔 2x2 小格 */
+.tv-star-mark {
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 3px solid #d62121;
+  background: transparent;
+  margin: 3px;
+  position: relative;
+}
+.tv-star-mark.B { border-color: #d62121; }
+.tv-star-mark.P { border-color: #1e5ec9; }
