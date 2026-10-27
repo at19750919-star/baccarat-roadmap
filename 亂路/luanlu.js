@@ -33,7 +33,7 @@ function getSequences(runs, firstSide = '莊') {
   return { red, blue, greenBanker, greenPlayer };
 }
 
-// 預設排除單跳；第三個參數供「單跳也算」及卡片統計使用。
+// 預設排除單跳；第三個參數供「單顆行也算」及卡片統計使用。
 function countColumnLengths(runs, firstSide = '莊', { includeSingles = false } = {}) {
   const counts = { banker: {}, player: {}, total: {} };
   runs.forEach((length, i) => {
@@ -120,14 +120,14 @@ function normalizeOptions(options = {}) {
   const o = { ...DEFAULTS, ...options };
   const labels = { count: '條數', rounds: '局數', maxDifference: '莊閒差上限', maxRun: '長龍上限',
     startNumber: '起始編號', attempts: '每條嘗試次數', hillSteps: '爬山步數',
-    perSideMax: '單邊同長度上限', combinedMax: '莊閒合計上限' };
+    perSideMax: '單邊同長度行上限', combinedMax: '莊閒合計同長度行上限' };
   for (const [key, min, max] of [['count', 1, 100], ['rounds', 1, 1000], ['maxDifference', 0, 1000],
     ['maxRun', 1, 1000], ['startNumber', 0, 1000000], ['attempts', 1, 100000], ['hillSteps', 0, 100000],
     ['perSideMax', 0, 1000], ['combinedMax', 0, 1000]]) {
     if (!Number.isInteger(o[key]) || o[key] < min || o[key] > max) throw new Error(`${labels[key]}必須是 ${min}～${max} 的整數。`);
   }
   for (const key of ['includeSingles', 'enableLengthCaps']) {
-    if (typeof o[key] !== 'boolean') throw new Error('同長度上限開關必須為布林值。');
+    if (typeof o[key] !== 'boolean') throw new Error('同長度行上限開關必須為布林值。');
   }
   if (o.rounds % 2 > o.maxDifference) throw new Error('奇數局至少有 1 局莊閒差，請調整局數或莊閒差上限。');
   o.prefix = String(o.prefix).trim();
@@ -279,6 +279,11 @@ function initUI() {
     const node = document.createElement(tag); node.className = className;
     if (text !== undefined) node.textContent = text; return node;
   };
+  const setLengthCapText = (node, text) => {
+    node.replaceChildren(...text.split(/(同長度行上限)/).flatMap(part => part === '同長度行上限'
+      ? ['同長度', element('span', 'term-greenBanker', '行'), '上限'] : [part]));
+    return node;
+  };
   const points = n => Number(n.toFixed(2)).toString();
   const reasonText = reasons => reasons.length ? reasons.map(r => `${r.label}×${points(r.count)}（${points(r.points)}分）`).join('、') : '無規律扣分';
   function setBusy(value) {
@@ -325,8 +330,8 @@ function initUI() {
         }
       }
       card.append(stats);
-      card.append(element('p', road.lengthCaps.ok ? 'road-reasons' : 'length-violation', !road.lengthCaps.enabled ? '同長度上限：未啟用' :
-        road.lengthCaps.ok ? '同長度上限：全部合格' : `同長度上限未通過（嘗試範圍內的最少違規備選）：${road.lengthCaps.violations.join('；')}`));
+      card.append(setLengthCapText(element('p', road.lengthCaps.ok ? 'road-reasons' : 'length-violation'), !road.lengthCaps.enabled ? '同長度行上限：未啟用' :
+        road.lengthCaps.ok ? '同長度行上限：全部合格' : `同長度行上限未通過（嘗試範圍內的最少違規備選）：${road.lengthCaps.violations.join('；')}`));
       for (const [key, label] of [['red', '洞'], ['blue', '柱'], ['greenBanker', '行莊'], ['greenPlayer', '行閒']]) {
         const section = element('div', `sequence ${key}`);
         const reasons = element('p', '');
@@ -379,8 +384,8 @@ function initUI() {
       }
       roads = next; generatedOptions = o; render(); progress.value = 1;
       const failed = roads.filter(road => !road.lengthCaps.ok).length;
-      status.textContent = `已完成${roads.length}條${failed ? `，其中${failed}條未通過同長度上限，請查看卡片違規內容` : ''}，可下載 JSON。`;
-    } catch (error) { status.textContent = `產生失敗：${error.message}`; }
+      setLengthCapText(status, `已完成${roads.length}條${failed ? `，其中${failed}條未通過同長度行上限，請查看卡片違規內容` : ''}，可下載 JSON。`);
+    } catch (error) { setLengthCapText(status, `產生失敗：${error.message}`); }
     finally { setBusy(false); }
   }
   form.addEventListener('submit', event => { event.preventDefault(); run(); });

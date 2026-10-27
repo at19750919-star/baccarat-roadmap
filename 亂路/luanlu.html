@@ -18,10 +18,10 @@
           <label>局數（不含和）<input name="rounds" type="number" min="1" max="1000" value="82" required></label>
           <label>莊閒差上限<input name="maxDifference" type="number" min="0" max="1000" value="4" required></label>
           <label>長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" required></label>
-          <label>單邊同長度上限<input name="perSideMax" type="number" min="0" max="1000" value="2" required></label>
-          <label>莊閒合計上限<input name="combinedMax" type="number" min="0" max="1000" value="3" required></label>
-          <label class="checkbox"><input name="includeSingles" type="checkbox">單跳也算</label>
-          <label class="checkbox"><input name="enableLengthCaps" type="checkbox" checked>啟用同長度上限</label>
+          <label><span>單邊同長度<span class="term-greenBanker">行</span>上限</span><input name="perSideMax" type="number" min="0" max="1000" value="2" required></label>
+          <label><span>莊閒合計同長度<span class="term-greenBanker">行</span>上限</span><input name="combinedMax" type="number" min="0" max="1000" value="3" required></label>
+          <label class="checkbox"><input name="includeSingles" type="checkbox"><span>單顆<span class="term-greenBanker">行</span>也算</span></label>
+          <label class="checkbox"><input name="enableLengthCaps" type="checkbox" checked><span>啟用同長度<span class="term-greenBanker">行</span>上限</span></label>
           <label>名稱前綴<input name="prefix" value="路單-AT" required></label>
           <label>起始編號<input name="startNumber" type="number" min="0" max="1000000" value="1" required></label>
           <label>每條嘗試次數<input name="attempts" type="number" min="1" max="100000" value="3000" required></label>
