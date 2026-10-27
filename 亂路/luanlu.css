@@ -118,8 +118,8 @@ button:disabled { opacity: .35; cursor: default; filter: grayscale(.5); }
 input:focus-visible, button:focus-visible { outline: 2px solid var(--gold-1); outline-offset: 3px; }
 .secondary { background: linear-gradient(180deg, #161f21, #0d1315); color: var(--txt); border-color: #8a6a2f; text-shadow: none; box-shadow: none; }
 .secondary:hover:enabled { color: var(--gold-1); }
-.actions { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.actions button { padding: 8px 10px; }
+.actions { margin-top: 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.actions button { padding: 8px 4px; letter-spacing: .08em; text-indent: .08em; white-space: nowrap; }
 .hint { font-size: 12px; line-height: 1.6; }
 .output-bar { margin-top: 12px; }
 .progress-area { flex: 1; min-width: 0; }
@@ -146,6 +146,18 @@ h2 { font: 600 21px var(--serif); color: var(--gold-1); margin: 0; overflow-wrap
 .sequence strong { font-size: 14px; }.red strong, .term-red { color: #ff8895; }.blue strong, .term-blue { color: #8bbbff; }.greenBanker strong, .greenPlayer strong, .term-greenBanker, .term-greenPlayer { color: #79d7ae; }
 .sequence p, .road-reasons { color: var(--txt-dim); font-size: 13px; margin: 4px 0 0; line-height: 1.6; }
 .road-reasons { margin-bottom: 18px; }
+#roadmap-dialog { width: min(1200px, calc(100% - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--gold-3); border-radius: 10px; background: var(--ink); color: var(--txt); box-shadow: 0 18px 60px #000b; }
+#roadmap-dialog[open] { display: flex; flex-direction: column; }
+#roadmap-dialog::backdrop { background: #000b; }
+.roadmap-toolbar { display: flex; flex: none; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--gold-4); }
+.roadmap-toolbar button { padding: 8px 12px; }
+#roadmap-status { margin-right: auto; color: var(--gold-1); font-size: 13px; }
+#roadmap-content { min-height: 0; overflow: auto; padding: 24px; scrollbar-color: var(--gold-3) var(--ink); }
+.roadmap-entry { width: max-content; min-width: 100%; margin-bottom: 24px; }
+.roadmap-entry:last-child { margin-bottom: 0; }
+.roadmap-entry .counts { margin: 0 0 12px; color: var(--txt); white-space: nowrap; }
+.roadmap-entry .road-scroll { width: max-content; margin: 0; overflow: visible; }
+#roadmap-content:focus-visible { outline: 2px solid var(--gold-1); outline-offset: -4px; }
 @media (max-width: 899px) { .workspace { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { main { padding: 24px 16px 40px; } .road-card { padding: 16px; } }
 @media (max-width: 420px) { fieldset { padding: 14px; } }

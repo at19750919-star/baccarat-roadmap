@@ -304,10 +304,85 @@ function toImportJson(roads) {
   }) };
 }
 
+// UI 共用佈局；座標從 0 起算，保留原卡片的六列與長龍橫向延伸規則。
+function roadLayout(road) {
+  const cells = [];
+  let columns = 0;
+  road.runs.forEach((length, i) => {
+    const side = i % 2 ? (road.nonTieOutcomes[0] === '莊' ? '閒' : '莊') : road.nonTieOutcomes[0];
+    for (let j = 0; j < length; j++) {
+      cells.push({ row: Math.min(j, 5), col: columns + Math.max(0, j - 5), side });
+    }
+    columns += Math.max(1, length - 5);
+  });
+  return { columns, rows: 6, cells };
+}
+
+function roadCounts(road) {
+  const b = road.nonTieOutcomes.filter(n => n === '莊').length;
+  return `莊${b} / 閒${road.nonTieOutcomes.length - b} · ${road.nonTieOutcomes.length}局`;
+}
+
+function roadmapImageLayout(roads, { cell = 26, gap = 24, padding = 24, titleHeight = 32, minWidth = 240 } = {}) {
+  let y = padding;
+  const entries = roads.map(road => {
+    const layout = roadLayout(road);
+    const gridWidth = layout.columns * cell, gridHeight = layout.rows * cell;
+    const entry = { ...layout, title: roadCounts(road), x: padding, y, gridY: y + titleHeight,
+      gridWidth, gridHeight, width: Math.max(minWidth, gridWidth), height: titleHeight + gridHeight };
+    y += entry.height + gap;
+    return entry;
+  });
+  return { entries, cell, gap, padding, titleHeight,
+    width: 2 * padding + entries.reduce((max, entry) => Math.max(max, entry.width), 0),
+    height: y + padding - (entries.length ? gap : 0) };
+}
+
+function drawRoadmapImage(canvas, roads, scale = 2) {
+  const layout = roadmapImageLayout(roads);
+  canvas.width = Math.ceil(layout.width * scale);
+  canvas.height = Math.ceil(layout.height * scale);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('無法建立圖片畫布');
+  const styles = typeof getComputedStyle === 'function' ? getComputedStyle(canvas.ownerDocument.documentElement) : null;
+  const ink = styles?.getPropertyValue('--ink').trim() || '#07090b';
+  const txt = styles?.getPropertyValue('--txt').trim() || '#e8e4d8';
+  const gold = styles?.getPropertyValue('--gold-3').trim() || '#a67c35';
+  ctx.scale(scale, scale);
+  ctx.fillStyle = ink; ctx.fillRect(0, 0, layout.width, layout.height);
+  ctx.font = '15px "Noto Sans TC", sans-serif'; ctx.textBaseline = 'top';
+  for (const entry of layout.entries) {
+    ctx.fillStyle = txt; ctx.fillText(entry.title, entry.x, entry.y);
+    ctx.fillStyle = '#0a100f'; ctx.fillRect(entry.x, entry.gridY, entry.gridWidth, entry.gridHeight);
+    ctx.strokeStyle = '#2c3634'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let col = 0; col <= entry.columns; col++) {
+      const x = entry.x + col * layout.cell;
+      ctx.moveTo(x, entry.gridY); ctx.lineTo(x, entry.gridY + entry.gridHeight);
+    }
+    for (let row = 0; row <= entry.rows; row++) {
+      const y = entry.gridY + row * layout.cell;
+      ctx.moveTo(entry.x, y); ctx.lineTo(entry.x + entry.gridWidth, y);
+    }
+    ctx.stroke(); ctx.strokeStyle = gold;
+    ctx.strokeRect(entry.x, entry.gridY, entry.gridWidth, entry.gridHeight);
+    ctx.lineWidth = 2;
+    for (const { row, col, side } of entry.cells) {
+      ctx.strokeStyle = side === '莊' ? '#ff6576' : '#68aaff';
+      ctx.beginPath();
+      ctx.arc(entry.x + (col + .5) * layout.cell, entry.gridY + (row + .5) * layout.cell, 8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  return layout;
+}
+
 function initUI() {
   const form = document.getElementById('settings'), results = document.getElementById('results');
   const status = document.getElementById('status'), progress = document.getElementById('progress');
   const download = document.getElementById('download');
+  const roadmapImage = document.getElementById('roadmap-image'), roadmapDialog = document.getElementById('roadmap-dialog');
+  const roadmapContent = document.getElementById('roadmap-content'), roadmapCopy = document.getElementById('roadmap-copy');
+  const roadmapStatus = document.getElementById('roadmap-status');
   let roads = [], generatedOptions, busy = false, rerollNumber = 0;
   const pause = () => new Promise(resolve => setTimeout(resolve, 0));
   const element = (tag, className, text) => {
@@ -327,7 +402,20 @@ function initUI() {
     form.querySelector('fieldset').disabled = value;
     results.querySelectorAll('button').forEach(button => { button.disabled = value; });
     download.disabled = value || !roads.length;
+    roadmapImage.disabled = value || !roads.length;
     results.setAttribute('aria-busy', String(value));
+  }
+  function roadGrid(road) {
+    const scroll = element('div', 'road-scroll'), grid = element('div', 'road-grid');
+    grid.setAttribute('role', 'img'); grid.setAttribute('aria-label', `大路欄長：${road.runs.join('、')}；首欄${road.nonTieOutcomes[0]}`);
+    const layout = roadLayout(road);
+    for (const { row, col, side } of layout.cells) {
+      const cell = element('span', `road-cell ${side === '莊' ? 'banker' : 'player'}`);
+      cell.style.gridRow = String(row + 1); cell.style.gridColumn = String(col + 1);
+      cell.append(element('i', '', '')); grid.append(cell);
+    }
+    grid.style.gridTemplateColumns = `repeat(${layout.columns}, 26px)`;
+    scroll.append(grid); return scroll;
   }
   function render() {
     results.replaceChildren();
@@ -335,26 +423,10 @@ function initUI() {
       const card = element('article', 'road-card');
       const heading = element('div', 'card-heading'), title = element('div', '');
       title.append(element('h2', '', road.name));
-      const b = road.nonTieOutcomes.filter(n => n === '莊').length;
-      title.append(element('p', 'counts', `莊${b} / 閒${road.nonTieOutcomes.length - b} · ${road.nonTieOutcomes.length}局`));
+      title.append(element('p', 'counts', roadCounts(road)));
       const score = element('div', 'score', points(road.score.total)); score.append(element('small', '', '規律總分'));
       heading.append(title, score); card.append(heading);
-      const scroll = element('div', 'road-scroll'), grid = element('div', 'road-grid');
-      grid.setAttribute('role', 'img'); grid.setAttribute('aria-label', `大路欄長：${road.runs.join('、')}；首欄${road.nonTieOutcomes[0]}`);
-      // 超過六顆的自訂長龍，從第六列橫向延伸，並保留欄與欄的間距。
-      let column = 0;
-      road.runs.forEach((length, i) => {
-        const side = i % 2 ? (road.nonTieOutcomes[0] === '莊' ? '閒' : '莊') : road.nonTieOutcomes[0];
-        for (let j = 0; j < length; j++) {
-          const cell = element('span', `road-cell ${side === '莊' ? 'banker' : 'player'}`);
-          cell.style.gridRow = String(Math.min(j, 5) + 1);
-          cell.style.gridColumn = String(column + Math.max(0, j - 5) + 1);
-          cell.append(element('i', '', '')); grid.append(cell);
-        }
-        column += Math.max(1, length - 5);
-      });
-      grid.style.gridTemplateColumns = `repeat(${column}, 26px)`;
-      scroll.append(grid); card.append(scroll);
+      card.append(roadGrid(road));
       const stats = element('p', 'length-stats', '長度統計：');
       for (const [side, label] of [['banker', '莊'], ['player', '閒'], ['total', '合計']]) {
         stats.append(element('span', '', `${side === 'banker' ? '' : '｜'}${label} `));
@@ -444,6 +516,46 @@ function initUI() {
     finally { setBusy(false); }
   }
   form.addEventListener('submit', event => { event.preventDefault(); run(); });
+  roadmapImage.addEventListener('click', () => {
+    if (busy || !roads.length) return;
+    roadmapStatus.textContent = '';
+    roadmapContent.replaceChildren(...roads.map(road => {
+      const entry = element('section', 'roadmap-entry');
+      entry.append(element('p', 'counts', roadCounts(road)), roadGrid(road));
+      return entry;
+    }));
+    roadmapDialog.showModal(); roadmapContent.scrollTop = 0; roadmapContent.scrollLeft = 0;
+  });
+  document.getElementById('roadmap-close').addEventListener('click', () => roadmapDialog.close());
+  roadmapCopy.addEventListener('click', async () => {
+    roadmapCopy.disabled = true; roadmapStatus.textContent = '';
+    try {
+      const canvas = document.createElement('canvas');
+      drawRoadmapImage(canvas, roads, Math.max(2, window.devicePixelRatio || 1));
+      const blobPromise = new Promise((resolve, reject) => canvas.toBlob(blob =>
+        blob ? resolve(blob) : reject(new Error('無法產生 PNG')), 'image/png'));
+      // 立即啟動剪貼簿寫入，保留點擊的使用者啟用狀態；PNG 編碼完成後再交付。
+      const blobReady = blobPromise.catch(() => null);
+      let copied = false;
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })]);
+          copied = true;
+        } catch { /* 權限或平台不支援時，使用同一張 PNG 下載。 */ }
+      }
+      const blob = await blobReady;
+      if (!blob) throw new Error('無法產生 PNG');
+      if (copied) roadmapStatus.textContent = '已複製';
+      else {
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = '路單圖.png';
+        document.body.append(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        roadmapStatus.textContent = '無法複製，已改為下載 PNG';
+      }
+    } catch (error) { roadmapStatus.textContent = `圖片產生失敗：${error.message}`; }
+    finally { roadmapCopy.disabled = false; }
+  });
   download.addEventListener('click', () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(toImportJson(roads), null, 2)], { type: 'application/json;charset=utf-8' }));
     const link = document.createElement('a'); link.href = url; link.download = '目標路單.json';
@@ -456,4 +568,5 @@ if (typeof document !== 'undefined') {
 }
 if (typeof module !== 'undefined') module.exports = { WEIGHTS, DEFAULTS, toRuns, getSequences, countColumnLengths, checkLengthCaps,
   countHoleLengths, countPillarLengths, checkHoleCaps, checkPillarCaps,
-  scoreSequence, scoreRoad, generateRoad, generateRoads, toImportJson, createRng };
+  scoreSequence, scoreRoad, generateRoad, generateRoads, toImportJson, createRng,
+  roadLayout, roadmapImageLayout, drawRoadmapImage };

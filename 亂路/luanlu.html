@@ -36,7 +36,7 @@
           <label class="row wide seed">種子<input name="seed" class="text" placeholder="選填，同設定同種子可重現" autocomplete="off"></label>
         </div>
         <p class="hint"><span class="term-greenBanker">行</span>＝兩顆以上欄的顆數（莊閒分開）；<span class="term-red">洞</span>＝連續單跳欄數；<span class="term-blue">柱</span>＝連續兩顆以上欄數。皆為整條同一長度出現次數上限，洞柱莊閒混看，空白＝不限。</p>
-        <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button></div>
+        <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button><button id="roadmap-image" class="secondary" type="button" disabled>路單圖</button></div>
         <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">按「產生路單」開始。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div></div>
         <p class="hint">只產生莊／閒不含和；分數越低規律越少；同名匯入會覆蓋。</p>
       </fieldset>
@@ -44,5 +44,13 @@
     <section id="results" aria-label="產生的路單" aria-busy="false"></section>
     </div>
   </main>
+  <dialog id="roadmap-dialog" aria-label="路單圖">
+    <div class="roadmap-toolbar">
+      <span id="roadmap-status" role="status" aria-live="polite"></span>
+      <button id="roadmap-copy" class="secondary" type="button">複製圖片</button>
+      <button id="roadmap-close" class="secondary" type="button" autofocus>關閉</button>
+    </div>
+    <div id="roadmap-content" tabindex="0" aria-label="路單圖內容"></div>
+  </dialog>
 </body>
 </html>

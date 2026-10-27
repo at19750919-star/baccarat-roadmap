@@ -256,4 +256,45 @@ test('洞柱上限留白與修改前種子1的10條完整結果一致（排除�
   const hash = require('node:crypto').createHash('sha256').update(JSON.stringify(previousFields)).digest('hex');
   assert.equal(hash, 'b5c1963bc15e384bb2baedb4fceed216e483bc474d11b45aac2a9fd30a08793f');
 });
+test('路單圖佈局與卡片欄位一致，固定六列，畫布隨條數與最大欄數調整', () => {
+  const { roadLayout, roadmapImageLayout } = require('../亂路/luanlu.js');
+  const generated = generateRoads({ count: 3, seed: 1 });
+  const longRuns = [8, 1, 7, 6];
+  const longRoad = { runs: longRuns, nonTieOutcomes: outcomes(longRuns, '閒') };
+  const samples = [...generated, longRoad];
+  const before = JSON.stringify(samples);
+  for (const options of [{ cell: 26, gap: 24, padding: 24, titleHeight: 32, minWidth: 240 },
+    { cell: 30, gap: 12, padding: 16, titleHeight: 40, minWidth: 200 }]) {
+    for (let count = 1; count <= samples.length; count++) {
+      const selected = samples.slice(0, count), layout = roadmapImageLayout(selected, options);
+      const columns = selected.map(road => road.runs.reduce((sum, run) => sum + Math.max(1, run - 5), 0));
+      assert.equal(layout.entries.length, count);
+      layout.entries.forEach((entry, i) => {
+        assert.equal(entry.columns, columns[i]); assert.equal(entry.rows, 6);
+        assert.equal(entry.gridWidth, columns[i] * options.cell);
+        assert.equal(entry.gridHeight, 6 * options.cell);
+        assert.equal(entry.width, Math.max(options.minWidth, columns[i] * options.cell));
+        assert.equal(entry.height, options.titleHeight + 6 * options.cell);
+        assert.equal(entry.y, options.padding + i * (entry.height + options.gap));
+        assert.equal(entry.gridY, entry.y + options.titleHeight);
+        assert.equal(entry.cells.length, selected[i].nonTieOutcomes.length);
+        assert.deepEqual(entry.cells.map(cell => cell.side), selected[i].nonTieOutcomes);
+        assert(entry.cells.every(cell => cell.row >= 0 && cell.row < 6 && cell.col >= 0 && cell.col < entry.columns));
+        const b = selected[i].nonTieOutcomes.filter(side => side === '莊').length;
+        assert.equal(entry.title, `莊${b} / 閒${selected[i].nonTieOutcomes.length - b} · ${selected[i].nonTieOutcomes.length}局`);
+      });
+      assert.equal(layout.width, 2 * options.padding + Math.max(options.minWidth, Math.max(...columns) * options.cell));
+      assert.equal(layout.height, 2 * options.padding + count * (options.titleHeight + 6 * options.cell) + (count - 1) * options.gap);
+    }
+  }
+  const longLayout = roadLayout(longRoad);
+  assert.equal(longLayout.columns, 7);
+  assert.deepEqual(longLayout.cells.slice(5, 9), [
+    { row: 5, col: 0, side: '閒' }, { row: 5, col: 1, side: '閒' },
+    { row: 5, col: 2, side: '閒' }, { row: 0, col: 3, side: '莊' }
+  ]);
+  assert.equal(roadmapImageLayout([]).height, 48);
+  assert.equal(roadmapImageLayout([]).width, 48);
+  assert.equal(JSON.stringify(samples), before, '顯示佈局不得改動路單資料');
+});
 console.log(`全部 ${passed} 項測試通過。`);
