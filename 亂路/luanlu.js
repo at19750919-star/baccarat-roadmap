@@ -327,10 +327,12 @@ function initUI() {
       card.append(stats);
       card.append(element('p', road.lengthCaps.ok ? 'road-reasons' : 'length-violation', !road.lengthCaps.enabled ? '同長度上限：未啟用' :
         road.lengthCaps.ok ? '同長度上限：全部合格' : `同長度上限未通過（嘗試範圍內的最少違規備選）：${road.lengthCaps.violations.join('；')}`));
-      for (const [key, label] of [['red', '紅'], ['blue', '藍'], ['greenBanker', '綠莊'], ['greenPlayer', '綠閒']]) {
+      for (const [key, label] of [['red', '洞'], ['blue', '柱'], ['greenBanker', '行莊'], ['greenPlayer', '行閒']]) {
         const section = element('div', `sequence ${key}`);
+        const reasons = element('p', '');
+        reasons.append(element('span', `term-${key}`, `${label}：`), reasonText(road.score[key].reasons));
         section.append(element('strong', '', `${label}：${road.sequences[key].join('、') || '無'}　／ ${points(road.score[key].total)}分`),
-          element('p', '', reasonText(road.score[key].reasons))); card.append(section);
+          reasons); card.append(section);
       }
       card.append(element('p', 'road-reasons', `大路：${reasonText(road.score.road.reasons)}`));
       const reroll = element('button', 'secondary', '重抽這條'); reroll.type = 'button';
