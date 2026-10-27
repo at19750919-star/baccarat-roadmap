@@ -11,35 +11,34 @@
 </head>
 <body>
   <main>
-    <header><span class="crest" aria-hidden="true"></span><div class="header-copy"><p class="eyebrow">百家樂路單</p><h1>亂路</h1><p>打亂莊閒規律，產生可匯入穿越排牌的路單。</p></div></header>
+    <header><span class="crest" aria-hidden="true"></span><div class="header-copy"><h1>亂路</h1></div></header>
     <div class="workspace">
     <form id="settings">
       <fieldset>
         <legend>產生設定</legend>
         <div class="fields">
-          <label>條數<input name="count" type="number" min="1" max="100" value="5" required></label>
-          <label>局數（不含和）<input name="rounds" type="number" min="1" max="1000" value="82" required></label>
-          <label>莊閒差上限<input name="maxDifference" type="number" min="0" max="1000" value="4" required></label>
-          <label>長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" required></label>
-          <label><span>單邊同長度<span class="term-greenBanker">行</span>上限</span><input name="perSideMax" type="number" min="0" max="1000" value="2" required></label>
-          <label><span>莊閒合計同長度<span class="term-greenBanker">行</span>上限</span><input name="combinedMax" type="number" min="0" max="1000" value="3" required></label>
-          <label><span>同長度<span class="term-red">洞</span>上限</span><input name="holeMax" type="number" min="0" max="1000" placeholder="空白＝不限"></label>
-          <label><span>同長度<span class="term-blue">柱</span>上限</span><input name="pillarMax" type="number" min="0" max="1000" placeholder="空白＝不限"></label>
-          <div class="cap-toggles">
+          <label class="row">條數<input name="count" type="number" min="1" max="100" value="5" required></label>
+          <label class="row">局數(不含和)<input name="rounds" type="number" min="1" max="1000" value="82" required></label>
+          <label class="row">莊閒差上限<input name="maxDifference" type="number" min="0" max="1000" value="4" required></label>
+          <label class="row">長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" required></label>
+          <label class="row"><span>單邊<span class="term-greenBanker">行</span></span><input name="perSideMax" type="number" min="0" max="1000" value="2" required></label>
+          <label class="row"><span>合計<span class="term-greenBanker">行</span></span><input name="combinedMax" type="number" min="0" max="1000" value="3" required></label>
+          <label class="row"><span>同長<span class="term-red">洞</span></span><input name="holeMax" type="number" min="0" max="1000" placeholder="不限"></label>
+          <label class="row"><span>同長<span class="term-blue">柱</span></span><input name="pillarMax" type="number" min="0" max="1000" placeholder="不限"></label>
+          <div class="cap-toggles wide">
             <label class="checkbox"><input name="includeSingles" type="checkbox"><span>單顆<span class="term-greenBanker">行</span>也算</span></label>
             <label class="checkbox"><input name="enableLengthCaps" type="checkbox" checked><span>啟用同長度<span class="term-greenBanker">行</span>上限</span></label>
           </div>
-          <label>名稱前綴<input name="prefix" value="路單-AT" required></label>
-          <label>起始編號<input name="startNumber" type="number" min="0" max="1000000" value="1" required></label>
-          <label>每條嘗試次數<input name="attempts" type="number" min="1" max="100000" value="3000" required></label>
-          <label>爬山步數<input name="hillSteps" type="number" min="0" max="100000" value="2000" required></label>
-          <label class="seed">種子（選填）<input name="seed" placeholder="同設定、同種子可重現" autocomplete="off"></label>
+          <label class="row">名稱前綴<input name="prefix" class="text" value="路單-AT" required></label>
+          <label class="row">起始編號<input name="startNumber" type="number" min="0" max="1000000" value="1" required></label>
+          <label class="row">嘗試次數<input name="attempts" type="number" min="1" max="100000" value="3000" required></label>
+          <label class="row">爬山步數<input name="hillSteps" type="number" min="0" max="100000" value="2000" required></label>
+          <label class="row wide seed">種子<input name="seed" class="text" placeholder="選填，同設定同種子可重現" autocomplete="off"></label>
         </div>
-        <p class="hint"><span class="term-greenBanker">行</span>：每個兩顆以上欄的顆數，莊閒分開；<span class="term-red">洞</span>：連續單跳欄的欄數；<span class="term-blue">柱</span>：連續兩顆以上欄的欄數。</p>
-        <p class="hint"><span class="term-red">洞</span>、<span class="term-blue">柱</span>上限皆為整條路單同一長度的出現次數加總，莊閒混看，空白＝不限。</p>
-        <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button><span>只產生莊／閒，不含和局</span></div>
-        <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">設定完成後，按「產生路單」。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div></div>
-        <p class="hint">規律總分越低越好，只代表規律較少。匯入時同名會覆蓋，請確認名稱前綴與起始編號。</p>
+        <p class="hint"><span class="term-greenBanker">行</span>＝兩顆以上欄的顆數（莊閒分開）；<span class="term-red">洞</span>＝連續單跳欄數；<span class="term-blue">柱</span>＝連續兩顆以上欄數。皆為整條同一長度出現次數上限，洞柱莊閒混看，空白＝不限。</p>
+        <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button></div>
+        <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">按「產生路單」開始。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div></div>
+        <p class="hint">只產生莊／閒不含和；分數越低規律越少；同名匯入會覆蓋。</p>
       </fieldset>
     </form>
     <section id="results" aria-label="產生的路單" aria-busy="false"></section>
