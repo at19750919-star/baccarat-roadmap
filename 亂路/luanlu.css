@@ -11,6 +11,11 @@ legend { padding: 0 8px; font-weight: bold; }
 .fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 label { display: flex; flex-direction: column; gap: 8px; color: #c9d1df; font-size: 14px; }
 .seed { grid-column: span 2; }
+.checkbox { flex-direction: row; align-items: center; min-height: 44px; }
+.checkbox input { width: 20px; height: 20px; flex-shrink: 0; accent-color: #dbba71; }
+.length-stats { line-height: 1.8; font-size: 14px; }
+.length-stats span { display: inline-block; white-space: pre-wrap; }
+.length-violation { color: #ff8895; line-height: 1.7; }
 input { min-width: 0; width: 100%; border: 1px solid #465164; border-radius: 4px; background: #10151e; color: #f0f2f7; padding: 11px 12px; font: inherit; }
 input::placeholder { color: #8793a7; }
 button { min-height: 44px; border: 1px solid transparent; border-radius: 4px; padding: 10px 22px; background: #dbba71; color: #19170f; font: inherit; font-weight: bold; cursor: pointer; }

@@ -4,7 +4,8 @@
 const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
   ordered: 3, period: 4, dominant: 3, longRed: 4, longBlue: 3 });
 const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
-  prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '' });
+  prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
+  perSideMax: 2, combinedMax: 3, includeSingles: false, enableLengthCaps: true });
 
 function toRuns(outcomes) {
   const runs = [];
@@ -30,6 +31,30 @@ function getSequences(runs, firstSide = '莊') {
     kind = next;
   });
   return { red, blue, greenBanker, greenPlayer };
+}
+
+// 預設排除單跳；第三個參數供「單跳也算」及卡片統計使用。
+function countColumnLengths(runs, firstSide = '莊', { includeSingles = false } = {}) {
+  const counts = { banker: {}, player: {}, total: {} };
+  runs.forEach((length, i) => {
+    if (!Number.isInteger(length) || length < 1) throw new Error('欄長必須為正整數。');
+    if (length === 1 && !includeSingles) return;
+    const side = (i % 2 === 0) === (firstSide === '莊') ? 'banker' : 'player';
+    counts[side][length] = (counts[side][length] || 0) + 1;
+    counts.total[length] = (counts.total[length] || 0) + 1;
+  });
+  return counts;
+}
+
+function checkLengthCaps(runs, firstSide = '莊', opts = {}) {
+  const { perSideMax = 2, combinedMax = 3, includeSingles = false } = opts;
+  const counts = countColumnLengths(runs, firstSide, { includeSingles }), violations = [];
+  for (const [side, label, max] of [['banker', '莊', perSideMax], ['player', '閒', perSideMax], ['total', '合計', combinedMax]]) {
+    for (const [length, count] of Object.entries(counts[side])) {
+      if (count > max) violations.push(`${label} ${length}顆欄有 ${count} 欄，超過上限 ${max} 欄`);
+    }
+  }
+  return { ok: violations.length === 0, violations };
 }
 
 function scoreSequence(seq) {
@@ -94,10 +119,15 @@ function scoreRoad(outcomes) {
 function normalizeOptions(options = {}) {
   const o = { ...DEFAULTS, ...options };
   const labels = { count: '條數', rounds: '局數', maxDifference: '莊閒差上限', maxRun: '長龍上限',
-    startNumber: '起始編號', attempts: '每條嘗試次數', hillSteps: '爬山步數' };
+    startNumber: '起始編號', attempts: '每條嘗試次數', hillSteps: '爬山步數',
+    perSideMax: '單邊同長度上限', combinedMax: '莊閒合計上限' };
   for (const [key, min, max] of [['count', 1, 100], ['rounds', 1, 1000], ['maxDifference', 0, 1000],
-    ['maxRun', 1, 1000], ['startNumber', 0, 1000000], ['attempts', 1, 100000], ['hillSteps', 0, 100000]]) {
+    ['maxRun', 1, 1000], ['startNumber', 0, 1000000], ['attempts', 1, 100000], ['hillSteps', 0, 100000],
+    ['perSideMax', 0, 1000], ['combinedMax', 0, 1000]]) {
     if (!Number.isInteger(o[key]) || o[key] < min || o[key] > max) throw new Error(`${labels[key]}必須是 ${min}～${max} 的整數。`);
+  }
+  for (const key of ['includeSingles', 'enableLengthCaps']) {
+    if (typeof o[key] !== 'boolean') throw new Error('同長度上限開關必須為布林值。');
   }
   if (o.rounds % 2 > o.maxDifference) throw new Error('奇數局至少有 1 局莊閒差，請調整局數或莊閒差上限。');
   o.prefix = String(o.prefix).trim();
@@ -135,11 +165,25 @@ function randomCandidate(o, rng) {
   const sum = weights.reduce((a, b) => a + b, 0);
   for (let retry = 0; retry < 100; retry++) {
     const runs = [];
+    const counts = [{}, {}], total = {};
     let remaining = o.rounds;
     while (remaining) {
-      let draw = rng() * sum, length = cap;
-      for (let i = 0; i < cap; i++) { draw -= weights[i]; if (draw < 0) { length = i + 1; break; } }
+      // 在抽樣時排除已用盡配額的長度，包含最後截短的欄。
+      const side = counts[runs.length % 2];
+      let available = weights;
+      if (o.enableLengthCaps) {
+        available = weights.map((weight, i) => {
+          const n = Math.min(i + 1, remaining);
+          return (n === 1 && !o.includeSingles) ||
+            ((side[n] || 0) < o.perSideMax && (total[n] || 0) < o.combinedMax) ? weight : 0;
+        });
+        // 配額不足時保留有界備選；roadSteps 會標示違規，不當成合格路。
+        if (!available.some(Boolean)) available = weights;
+      }
+      let draw = rng() * (available === weights ? sum : available.reduce((a, b) => a + b, 0)), length = cap;
+      for (let i = 0; i < cap; i++) { draw -= available[i]; if (draw < 0) { length = i + 1; break; } }
       length = Math.min(length, remaining); runs.push(length); remaining -= length;
+      side[length] = (side[length] || 0) + 1; total[length] = (total[length] || 0) + 1;
     }
     if (validRuns(runs, o)) return runs;
   }
@@ -177,18 +221,24 @@ function mutate(runs, rng) {
 function* roadSteps(options, rng) {
   const o = normalizeOptions(options);
   const first = rng() < 0.5 ? '莊' : '閒';
-  let best, bestScore = Infinity;
+  let best, bestScore = Infinity, bestViolations = Infinity;
   const steps = o.attempts + o.hillSteps;
   for (let i = 0; i < steps; i++) {
     const runs = i < o.attempts ? randomCandidate(o, rng) : mutate(best, rng);
     if (validRuns(runs, o)) {
+      const violations = o.enableLengthCaps ? checkLengthCaps(runs, first, o).violations.length : 0;
       const score = scoreRoad(outcomesFromRuns(runs, first)).total;
-      if (score <= bestScore) { best = runs; bestScore = score; }
+      // 合格路永遠優先。尚無合格路時，只保留已搜尋到違規項目最少的備選。
+      if (violations < bestViolations || (violations === bestViolations && score <= bestScore)) {
+        best = runs; bestScore = score; bestViolations = violations;
+      }
     }
     if ((i + 1) % 25 === 0 || i + 1 === steps) yield (i + 1) / steps;
   }
   const nonTieOutcomes = outcomesFromRuns(best, first);
-  return { nonTieOutcomes, runs: best, sequences: getSequences(best, first), score: scoreRoad(nonTieOutcomes) };
+  return { nonTieOutcomes, runs: best, sequences: getSequences(best, first), score: scoreRoad(nonTieOutcomes),
+    columnLengths: countColumnLengths(best, first, o),
+    lengthCaps: { enabled: o.enableLengthCaps, ...(o.enableLengthCaps ? checkLengthCaps(best, first, o) : { ok: true, violations: [] }) } };
 }
 function generateRoad(options = {}, rng) {
   const iterator = roadSteps(options, rng || createRng(options.seed));
@@ -264,6 +314,19 @@ function initUI() {
       });
       grid.style.gridTemplateColumns = `repeat(${column}, 26px)`;
       scroll.append(grid); card.append(scroll);
+      const stats = element('p', 'length-stats', '長度統計：');
+      for (const [side, label] of [['banker', '莊'], ['player', '閒'], ['total', '合計']]) {
+        stats.append(element('span', '', `${side === 'banker' ? '' : '｜'}${label} `));
+        const entries = Object.entries(road.columnLengths[side]);
+        if (!entries.length) stats.append(element('span', '', '無 '));
+        for (const [length, count] of entries) {
+          const max = side === 'total' ? generatedOptions.combinedMax : generatedOptions.perSideMax;
+          stats.append(element('span', road.lengthCaps.enabled && count > max ? 'length-violation' : '', `${length}顆×${count} `));
+        }
+      }
+      card.append(stats);
+      card.append(element('p', road.lengthCaps.ok ? 'road-reasons' : 'length-violation', !road.lengthCaps.enabled ? '同長度上限：未啟用' :
+        road.lengthCaps.ok ? '同長度上限：全部合格' : `同長度上限未通過（嘗試範圍內的最少違規備選）：${road.lengthCaps.violations.join('；')}`));
       for (const [key, label] of [['red', '紅'], ['blue', '藍'], ['greenBanker', '綠莊'], ['greenPlayer', '綠閒']]) {
         const section = element('div', `sequence ${key}`);
         section.append(element('strong', '', `${label}：${road.sequences[key].join('、') || '無'}　／ ${points(road.score[key].total)}分`),
@@ -277,7 +340,8 @@ function initUI() {
   }
   function readOptions() {
     const data = new FormData(form), o = {};
-    for (const key of Object.keys(DEFAULTS)) o[key] = key === 'prefix' || key === 'seed' ? data.get(key) : Number(data.get(key));
+    for (const key of Object.keys(DEFAULTS)) o[key] = typeof DEFAULTS[key] === 'boolean' ? data.has(key) :
+      key === 'prefix' || key === 'seed' ? data.get(key) : Number(data.get(key));
     return normalizeOptions(o);
   }
   async function run(index = null) {
@@ -312,7 +376,8 @@ function initUI() {
         if (!accepted) throw new Error('無法找到前20局不同的路單，請減少條數或放寬條件。');
       }
       roads = next; generatedOptions = o; render(); progress.value = 1;
-      status.textContent = `已完成${roads.length}條，可下載 JSON。`;
+      const failed = roads.filter(road => !road.lengthCaps.ok).length;
+      status.textContent = `已完成${roads.length}條${failed ? `，其中${failed}條未通過同長度上限，請查看卡片違規內容` : ''}，可下載 JSON。`;
     } catch (error) { status.textContent = `產生失敗：${error.message}`; }
     finally { setBusy(false); }
   }
@@ -327,5 +392,5 @@ if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initUI);
   else initUI();
 }
-if (typeof module !== 'undefined') module.exports = { WEIGHTS, DEFAULTS, toRuns, getSequences,
+if (typeof module !== 'undefined') module.exports = { WEIGHTS, DEFAULTS, toRuns, getSequences, countColumnLengths, checkLengthCaps,
   scoreSequence, scoreRoad, generateRoad, generateRoads, toImportJson, createRng };
