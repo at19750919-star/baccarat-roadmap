@@ -26,13 +26,27 @@ body {
     linear-gradient(180deg, #0a0e10 0%, #07090b 100%);
   background-attachment: fixed;
 }
-main { width: min(1160px, 100%); margin: auto; padding: 36px 24px 64px; }
+main { width: min(1560px, 100%); margin: auto; padding: 28px 24px 64px; }
 header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   margin-bottom: 28px;
   padding-bottom: 16px;
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(90deg, transparent, #8a6a2f 20%, #f4dfa4 50%, #8a6a2f 80%, transparent) 1;
 }
+.crest {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex: none;
+  background: #080908 url("at-spade-logo.png") center/cover no-repeat;
+  box-shadow: 0 0 0 1px #8a6a2f, 0 0 0 4px #0c1110, 0 0 0 5px #5d431c, 0 6px 18px rgba(0, 0, 0, .6), inset 0 0 14px rgba(232, 201, 122, .15);
+}
+.header-copy { min-width: 0; }
+.workspace { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start; }
+#settings { min-width: 0; }
 .eyebrow { color: var(--gold-2); font-size: 12px; letter-spacing: .3em; margin: 0 0 8px; }
 h1 {
   font-family: var(--disp);
@@ -46,8 +60,8 @@ h1 {
   color: transparent;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
 }
-header > p:last-child, .hint, .actions span { color: var(--txt-dim); line-height: 1.7; }
-header > p:last-child { margin: 0; }
+.header-copy > p:last-child, .hint, .actions span { color: var(--txt-dim); line-height: 1.7; }
+.header-copy > p:last-child { margin: 0; }
 fieldset, .road-card {
   position: relative;
   border: 1px solid var(--gold-3);
@@ -66,18 +80,17 @@ fieldset::after, .road-card::before, .road-card::after {
 }
 .road-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
 fieldset::after, .road-card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-fieldset { padding: 20px; margin: 0; min-width: 0; }
+fieldset { padding: 18px; margin: 0; min-width: 0; }
 legend { padding: 0 10px; font-family: var(--serif); font-weight: 600; font-size: 14px; letter-spacing: .25em; color: var(--gold-2); }
-.fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
-label { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: var(--txt); font-size: 14px; }
-.seed { grid-column: span 2; }
-.cap-toggles { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 24px; }
-.checkbox { flex-direction: row; align-items: center; min-height: 44px; }
+.fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+label { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: var(--txt); font-size: 13px; }
+.cap-toggles { display: flex; flex-direction: column; gap: 4px; }
+.checkbox { flex-direction: row; align-items: center; min-height: 36px; }
 .checkbox input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--gold-2); }
 .length-stats { line-height: 1.8; font-size: 14px; }
 .length-stats span { display: inline-block; white-space: pre-wrap; }
 .length-violation { color: #ff8895; line-height: 1.7; }
-input { min-width: 0; width: 100%; border: 1px solid #33403d; border-radius: 6px; background: #0a100f; color: var(--gold-1); padding: 11px 12px; font: inherit; transition: border-color .2s, box-shadow .2s; }
+input { min-width: 0; width: 100%; border: 1px solid #33403d; border-radius: 6px; background: #0a100f; color: var(--gold-1); padding: 8px 10px; font: inherit; transition: border-color .2s, box-shadow .2s; }
 input[type="number"] { font-family: var(--disp); font-weight: 500; font-variant-numeric: tabular-nums; }
 input::placeholder { color: var(--txt-dim); font-family: var(--sans); font-size: 13px; }
 input:focus { border-color: #c9a25a; box-shadow: 0 0 10px rgba(212, 176, 106, .25); }
@@ -102,17 +115,18 @@ button:disabled { opacity: .35; cursor: default; filter: grayscale(.5); }
 input:focus-visible, button:focus-visible { outline: 2px solid var(--gold-1); outline-offset: 3px; }
 .secondary { background: linear-gradient(180deg, #161f21, #0d1315); color: var(--txt); border-color: #8a6a2f; text-shadow: none; box-shadow: none; }
 .secondary:hover:enabled { color: var(--gold-1); }
-.actions { margin-top: 22px; display: flex; align-items: center; gap: 16px; }
+.actions { margin-top: 18px; display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
 .actions span, .hint { font-size: 13px; }
-.output-bar { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
+.output-bar { margin-top: 18px; }
 .progress-area { flex: 1; min-width: 0; }
-#status { margin: 0 0 10px; line-height: 1.5; }
+#status { margin: 0 0 10px; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
 progress { display: block; width: 100%; height: 6px; accent-color: var(--gold-2); background: #0a100f; border: 0; border-radius: 3px; overflow: hidden; }
 progress::-webkit-progress-bar { background: #0a100f; }
 progress::-webkit-progress-value { background: linear-gradient(90deg, var(--gold-4), var(--gold-1)); }
 progress::-moz-progress-bar { background: linear-gradient(90deg, var(--gold-4), var(--gold-1)); }
-.hint { margin: 14px 0 24px; }
-#results { display: grid; gap: 22px; }
+.hint { margin: 14px 0; }
+fieldset > .hint:last-child { margin-bottom: 0; }
+#results { display: grid; min-width: 0; gap: 22px; align-content: start; }
 .road-card { min-width: 0; padding: 22px; }
 .card-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; margin-bottom: 18px; }
 h2 { font: 600 21px var(--serif); color: var(--gold-1); margin: 0; overflow-wrap: anywhere; }
@@ -128,6 +142,7 @@ h2 { font: 600 21px var(--serif); color: var(--gold-1); margin: 0; overflow-wrap
 .sequence strong { font-size: 14px; }.red strong, .term-red { color: #ff8895; }.blue strong, .term-blue { color: #8bbbff; }.greenBanker strong, .greenPlayer strong, .term-greenBanker, .term-greenPlayer { color: #79d7ae; }
 .sequence p, .road-reasons { color: var(--txt-dim); font-size: 13px; margin: 4px 0 0; line-height: 1.6; }
 .road-reasons { margin-bottom: 18px; }
-@media (max-width: 760px) { .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } main { padding: 24px 16px 40px; } .road-card { padding: 16px; } }
-@media (max-width: 420px) { .output-bar { align-items: stretch; flex-direction: column; gap: 14px; } .actions { align-items: start; flex-direction: column; gap: 8px; } fieldset { padding: 14px; } .fields { gap: 14px 10px; } }
+@media (max-width: 899px) { .workspace { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { main { padding: 24px 16px 40px; } .road-card { padding: 16px; } }
+@media (max-width: 420px) { fieldset { padding: 14px; } }
 @media (prefers-reduced-motion: reduce) { input, button { transition: none; } button:hover:enabled, button:active:enabled { transform: none; } }

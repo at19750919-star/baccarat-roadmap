@@ -11,7 +11,8 @@
 </head>
 <body>
   <main>
-    <header><p class="eyebrow">百家樂路單</p><h1>亂路</h1><p>打亂莊閒規律，產生可匯入穿越排牌的路單。</p></header>
+    <header><span class="crest" aria-hidden="true"></span><div class="header-copy"><p class="eyebrow">百家樂路單</p><h1>亂路</h1><p>打亂莊閒規律，產生可匯入穿越排牌的路單。</p></div></header>
+    <div class="workspace">
     <form id="settings">
       <fieldset>
         <legend>產生設定</legend>
@@ -36,12 +37,13 @@
         </div>
         <p class="hint"><span class="term-greenBanker">行</span>：每個兩顆以上欄的顆數，莊閒分開；<span class="term-red">洞</span>：連續單跳欄的欄數；<span class="term-blue">柱</span>：連續兩顆以上欄的欄數。</p>
         <p class="hint"><span class="term-red">洞</span>、<span class="term-blue">柱</span>上限皆為整條路單同一長度的出現次數加總，莊閒混看，空白＝不限。</p>
-        <div class="actions"><button type="submit">產生路單</button><span>只產生莊／閒，不含和局</span></div>
+        <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button><span>只產生莊／閒，不含和局</span></div>
+        <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">設定完成後，按「產生路單」。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div></div>
+        <p class="hint">規律總分越低越好，只代表規律較少。匯入時同名會覆蓋，請確認名稱前綴與起始編號。</p>
       </fieldset>
     </form>
-    <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">設定完成後，按「產生路單」。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div><button id="download" class="secondary" type="button" disabled>下載 JSON</button></div>
-    <p class="hint">規律總分越低越好，只代表規律較少。匯入時同名會覆蓋，請確認名稱前綴與起始編號。</p>
     <section id="results" aria-label="產生的路單" aria-busy="false"></section>
+    </div>
   </main>
 </body>
 </html>
