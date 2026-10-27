@@ -1,7 +1,8 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { WEIGHTS, toRuns, getSequences, scoreSequence, scoreRoad, generateRoad,
-  generateRoads, toImportJson, createRng, countColumnLengths, checkLengthCaps } = require('../亂路/luanlu.js');
+  generateRoads, toImportJson, createRng, countColumnLengths, checkLengthCaps,
+  countHoleLengths, countPillarLengths, checkHoleCaps, checkPillarCaps } = require('../亂路/luanlu.js');
 
 function outcomes(runs, first = '莊') {
   return runs.flatMap((length, i) => Array(length).fill(i % 2 ? (first === '莊' ? '閒' : '莊') : first));
@@ -165,5 +166,94 @@ test('備選優先減少違規項目，爬山不能以較低分數換取更多�
   assert.equal(before.lengthCaps.ok, false); assert.equal(after.lengthCaps.ok, false);
   assert(after.lengthCaps.violations.length <= before.lengthCaps.violations.length);
   if (after.lengthCaps.violations.length === before.lengthCaps.violations.length) assert(after.score.total <= before.score.total);
+});
+test('洞柱統計符合範例，包含頭尾、空序列與莊閒混看的不相鄰同長度', () => {
+  const runs = [1, 1, 3, 2, 1, 4, 2, 2, 1, 1, 1];
+  assert.deepEqual(countHoleLengths(runs), { 1: 1, 2: 1, 3: 1 });
+  assert.deepEqual(countPillarLengths(runs), { 2: 1, 3: 1 });
+  assert.deepEqual(countHoleLengths([]), {});
+  assert.deepEqual(countPillarLengths([]), {});
+  assert.deepEqual(countHoleLengths([1, 1, 1]), { 3: 1 });
+  assert.deepEqual(countPillarLengths([2, 6, 3]), { 3: 1 });
+  assert.deepEqual(countHoleLengths([2, 3]), {});
+  assert.deepEqual(countPillarLengths([1, 1]), {});
+  // 洞序列 [1,2,1]：兩個長度1不相鄰、起始莊閒也不同，仍須加總。
+  assert.deepEqual(countHoleLengths([1, 2, 1, 1, 2, 1]), { 1: 2, 2: 1 });
+  // 柱序列 [1,2,1]，按欄數分組，不加總各欄顆數。
+  assert.deepEqual(countPillarLengths([2, 1, 3, 4, 1, 6]), { 1: 2, 2: 1 });
+});
+test('洞柱上限逐個長度加總，等於上限合格、空白不限、零禁止出現', () => {
+  const runs = [1, 2, 1, 1, 2, 1];
+  assert.deepEqual(checkHoleCaps(runs), { ok: true, violations: [] });
+  assert.deepEqual(checkPillarCaps(runs, { pillarMax: '' }), { ok: true, violations: [] });
+  const hole = checkHoleCaps(runs, { holeMax: 1 });
+  assert.equal(hole.ok, false); assert.equal(hole.violations.length, 1);
+  assert.match(hole.violations[0], /1欄的洞出現 2 次/);
+  assert.equal(checkHoleCaps(runs, { holeMax: 2 }).ok, true);
+  assert.equal(checkPillarCaps(runs, { pillarMax: 2 }).ok, true);
+  assert.equal(checkPillarCaps(runs, { pillarMax: 1 }).violations.length, 1);
+  assert.equal(checkHoleCaps(runs, { holeMax: 0 }).violations.length, 2);
+  assert.equal(checkPillarCaps(runs, { pillarMax: 0 }).violations.length, 1);
+  assert.equal(checkHoleCaps([], { holeMax: 0 }).ok, true);
+  assert.equal(checkPillarCaps([], { pillarMax: 0 }).ok, true);
+  for (const key of ['holeMax', 'pillarMax']) {
+    for (const value of [-1, 1.5, 1001, NaN, null, '1']) {
+      assert.throws(() => generateRoad({ [key]: value }), /必須留白或填入/);
+    }
+  }
+});
+test('種子1、洞上限1、柱上限2產生10條，全部合格或帶有完整違規標記', () => {
+  const options = { seed: 1, count: 10, holeMax: 1, pillarMax: 2 };
+  const limited = generateRoads(options);
+  assert.equal(limited.length, 10);
+  assert.equal(new Set(limited.map(r => r.nonTieOutcomes.slice(0, 20).join(''))).size, 10);
+  for (const road of limited) {
+    checkRoad(road);
+    assert.deepEqual(road.holeLengths, countHoleLengths(road.runs));
+    assert.deepEqual(road.pillarLengths, countPillarLengths(road.runs));
+    assert.deepEqual(road.holeCaps, { enabled: true, ...checkHoleCaps(road.runs, options) });
+    assert.deepEqual(road.pillarCaps, { enabled: true, ...checkPillarCaps(road.runs, options) });
+    assert.deepEqual(road.lengthCaps, { enabled: true, ...checkLengthCaps(road.runs, road.nonTieOutcomes[0], options) });
+    for (const cap of [road.lengthCaps, road.holeCaps, road.pillarCaps]) {
+      assert.equal(cap.ok, cap.violations.length === 0);
+      cap.violations.forEach(text => assert.match(text, /超過上限/));
+    }
+  }
+  console.log(`  洞1／柱2：${limited.filter(r => r.lengthCaps.ok && r.holeCaps.ok && r.pillarCaps.ok).length}條全部合格，其餘明確標違規`);
+});
+test('洞柱限制獨立於行開關，不可能條件標記，候選及爬山按全部違規數優先', () => {
+  const impossible = generateRoad({ rounds: 8, maxRun: 1, maxDifference: 0, enableLengthCaps: false,
+    holeMax: 0, pillarMax: 0, attempts: 2, hillSteps: 20, seed: 1 });
+  checkRoad(impossible, 8, 0, 1);
+  assert.equal(impossible.lengthCaps.enabled, false);
+  assert.equal(impossible.holeCaps.ok, false);
+  assert.equal(impossible.pillarCaps.ok, true);
+  const options = { seed: 1, holeMax: 0, pillarMax: 0, attempts: 20, hillSteps: 0 };
+  const violations = r => r.lengthCaps.violations.length + r.holeCaps.violations.length + r.pillarCaps.violations.length;
+  const before = generateRoad(options), after = generateRoad({ ...options, hillSteps: 500 });
+  checkRoad(before); checkRoad(after);
+  assert(violations(after) <= violations(before));
+  if (violations(after) === violations(before)) assert(after.score.total <= before.score.total);
+  for (let attempts = 1; attempts < 20; attempts++) {
+    const candidate = generateRoad({ ...options, attempts });
+    assert(violations(before) <= violations(candidate));
+    if (violations(before) === violations(candidate)) assert(before.score.total <= candidate.score.total);
+  }
+  const validOptions = { seed: 1, holeMax: 10, pillarMax: 10, attempts: 20, hillSteps: 0 };
+  const validBefore = generateRoad(validOptions), validAfter = generateRoad({ ...validOptions, hillSteps: 500 });
+  assert.equal(violations(validBefore), 0); assert.equal(violations(validAfter), 0);
+  assert(validAfter.score.total <= validBefore.score.total);
+});
+test('洞柱上限留白與修改前種子1的10條完整結果一致（排除新增統計欄位）', () => {
+  const blank = generateRoads({ count: 10, seed: 1, holeMax: '', pillarMax: '' });
+  assert.deepEqual(blank, roads.slice(0, 10));
+  blank.forEach(road => {
+    assert.deepEqual(road.holeCaps, { enabled: false, ok: true, violations: [] });
+    assert.deepEqual(road.pillarCaps, { enabled: false, ok: true, violations: [] });
+  });
+  const previousFields = blank.map(({ holeLengths, pillarLengths, holeCaps, pillarCaps, ...road }) => road);
+  // 修改前實際執行 generateRoads({ count: 10, seed: 1 }) 的 JSON SHA-256。
+  const hash = require('node:crypto').createHash('sha256').update(JSON.stringify(previousFields)).digest('hex');
+  assert.equal(hash, 'b5c1963bc15e384bb2baedb4fceed216e483bc474d11b45aac2a9fd30a08793f');
 });
 console.log(`全部 ${passed} 項測試通過。`);

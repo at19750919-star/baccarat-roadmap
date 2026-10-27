@@ -11,6 +11,7 @@ legend { padding: 0 8px; font-weight: bold; }
 .fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 label { display: flex; flex-direction: column; gap: 8px; color: #c9d1df; font-size: 14px; }
 .seed { grid-column: span 2; }
+.cap-toggles { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 24px; }
 .checkbox { flex-direction: row; align-items: center; min-height: 44px; }
 .checkbox input { width: 20px; height: 20px; flex-shrink: 0; accent-color: #dbba71; }
 .length-stats { line-height: 1.8; font-size: 14px; }

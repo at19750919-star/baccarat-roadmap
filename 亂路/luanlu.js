@@ -5,7 +5,8 @@ const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
   ordered: 3, period: 4, dominant: 3, longRed: 4, longBlue: 3 });
 const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
   prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
-  perSideMax: 2, combinedMax: 3, includeSingles: false, enableLengthCaps: true });
+  perSideMax: 2, combinedMax: 3, includeSingles: false, enableLengthCaps: true,
+  holeMax: '', pillarMax: '' });
 
 function toRuns(outcomes) {
   const runs = [];
@@ -55,6 +56,30 @@ function checkLengthCaps(runs, firstSide = '莊', opts = {}) {
     }
   }
   return { ok: violations.length === 0, violations };
+}
+
+// 洞、柱都莊閒混看；同長度在整條路單出現的次數加總，並非連續重複次數。
+function countSequenceLengths(sequence) {
+  const counts = {};
+  for (const length of sequence) counts[length] = (counts[length] || 0) + 1;
+  return counts;
+}
+function countHoleLengths(runs) { return countSequenceLengths(getSequences(runs).red); }
+function countPillarLengths(runs) { return countSequenceLengths(getSequences(runs).blue); }
+function checkSequenceCap(counts, max, label) {
+  const violations = [];
+  if (max !== '') {
+    for (const [length, count] of Object.entries(counts)) {
+      if (count > max) violations.push(`${length}欄的${label}出現 ${count} 次，超過上限 ${max} 次`);
+    }
+  }
+  return { ok: violations.length === 0, violations };
+}
+function checkHoleCaps(runs, { holeMax = '' } = {}) {
+  return checkSequenceCap(countHoleLengths(runs), holeMax, '洞');
+}
+function checkPillarCaps(runs, { pillarMax = '' } = {}) {
+  return checkSequenceCap(countPillarLengths(runs), pillarMax, '柱');
 }
 
 function scoreSequence(seq) {
@@ -128,6 +153,11 @@ function normalizeOptions(options = {}) {
   }
   for (const key of ['includeSingles', 'enableLengthCaps']) {
     if (typeof o[key] !== 'boolean') throw new Error('同長度行上限開關必須為布林值。');
+  }
+  for (const [key, label] of [['holeMax', '洞'], ['pillarMax', '柱']]) {
+    if (o[key] !== '' && (!Number.isInteger(o[key]) || o[key] < 0 || o[key] > 1000)) {
+      throw new Error(`同長度${label}上限必須留白或填入 0～1000 的整數。`);
+    }
   }
   if (o.rounds % 2 > o.maxDifference) throw new Error('奇數局至少有 1 局莊閒差，請調整局數或莊閒差上限。');
   o.prefix = String(o.prefix).trim();
@@ -226,7 +256,9 @@ function* roadSteps(options, rng) {
   for (let i = 0; i < steps; i++) {
     const runs = i < o.attempts ? randomCandidate(o, rng) : mutate(best, rng);
     if (validRuns(runs, o)) {
-      const violations = o.enableLengthCaps ? checkLengthCaps(runs, first, o).violations.length : 0;
+      const violations = (o.enableLengthCaps ? checkLengthCaps(runs, first, o).violations.length : 0) +
+        (o.holeMax === '' ? 0 : checkHoleCaps(runs, o).violations.length) +
+        (o.pillarMax === '' ? 0 : checkPillarCaps(runs, o).violations.length);
       const score = scoreRoad(outcomesFromRuns(runs, first)).total;
       // 合格路永遠優先。尚無合格路時，只保留已搜尋到違規項目最少的備選。
       if (violations < bestViolations || (violations === bestViolations && score <= bestScore)) {
@@ -238,6 +270,9 @@ function* roadSteps(options, rng) {
   const nonTieOutcomes = outcomesFromRuns(best, first);
   return { nonTieOutcomes, runs: best, sequences: getSequences(best, first), score: scoreRoad(nonTieOutcomes),
     columnLengths: countColumnLengths(best, first, o),
+    holeLengths: countHoleLengths(best), pillarLengths: countPillarLengths(best),
+    holeCaps: { enabled: o.holeMax !== '', ...checkHoleCaps(best, o) },
+    pillarCaps: { enabled: o.pillarMax !== '', ...checkPillarCaps(best, o) },
     lengthCaps: { enabled: o.enableLengthCaps, ...(o.enableLengthCaps ? checkLengthCaps(best, first, o) : { ok: true, violations: [] }) } };
 }
 function generateRoad(options = {}, rng) {
@@ -280,8 +315,9 @@ function initUI() {
     if (text !== undefined) node.textContent = text; return node;
   };
   const setLengthCapText = (node, text) => {
-    node.replaceChildren(...text.split(/(同長度行上限)/).flatMap(part => part === '同長度行上限'
-      ? ['同長度', element('span', 'term-greenBanker', '行'), '上限'] : [part]));
+    node.replaceChildren(...text.split(/(同長度行上限|洞|柱)/).flatMap(part => part === '同長度行上限'
+      ? ['同長度', element('span', 'term-greenBanker', '行'), '上限'] :
+      part === '洞' || part === '柱' ? [element('span', part === '洞' ? 'term-red' : 'term-blue', part)] : [part]));
     return node;
   };
   const points = n => Number(n.toFixed(2)).toString();
@@ -330,8 +366,26 @@ function initUI() {
         }
       }
       card.append(stats);
+      const sequenceStats = element('p', 'length-stats sequence-length-stats', '長度統計：');
+      for (const [key, label, color] of [['hole', '洞', 'red'], ['pillar', '柱', 'blue']]) {
+        if (key === 'pillar') sequenceStats.append('｜');
+        sequenceStats.append(element('span', `term-${color}`, `${label} `));
+        const entries = Object.entries(road[`${key}Lengths`]);
+        if (!entries.length) sequenceStats.append('無 ');
+        for (const [length, count] of entries) {
+          sequenceStats.append(element('span', road[`${key}Caps`].enabled && count > generatedOptions[`${key}Max`]
+            ? 'length-violation' : '', `${length}欄×${count}次 `));
+        }
+      }
+      card.append(sequenceStats);
       card.append(setLengthCapText(element('p', road.lengthCaps.ok ? 'road-reasons' : 'length-violation'), !road.lengthCaps.enabled ? '同長度行上限：未啟用' :
         road.lengthCaps.ok ? '同長度行上限：全部合格' : `同長度行上限未通過（嘗試範圍內的最少違規備選）：${road.lengthCaps.violations.join('；')}`));
+      for (const [key, label] of [['hole', '洞'], ['pillar', '柱']]) {
+        const cap = road[`${key}Caps`];
+        card.append(setLengthCapText(element('p', cap.ok ? 'road-reasons' : 'length-violation'),
+          !cap.enabled ? `同長度${label}上限：不限` : cap.ok ? `同長度${label}上限：全部合格` :
+            `同長度${label}上限未通過（嘗試範圍內的最少違規備選）：${cap.violations.join('；')}`));
+      }
       for (const [key, label] of [['red', '洞'], ['blue', '柱'], ['greenBanker', '行莊'], ['greenPlayer', '行閒']]) {
         const section = element('div', `sequence ${key}`);
         const reasons = element('p', '');
@@ -348,7 +402,8 @@ function initUI() {
   function readOptions() {
     const data = new FormData(form), o = {};
     for (const key of Object.keys(DEFAULTS)) o[key] = typeof DEFAULTS[key] === 'boolean' ? data.has(key) :
-      key === 'prefix' || key === 'seed' ? data.get(key) : Number(data.get(key));
+      key === 'prefix' || key === 'seed' || ((key === 'holeMax' || key === 'pillarMax') && data.get(key) === '')
+        ? data.get(key) : Number(data.get(key));
     return normalizeOptions(o);
   }
   async function run(index = null) {
@@ -383,8 +438,8 @@ function initUI() {
         if (!accepted) throw new Error('無法找到前20局不同的路單，請減少條數或放寬條件。');
       }
       roads = next; generatedOptions = o; render(); progress.value = 1;
-      const failed = roads.filter(road => !road.lengthCaps.ok).length;
-      setLengthCapText(status, `已完成${roads.length}條${failed ? `，其中${failed}條未通過同長度行上限，請查看卡片違規內容` : ''}，可下載 JSON。`);
+      const failed = roads.filter(road => !road.lengthCaps.ok || !road.holeCaps.ok || !road.pillarCaps.ok).length;
+      setLengthCapText(status, `已完成${roads.length}條${failed ? `，其中${failed}條未通過長度上限，請查看卡片違規內容` : ''}，可下載 JSON。`);
     } catch (error) { setLengthCapText(status, `產生失敗：${error.message}`); }
     finally { setBusy(false); }
   }
@@ -400,4 +455,5 @@ if (typeof document !== 'undefined') {
   else initUI();
 }
 if (typeof module !== 'undefined') module.exports = { WEIGHTS, DEFAULTS, toRuns, getSequences, countColumnLengths, checkLengthCaps,
+  countHoleLengths, countPillarLengths, checkHoleCaps, checkPillarCaps,
   scoreSequence, scoreRoad, generateRoad, generateRoads, toImportJson, createRng };

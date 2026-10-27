@@ -20,8 +20,12 @@
           <label>長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" required></label>
           <label><span>單邊同長度<span class="term-greenBanker">行</span>上限</span><input name="perSideMax" type="number" min="0" max="1000" value="2" required></label>
           <label><span>莊閒合計同長度<span class="term-greenBanker">行</span>上限</span><input name="combinedMax" type="number" min="0" max="1000" value="3" required></label>
-          <label class="checkbox"><input name="includeSingles" type="checkbox"><span>單顆<span class="term-greenBanker">行</span>也算</span></label>
-          <label class="checkbox"><input name="enableLengthCaps" type="checkbox" checked><span>啟用同長度<span class="term-greenBanker">行</span>上限</span></label>
+          <label><span>同長度<span class="term-red">洞</span>上限</span><input name="holeMax" type="number" min="0" max="1000" placeholder="空白＝不限"></label>
+          <label><span>同長度<span class="term-blue">柱</span>上限</span><input name="pillarMax" type="number" min="0" max="1000" placeholder="空白＝不限"></label>
+          <div class="cap-toggles">
+            <label class="checkbox"><input name="includeSingles" type="checkbox"><span>單顆<span class="term-greenBanker">行</span>也算</span></label>
+            <label class="checkbox"><input name="enableLengthCaps" type="checkbox" checked><span>啟用同長度<span class="term-greenBanker">行</span>上限</span></label>
+          </div>
           <label>名稱前綴<input name="prefix" value="路單-AT" required></label>
           <label>起始編號<input name="startNumber" type="number" min="0" max="1000000" value="1" required></label>
           <label>每條嘗試次數<input name="attempts" type="number" min="1" max="100000" value="3000" required></label>
@@ -29,6 +33,7 @@
           <label class="seed">種子（選填）<input name="seed" placeholder="同設定、同種子可重現" autocomplete="off"></label>
         </div>
         <p class="hint"><span class="term-greenBanker">行</span>：每個兩顆以上欄的顆數，莊閒分開；<span class="term-red">洞</span>：連續單跳欄的欄數；<span class="term-blue">柱</span>：連續兩顆以上欄的欄數。</p>
+        <p class="hint"><span class="term-red">洞</span>、<span class="term-blue">柱</span>上限皆為整條路單同一長度的出現次數加總，莊閒混看，空白＝不限。</p>
         <div class="actions"><button type="submit">產生路單</button><span>只產生莊／閒，不含和局</span></div>
       </fieldset>
     </form>
