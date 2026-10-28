@@ -19,11 +19,11 @@ const state = {
   cols: 6,           // 珠盤路、大路的列數(高度)
 };
 
-// Hosted TV starts a fresh road; local editing and previews retain their records.
+// Hosted TV keeps rounds per tab: a new tab is blank, refreshing retains its road.
 const localRoadmap = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const hostedTV = !!document.querySelector('.tv-app') && !localRoadmap;
 const beadPreview = !!document.querySelector('.tv-app') && !hostedTV && new URLSearchParams(location.search).get('preview') === 'beads';
-const LS_KEY = beadPreview ? 'baccarat_beads_preview_v1' : 'baccarat_road_rounds_v1';
+const LS_KEY = hostedTV ? 'baccarat_tv_tab_rounds_v1' : beadPreview ? 'baccarat_beads_preview_v1' : 'baccarat_road_rounds_v1';
 const SAVED_ROADS_KEY = "at_baccarat_saved_roads_v1";
 
 function loadSavedRoadmaps() {
@@ -101,12 +101,16 @@ async function saveRoadmap() {
 
 // ---------- 持久化 ----------
 function saveState() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(state.rounds)); } catch (_) {}
+  try { (hostedTV ? sessionStorage : localStorage).setItem(LS_KEY, JSON.stringify(state.rounds)); } catch (_) {}
 }
 function loadState() {
-  if (hostedTV) { state.rounds = []; return; }
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    let raw = (hostedTV ? sessionStorage : localStorage).getItem(LS_KEY);
+    // Recover a road being entered in v10 when that existing tab first refreshes.
+    // A newly opened tab must never import legacy/sample rounds from another page.
+    if (hostedTV && raw === null && performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+      raw = localStorage.getItem('baccarat_road_rounds_v1');
+    }
     if (!raw) {
       if (beadPreview) state.rounds = [
         { r: 'B', l6: true }, { r: 'B', l6: true, tiger: 'small' },
