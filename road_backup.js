@@ -14,6 +14,10 @@
   }
   async function png(entry){
     if(typeof html2canvas!=='function')throw Error('截圖套件未載入，JSON仍可下載；請恢復網路後重試儲存。');
+    if(document.querySelector('.tv-app')){
+      if(!root.BaccaratTVExport)throw Error('TV 圖片模組未載入，請重新整理後再儲存。');
+      return root.BaccaratTVExport.png(entry);
+    }
     // Capture the complete board layout, then redraw its roads from the saved snapshot.
     const rounds=entry.rounds,big=buildBigRoad(rounds),source=document.querySelector('.app');
     const host=document.createElement('div'),view=source.cloneNode(true),boards=[];
@@ -85,7 +89,7 @@
   async function save(entry,{listSaved=true}={}){
     if(busy)return {ok:false,error:'saving'};busy=true;buttons();el('backupRetryBtn').hidden=true;
     const snapshot=JSON.parse(JSON.stringify(entry)),pack={snapshot,name:safeName(snapshot.name),json:new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'})},note=listSaved?'本機清單已儲存。':'本機清單寫入失敗。';pending=null;links(pack);status(note+' 正在產生完整路單 PNG…');
-    try{pack.receipt=receipt();const image=await png(snapshot);pack.png=image.blob;pack.image=image;links(pack);status(note+' 正在送出雲端備份…');return await upload(pack,note);}
+    try{pack.receipt=receipt();const image=await png(snapshot);pack.png=image.blob;pack.image=image;links(pack);if(document.querySelector('.tv-app'))el('backupPngLink').click();status(note+' 正在送出雲端備份…');return await upload(pack,note);}
     catch(error){status(note+' '+error.message+' JSON仍可下載；未確認雲端備份。');return {ok:false,error:error.message,pack};}
     finally{busy=false;buttons();}
   }

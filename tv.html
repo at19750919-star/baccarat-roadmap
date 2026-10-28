@@ -8,27 +8,57 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&amp;family=Cinzel:wght@500;700;900&amp;family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&amp;family=Noto+Serif+TC:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
-<link href="style.css?v=6" rel="stylesheet"/>
+<link href="style.css?v=8" rel="stylesheet"/>
 <link href="themes.css?v=1" rel="stylesheet"/>
 <script src="themes.js?v=1"></script>
-<link href="tv.css" rel="stylesheet"/></head>
+<link href="tv.css?v=25" rel="stylesheet"/>
+<link href="result-announcement.css?v=8" rel="stylesheet"/></head>
 <body>
 <div class="app tv-app">
-<header class="title-bar"><div class="tv-shortcuts"><div class="key-legend">
-<div class="key-row">
-<span><b>1</b>莊</span>
-<span><b>2</b>閒</span>
-<span><b>3</b>和</span>
-<span><b>4</b>莊對</span>
-<span><b>5</b>閒對</span>
-<span><b>6</b>幸運6</span>
-<span><b>⏎</b>確定</span>
-<span><b>7</b>退</span>
-<span>雙擊<b>7</b>金額</span>
-<span>雙擊<b>8</b>隱藏</span>
-<span>雙擊<b>9</b>清</span>
-<span><b>F</b>全螢幕</span>
+<header class="title-bar"><div class="tv-shortcuts">
+<div class="tv-table-board">
+  <div class="tv-board-brand">
+    <span class="tv-board-brand-icon">♠</span>
+    <span class="tv-board-title-en">VIP BACCARAT</span>
+    <span class="tv-board-divider">|</span>
+    <span class="tv-board-title-zh">尊榮百家樂</span>
+  </div>
+  <div class="tv-board-stats">
+    <div class="tv-board-item">
+      <span class="tv-board-label">桌號 TABLE</span>
+      <b class="tv-board-val">001</b>
+    </div>
+    <div class="tv-board-item">
+      <span class="tv-board-label">靴號 SHOE</span>
+      <b class="tv-board-val">01</b>
+    </div>
+    <div class="tv-board-item tv-board-round">
+      <span class="tv-board-label">局數 ROUND</span>
+      <b class="tv-board-val" id="tvTopRoundCount">0</b>
+    </div>
+  </div>
 </div>
+<div class="key-legend" hidden>
+<div class="key-row">
+<span>莊<b id="legendKeyB">1</b></span>
+<span>閒<b id="legendKeyP">2</b></span>
+<span>和<b id="legendKeyT">3</b></span>
+<span>莊對<b id="legendKeyBP">4</b></span>
+<span>閒對<b id="legendKeyPP">5</b></span>
+<span>幸運6<b id="legendKeyL6">6</b></span>
+<span>小老虎<b id="legendKeyST">66</b></span>
+<span>大老虎<b id="legendKeyBT">666</b></span>
+<span>小幸運7<b id="legendKeyL72">22</b></span>
+<span>大幸運7<b id="legendKeyL73">222</b></span>
+<span>超級幸運7<b id="legendKeyS7">2222~</b></span>
+<span>確定<b id="legendKeyConfirm">⏎</b></span>
+<span>退局<b id="legendKeyUndo">⌫</b></span>
+<span>金額<b id="legendKeyLimit">77</b></span>
+<span>隱藏<b id="legendKeyBoss">88</b></span>
+<span>清<b id="legendKeyClear">99</b></span>
+<span>全螢幕<b id="legendKeyFullscreen">F</b></span>
+</div>
+<div class="tv-lucky7-key-hint" role="status" aria-live="polite" hidden></div>
 </div><div class="title-controls tv-hidden" aria-hidden="true">
 <div class="action-buttons">
 <button class="btn action-btn btn-banker" data-action="B">莊</button>
@@ -44,15 +74,15 @@
 <button class="btn action-btn btn-clear" id="clearBtn">清</button>
 </div>
 </div></div><div class="panel limit-panel tv-limit">
-<div class="tv-limit-col tv-limit-keys"><span class="tv-limit-name"></span><span class="tv-limit-key">最高</span><span class="tv-limit-key">最低</span></div>
-<div class="tv-limit-col"><span class="tv-limit-name">莊&amp;閒</span><input aria-label="莊&閒最高" class="limit-input" data-k="bpMax" min="0" type="number" value="10000"/><input aria-label="莊&閒最低" class="limit-input" data-k="bpMin" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">和</span><input aria-label="和最高" class="limit-input" data-k="tMax" min="0" type="number" value="10000"/><input aria-label="和最低" class="limit-input" data-k="tMin" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">對子</span><input aria-label="對子最高" class="limit-input" data-k="pMax" min="0" type="number" value="10000"/><input aria-label="對子最低" class="limit-input" data-k="pMin" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">幸運6</span><input aria-label="幸運6最高" class="limit-input" data-k="l6Max" min="0" type="number" value="10000"/><input aria-label="幸運6最低" class="limit-input" data-k="l6Min" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">小老虎</span><input aria-label="小老虎最高" class="limit-input" data-k="stMax" min="0" type="number" value="10000"/><input aria-label="小老虎最低" class="limit-input" data-k="stMin" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">大老虎</span><input aria-label="大老虎最高" class="limit-input" data-k="btMax" min="0" type="number" value="10000"/><input aria-label="大老虎最低" class="limit-input" data-k="btMin" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">閒幸運7</span><input aria-label="閒幸運7最高" class="limit-input" data-k="l7Max" min="0" type="number" value="10000"/><input aria-label="閒幸運7最低" class="limit-input" data-k="l7Min" min="0" type="number" value="100"/></div>
-<div class="tv-limit-col"><span class="tv-limit-name">超級幸運7</span><input aria-label="超級幸運7最高" class="limit-input" data-k="s7Max" min="0" type="number" value="10000"/><input aria-label="超級幸運7最低" class="limit-input" data-k="s7Min" min="0" type="number" value="100"/></div>
+<div class="tv-limit-col tv-limit-keys"><span class="tv-limit-name"></span><span class="tv-limit-key tv-limit-key-high">最高</span><span class="tv-limit-key tv-limit-key-low">最低</span></div>
+<div class="tv-limit-col"><span class="tv-limit-name">莊&amp;閒</span><input aria-label="莊&閒最高" class="limit-input" data-k="bpMax" inputmode="numeric" type="text" value="1,500,000"/><input aria-label="莊&閒最低" class="limit-input" data-k="bpMin" inputmode="numeric" type="text" value="30,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">和</span><input aria-label="和最高" class="limit-input" data-k="tMax" inputmode="numeric" type="text" value="187,500"/><input aria-label="和最低" class="limit-input" data-k="tMin" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">對子</span><input aria-label="對子最高" class="limit-input" data-k="pMax" inputmode="numeric" type="text" value="65,000"/><input aria-label="對子最低" class="limit-input" data-k="pMin" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">幸運6</span><input aria-label="幸運6最高" class="limit-input" data-k="l6Max" inputmode="numeric" type="text" value="100,000"/><input aria-label="幸運6最低" class="limit-input" data-k="l6Min" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">小老虎</span><input aria-label="小老虎最高" class="limit-input" data-k="stMax" inputmode="numeric" type="text" value="40,000"/><input aria-label="小老虎最低" class="limit-input" data-k="stMin" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">大老虎</span><input aria-label="大老虎最高" class="limit-input" data-k="btMax" inputmode="numeric" type="text" value="40,000"/><input aria-label="大老虎最低" class="limit-input" data-k="btMin" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">閒幸運7</span><input aria-label="閒幸運7最高" class="limit-input" data-k="l7Max" inputmode="numeric" type="text" value="100,000"/><input aria-label="閒幸運7最低" class="limit-input" data-k="l7Min" inputmode="numeric" type="text" value="3,000"/></div>
+<div class="tv-limit-col"><span class="tv-limit-name">超級幸運7</span><input aria-label="超級幸運7最高" class="limit-input" data-k="s7Max" inputmode="numeric" type="text" value="40,000"/><input aria-label="超級幸運7最低" class="limit-input" data-k="s7Min" inputmode="numeric" type="text" value="3,000"/></div>
 </div><div class="tv-identity"><div class="tv-tools tv-hidden" aria-hidden="true"><div class="notice-icons">
 <!-- 音效:幾何喇叭 + 三層弧形聲波(點擊開關 TTS) -->
 <button aria-label="音效" class="deco-icon-btn" id="soundToggleBtn" title="音效">
@@ -232,39 +262,21 @@
 <circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
 </svg>
 </button>
-<!-- 儲存:Art Deco 軟碟造型 (儲存至共用清單並下載 .json 路單檔) -->
-<button aria-label="儲存路單" class="deco-icon-btn" id="saveBtn" title="儲存路單">
-<svg aria-hidden="true" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-<polygon fill="none" points="35,6 85,6 114,35 114,85 85,114 35,114 6,85 6,35" stroke="currentColor" stroke-width="1.6"></polygon>
-<polygon fill="none" opacity="0.55" points="38,14 82,14 106,38 106,82 82,106 38,106 14,82 14,38" stroke="currentColor" stroke-width="0.6"></polygon>
-<!-- 軟碟外框 (右上角切角) -->
-<path d="M 30 30 L 80 30 L 90 40 L 90 90 L 30 90 Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2.2"></path>
-<!-- 上方金屬滑片 -->
-<rect fill="currentColor" height="14" width="36" x="40" y="30"></rect>
-<!-- 滑片切口 -->
-<rect fill="#fafafa" height="6" width="4" x="62" y="34"></rect>
-<!-- 下方標籤(三條橫線) -->
-<rect fill="none" height="30" opacity="0.6" stroke="currentColor" stroke-width="0.9" width="44" x="38" y="56"></rect>
-<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="64" y2="64"></line>
-<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="72" y2="72"></line>
-<line opacity="0.5" stroke="currentColor" stroke-width="0.8" x1="42" x2="78" y1="80" y2="80"></line>
-<!-- 切角次層細線 (Art Deco 階梯感) -->
-<polyline fill="none" opacity="0.5" points="80,30 80,40 90,40" stroke="currentColor" stroke-width="0.7"></polyline>
-<circle cx="60" cy="6" fill="currentColor" r="1.6"></circle>
-<circle cx="60" cy="114" fill="currentColor" r="1.6"></circle>
-<circle cx="6" cy="60" fill="currentColor" r="1.6"></circle>
-<circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
-</svg>
-</button>
 </div><label class="theme-control" for="themeSelect">造型
             <select aria-label="路單造型" id="themeSelect">
 <option value="classic">經典紅金</option>
 <option value="black-gold">黑金</option>
 </select>
-</label></div><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo.png" width="130"/></div></header>
+</label></div><button type="button" class="tv-save-btn" id="saveBtn" title="下載 JSON、PNG 並備份至 OneDrive">儲存路單</button><button type="button" class="tv-logo-btn" id="tvSettingsButton" aria-label="路單設定" aria-haspopup="dialog" aria-controls="tvSettings" title="路單設定"><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo-transparent.png" width="130"/></button></div></header>
 <!-- 大路 (full width on top) -->
 <section class="panel big-panel">
 <div class="grid-board big-road" data-label="大路" id="bigRoad"></div>
+<button type="button" id="dragonCornerBadge" class="dragon-corner-badge" hidden title="點擊重播長龍特效">
+<span class="dragon-badge-icon" aria-hidden="true"></span>
+<span class="dragon-badge-label" id="dragonBadgeLabel">莊長龍</span>
+<b class="dragon-badge-count" id="dragonBadgeCount">7</b>
+<span class="dragon-badge-unit">連勝</span>
+</button>
 </section>
 <!-- 中間:左(大眼仔/小路) | 右(甲由路/公告欄) -->
 <section class="mid-row tv-road-row"><div class="panel derived-panel">
@@ -278,20 +290,20 @@
 <section class="bottom-row">
 <div class="panel stats-panel tv-stats">
 <div class="tv-stat-head tv-stat-table">桌號：<b>001</b></div>
-<div class="tv-stat-head">靴號：<b>1</b></div><div class="tv-stat-head">局數：<b id="totalCount">0</b></div>
+<div class="tv-stat-head">局數：<b id="totalCount">0</b></div>
 <ul class="stats-list">
 <li class="stat-banker"><span class="k">莊贏</span><b id="cntB">0</b></li>
 <li class="stat-tie"><span class="k">和局</span><b id="cntT">0</b></li>
 <li class="stat-player"><span class="k">閒贏</span><b id="cntP">0</b></li>
-<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×4</small></span><b id="cntS74">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×4</small></span></span><b id="cntS74">0</b></li>
 <li class="stat-lucky6"><span class="k">幸運6</span><b id="cntL6">0</b></li>
 <li class="stat-banker-pair"><span class="k">莊對</span><b id="cntBP">0</b></li>
-<li class="tv-stat-blue"><span class="k">幸運7<small>×2</small></span><b id="cntL72">0</b></li>
-<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×5</small></span><b id="cntS75">0</b></li>
+<li class="tv-stat-blue tv-lucky7"><span class="k">幸運7<small>×2</small></span><b id="cntL72">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×5</small></span></span><b id="cntS75">0</b></li>
 <li class="stat-lucky6"><span class="k">幸運6<br>小老虎</span><b id="cntST">0</b></li>
 <li class="stat-player-pair"><span class="k">閒對</span><b id="cntPP">0</b></li>
-<li class="tv-stat-blue"><span class="k">幸運7<small>×3</small></span><b id="cntL73">0</b></li>
-<li class="tv-stat-blue"><span class="k">超級<br>幸運</span><span class="k tv-k-num">7<small>×6</small></span><b id="cntS76">0</b></li>
+<li class="tv-stat-blue tv-lucky7"><span class="k">幸運7<small>×3</small></span><b id="cntL73">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×6</small></span></span><b id="cntS76">0</b></li>
 <li class="stat-lucky6"><span class="k">幸運6<br>大老虎</span><b id="cntBT">0</b></li>
 <li class="tv-stat-empty"></li>
 <li class="tv-stat-empty"></li>
@@ -323,12 +335,132 @@
 </div>
 </div>
 </section>
+<dialog id="tvSettings" class="tv-settings" aria-labelledby="tvSettingsTitle">
+<form method="dialog" id="tvSettingsForm" novalidate>
+<header class="tv-settings-header"><h2 id="tvSettingsTitle">路單設定</h2><span class="tv-drag-hint">拖曳移動 ｜ 邊緣縮放</span><button type="button" id="tvSettingsSizeToggle" class="tv-settings-size-btn" title="切換大視窗/標準視窗" aria-label="切換視窗尺寸">⛶</button><button type="button" id="tvSettingsClose" aria-label="關閉設定">×</button></header>
+<div class="tv-settings-tabs" role="tablist" aria-label="設定分類">
+<button type="button" id="tvTabBasic" role="tab" data-settings-tab="basic" aria-controls="tvBasicPanel" aria-selected="true">基本設定</button>
+<button type="button" id="tvTabKeys" role="tab" data-settings-tab="keys" aria-controls="tvKeysPanel" aria-selected="false" tabindex="-1">按鍵設定</button>
+<button type="button" id="tvTabScreen" role="tab" data-settings-tab="0" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">畫面顏色</button>
+<button type="button" id="tvTabRoad" role="tab" data-settings-tab="1" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">路單顏色</button>
+<button type="button" id="tvTabStatsFont" role="tab" data-settings-tab="statsFont" aria-controls="tvStatsFontPanel" aria-selected="false" tabindex="-1">統計字級</button>
+<button type="button" id="tvTabStats" role="tab" data-settings-tab="2" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">統計顏色</button>
+<button type="button" id="tvTabSymbols" role="tab" data-settings-tab="symbols" aria-controls="tvSymbolsPanel" aria-selected="false" tabindex="-1">符號調整</button>
+</div>
+<p class="tv-live-hint">調整即時預覽，按「儲存」保留。</p>
+<div class="tv-settings-content">
+<section id="tvBasicPanel" role="tabpanel" aria-labelledby="tvTabBasic">
+<div class="tv-size-settings">
+<label for="tvBigColumns">大路欄數 <span><input id="tvBigColumns" name="columns" type="number" min="38" max="48" step="1" required/> 欄</span></label>
+<label for="tvDragonThreshold">長龍起算 <span><input id="tvDragonThreshold" name="dragonThreshold" type="number" min="2" max="100" step="1" required/> 局</span></label>
+<label for="tvBigStroke">大路筆畫 <span><input id="tvBigStroke" name="bigStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
+<label for="tvEyeStroke">大眼仔筆畫 <span><input id="tvEyeStroke" name="eyeStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
+<label for="tvCockroachStroke">蟑螂路筆畫 <span><input id="tvCockroachStroke" name="cockroachStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
+<label for="tvStarStroke">三星路筆畫 <span><input id="tvStarStroke" name="starStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
+</div>
+<div class="tv-settings-help"><p>欄數 38～48 欄，筆畫 1～10 px。</p><p>長龍達到設定局數時亮起，再多一局播放全螢幕特效；和局不中斷連勝。</p></div>
+</section>
+<section id="tvStatsFontPanel" role="tabpanel" aria-labelledby="tvTabStatsFont" hidden>
+<div class="tv-stats-font-preview-wrap"><p>即時預覽・與畫面上的統計資料同步</p><div id="tvStatsFontPreview" class="tv-stats-font-preview tv-app" role="img" aria-label="統計區即時預覽"></div></div>
+<div class="tv-stats-font-controls">
+<label class="tv-stats-font-control" for="tvStatsNameSize"><span>名稱大小</span><input id="tvStatsNameSize" type="range" min="16" max="48" step="1" data-stats-font="statsNameSize"/><input id="tvStatsNameSizeValue" name="statsNameSize" type="number" min="16" max="48" step="1" aria-label="名稱大小數值" required/><span>px</span></label>
+<label class="tv-stats-font-control" for="tvStatsNumberSize"><span>數字大小</span><input id="tvStatsNumberSize" type="range" min="18" max="40" step="1" data-stats-font="statsNumberSize"/><input id="tvStatsNumberSizeValue" name="statsNumberSize" type="number" min="18" max="40" step="1" aria-label="數字大小數值" required/><span>px</span></label>
+<label class="tv-stats-font-control" for="tvStatsHeaderSize"><span>標頭文字</span><input id="tvStatsHeaderSize" type="range" min="16" max="36" step="1" data-stats-font="statsHeaderSize"/><input id="tvStatsHeaderSizeValue" name="statsHeaderSize" type="number" min="16" max="36" step="1" aria-label="標頭文字大小數值" required/><span>px</span></label>
+</div>
+<div class="tv-settings-help"><p>名稱大小是字級上限；長名稱會自動縮小，避免擠到數字。「恢復預設」只還原統計字級。</p></div>
+</section>
+<section id="tvKeysPanel" role="tabpanel" aria-labelledby="tvTabKeys" hidden>
+<div class="tv-keys-settings">
+  <div class="tv-keys-subgroup">
+    <h3 class="tv-keys-subhead">⌨️ 按鍵綁定（標籤在前，數字在後）</h3>
+    <div class="tv-keys-grid">
+      <label class="tv-key-bind-row"><span>莊贏</span><input id="tvKeyB" name="keyB" maxlength="1" value="1" required/></label>
+      <label class="tv-key-bind-row"><span>閒贏</span><input id="tvKeyP" name="keyP" maxlength="1" value="2" required/></label>
+      <label class="tv-key-bind-row"><span>和局</span><input id="tvKeyT" name="keyT" maxlength="1" value="3" required/></label>
+      <label class="tv-key-bind-row"><span>幸運6</span><input id="tvKeyL6" name="keyL6" maxlength="1" value="6" required/></label>
+      <label class="tv-key-bind-row"><span>莊對</span><input id="tvKeyBP" name="keyBP" maxlength="1" value="4" required/></label>
+      <label class="tv-key-bind-row"><span>閒對</span><input id="tvKeyPP" name="keyPP" maxlength="1" value="5" required/></label>
+      <label class="tv-key-bind-row"><span>老虎連按</span><input id="tvKeyTiger" name="keyTiger" maxlength="1" value="6" required/></label>
+      <label class="tv-key-bind-row"><span>幸運七連按</span><input id="tvKeySeven" name="keySeven" maxlength="1" value="2" required/></label>
+    </div>
+  </div>
+
+  <div class="tv-keys-subgroup">
+    <h3 class="tv-keys-subhead">🛠️ 系統與輔助功能鍵（標籤在前，數字／鍵在後）</h3>
+    <div class="tv-keys-grid">
+      <label class="tv-key-bind-row"><span>確定送出</span><input id="tvKeyConfirm" name="keyConfirm" maxlength="10" value="Enter" required/></label>
+      <label class="tv-key-bind-row"><span>退回上局</span><input id="tvKeyUndo" name="keyUndo" maxlength="10" value="Backspace" required/></label>
+      <label class="tv-key-bind-row"><span>設定金額</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="7" required/></label>
+      <label class="tv-key-bind-row"><span>隱藏頁面</span><input id="tvKeyBoss" name="keyBoss" maxlength="5" value="8" required/></label>
+      <label class="tv-key-bind-row"><span>清空路單</span><input id="tvKeyClear" name="keyClear" maxlength="5" value="9" required/></label>
+      <label class="tv-key-bind-row"><span>全螢幕</span><input id="tvKeyFullscreen" name="keyFullscreen" maxlength="5" value="F" required/></label>
+    </div>
+  </div>
+
+  <div class="tv-keys-subgroup">
+    <h3 class="tv-keys-subhead">⏱️ 操作模式設定</h3>
+    <label class="tv-check-row"><span>免按 ENTER 自動開獎</span><input id="tvAutoCommit" name="autoCommit" type="checkbox" checked/></label>
+    <label class="tv-key-bind-row"><span>連按停頓等待時間</span><span><input id="tvAutoCommitDelay" name="autoCommitDelay" type="number" min="0.2" max="0.8" step="0.01" value="0.38"/> 秒</span></label>
+  </div>
+
+  <div class="tv-keys-subgroup">
+    <h3 class="tv-keys-subhead">🔊 語音播報設定</h3>
+    <label class="tv-check-row"><span>語音播報開關</span><input id="tvSoundEnabled" name="soundEnabled" type="checkbox" checked/></label>
+    <label class="tv-key-bind-row"><span>語音音量大小</span><span class="tv-vol-wrap"><input id="tvSoundVolume" name="soundVolume" type="range" min="10" max="100" step="5" value="100"/><b id="tvSoundVolumeText">100%</b></span></label>
+    <div class="tv-audition-row">
+      <span class="tv-audition-title">快速試聽語音：</span>
+      <div class="tv-audition-btns">
+        <button type="button" class="tv-mini-audio-btn" data-audio="b_win">莊贏</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="p_win">閒贏</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="tie">和局</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="small_tiger">小老虎</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="big_tiger">大老虎</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="l7_small">小Lucky7</button>
+        <button type="button" class="tv-mini-audio-btn" data-audio="s7_4">4張超級7</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tv-settings-help">
+    <p>小老虎：連按 2 次幸運6鍵 ｜ 大老虎：連按 3 次幸運6鍵</p>
+    <p>幸運七：連按 2～6 次閒贏鍵 ｜ 退局：Backspace ⌫</p>
+  </div>
+</div>
+</section>
+<section id="tvSymbolsPanel" role="tabpanel" aria-labelledby="tvTabSymbols" hidden></section>
+<section id="tvColorPanel" role="tabpanel" aria-labelledby="tvTabScreen" hidden>
+<div class="tv-target-row"><span id="tvTargetLabel">調整項目</span><div class="tv-target-picker"><button type="button" id="tvColorTarget" role="combobox" aria-labelledby="tvTargetLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="tvColorOptions"><span></span><span aria-hidden="true">▾</span></button><div id="tvColorOptions" class="tv-target-menu" role="listbox" aria-labelledby="tvTargetLabel" hidden></div></div><button type="button" id="tvColorReset" title="只還原目前選取項目的顏色">還原此項</button></div>
+<div class="tv-color-workspace"><div id="tvColorSettings" class="tv-color-settings"></div><div id="tvColorEditorHost"></div></div>
+</section>
+</div>
+<p id="tvSettingsStatus" role="status" hidden></p>
+<footer class="tv-settings-actions"><button type="button" id="tvSettingsReset">恢復預設</button><button type="button" id="tvColorsReset" hidden>全部還原</button><span class="tv-settings-spacer"></span><button type="button" id="tvSettingsCancel">取消</button><button type="submit">儲存</button></footer>
+</form>
+<div class="tv-resizer tv-resizer-left" data-dir="w" title="拖曳調整寬度"></div>
+<div class="tv-resizer tv-resizer-right" data-dir="e" title="拖曳調整寬度"></div>
+<div class="tv-resizer tv-resizer-bottom" data-dir="s" title="拖曳調整高度"></div>
+<div class="tv-resizer tv-resizer-bottom-left" data-dir="sw" title="拖曳調整大小"></div>
+<div class="tv-resizer tv-resizer-bottom-right" data-dir="se" id="tvSettingsResizer" title="拖曳縮放視窗大小"></div>
+</dialog>
 </div>
 <!-- 巨龍特效層 -->
-<div class="dragon-overlay" id="dragonOverlay">
-<img alt="Banker Dragon" class="golden-dragon-img dragon-banker-img" src="dragon_gold.apng"/>
-<img alt="Player Dragon" class="golden-dragon-img dragon-player-img" src="dragon_blue.apng"/>
+<div class="dragon-overlay" id="dragonOverlay" aria-hidden="true">
+<canvas id="dragonFxCanvas" class="dragon-fx-canvas"></canvas>
+<video class="dragon-video" id="dragonVideo" muted playsinline preload="auto" src="特效/dragon-long-v2.webm" data-player-src="特效/dragon-long-v2.webm" data-banker-src="特效/dragon-long-banker.webm"></video>
+<div class="dragon-stage">
+<div class="dragon-aura-ring"></div>
+<div class="dragon-magic-circle"></div>
+<img alt="Banker Dragon" class="golden-dragon-img dragon-banker-img" src="assets/dragon_banker.png"/>
+<img alt="Player Dragon" class="golden-dragon-img dragon-player-img" src="assets/dragon_player.png"/>
+<div class="dragon-banner" id="dragonBanner">
+<div class="dragon-title" id="dragonTitle">莊家・赤金炎龍</div>
+<div class="dragon-combo-wrap">
 <div class="dragon-combo" id="dragonCombo"></div>
+<span class="dragon-combo-unit">連勝</span>
+</div>
+<div class="dragon-subtitle" id="dragonSubtitle">BANKER DRAGON STREAK</div>
+</div>
+</div>
 </div>
 <!-- 老闆鍵:模仿 Windows 桌面 (雙擊 Numpad 8 切換) -->
 <div aria-hidden="true" class="boss-screen" id="bossScreen">
@@ -355,8 +487,12 @@
 <button hidden="" id="backupRetryBtn" type="button">重試雲端備份</button>
 <button aria-label="關閉儲存結果" id="backupCloseBtn" type="button">關閉</button>
 </aside>
-<script src="road_backup.js?v=6"></script>
-<script src="app.js?v=4"></script>
-<script src="tv.js"></script>
+<script src="tv-export.js?v=2"></script>
+<script src="road_backup.js?v=7"></script>
+<script src="app.js?v=9"></script>
+<script src="tv-caption-settings.js?v=2"></script>
+<script src="tv-symbol-settings.js?v=6"></script>
+<script src="tv.js?v=13"></script>
+<script src="result-announcement.js?v=4"></script>
 </body>
 </html>

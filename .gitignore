@@ -11,3 +11,14 @@
 *.png
 # 頁面使用的圖片資源不排除
 !dragon_transparent.png
+!assets/beads/cat-v2.png
+!assets/beads/tiger-v2.png
+!assets/beads/tiger-v3.png
+!assets/beads/tiger-v4.png
+!assets/dragons/banker-gold-red-v1.png
+!assets/dragons/player-sapphire-blue-v1.png
+!tv-at-logo-transparent.png
+!assets/dragon_banker.png
+!assets/dragon_player.png
+!assets/beads/blue-seven.png
+!assets/beads/purple-seven.png

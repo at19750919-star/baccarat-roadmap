@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=8">
 <link rel="stylesheet" href="themes.css?v=1">
 <script src="themes.js?v=1"></script>
 </head>
@@ -41,6 +41,12 @@
     <!-- 大路 (full width on top) -->
     <section class="panel big-panel">
       <div id="bigRoad" class="grid-board big-road" data-label="大路"></div>
+      <button type="button" id="dragonCornerBadge" class="dragon-corner-badge" hidden title="點擊重播長龍特效">
+        <span class="dragon-badge-icon" aria-hidden="true"></span>
+        <span class="dragon-badge-label" id="dragonBadgeLabel">莊長龍</span>
+        <b class="dragon-badge-count" id="dragonBadgeCount">7</b>
+        <span class="dragon-badge-unit">連勝</span>
+      </button>
     </section>
 
     <!-- 中間:左(大眼仔/小路) | 右(甲由路/公告欄) -->
@@ -369,10 +375,26 @@
   </div>
 
   <!-- 巨龍特效層 -->
-  <div id="dragonOverlay" class="dragon-overlay">
-    <img src="dragon_gold.apng" class="golden-dragon-img dragon-banker-img" alt="Banker Dragon">
-    <img src="dragon_blue.apng" class="golden-dragon-img dragon-player-img" alt="Player Dragon">
-    <div id="dragonCombo" class="dragon-combo"></div>
+  <div id="dragonOverlay" class="dragon-overlay" aria-hidden="true">
+    <canvas id="dragonFxCanvas" class="dragon-fx-canvas"></canvas>
+    <div class="dragon-stage">
+      <div class="dragon-aura-ring"></div>
+      <div class="dragon-magic-circle"></div>
+      <img src="assets/dragon_banker.png" class="golden-dragon-img dragon-banker-img" alt="Banker Dragon">
+      <img src="assets/dragon_player.png" class="golden-dragon-img dragon-player-img" alt="Player Dragon">
+      <div class="dragon-banner" id="dragonBanner">
+        <div class="dragon-title" id="dragonTitle">莊家・赤金炎龍</div>
+        <div class="dragon-combo-wrap">
+
+          <div id="dragonCombo" class="dragon-combo"></div>
+          <span class="dragon-combo-unit">連勝</span>
+        </div>
+        <div class="dragon-subtitle" id="dragonSubtitle">BANKER DRAGON STREAK</div>
+      </div>
+    </div>
+
+
+
   </div>
 
   <!-- 老闆鍵:模仿 Windows 桌面 (雙擊 Numpad 8 切換) -->
@@ -401,7 +423,7 @@
     <button type="button" id="backupRetryBtn" hidden>重試雲端備份</button>
     <button type="button" id="backupCloseBtn" aria-label="關閉儲存結果">關閉</button>
   </aside>
-  <script src="road_backup.js?v=6"></script>
-  <script src="app.js?v=4"></script>
+  <script src="road_backup.js?v=7"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
