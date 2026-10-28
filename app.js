@@ -19,8 +19,10 @@ const state = {
   cols: 6,           // 珠盤路、大路的列數(高度)
 };
 
-// Sample preview has independent storage; live records are never replaced.
-const beadPreview = !!document.querySelector('.tv-app') && new URLSearchParams(location.search).get('preview') === 'beads';
+// Hosted TV starts a fresh road; local editing and previews retain their records.
+const localRoadmap = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+const hostedTV = !!document.querySelector('.tv-app') && !localRoadmap;
+const beadPreview = !!document.querySelector('.tv-app') && !hostedTV && new URLSearchParams(location.search).get('preview') === 'beads';
 const LS_KEY = beadPreview ? 'baccarat_beads_preview_v1' : 'baccarat_road_rounds_v1';
 const SAVED_ROADS_KEY = "at_baccarat_saved_roads_v1";
 
@@ -102,6 +104,7 @@ function saveState() {
   try { localStorage.setItem(LS_KEY, JSON.stringify(state.rounds)); } catch (_) {}
 }
 function loadState() {
+  if (hostedTV) { state.rounds = []; return; }
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) {
