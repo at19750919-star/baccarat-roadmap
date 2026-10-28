@@ -1,0 +1,21 @@
+{
+  "created": "2026-10-29",
+  "generator": "Grok Build CLI 1.0.46 / native reference_to_video",
+  "generation_calls": 1,
+  "requested_duration_seconds": 8,
+  "original_duration_seconds": 8.041667,
+  "final_duration_seconds": 8,
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "source_image": "banker-gold-red-realistic-v5-ear-body-jewels.png",
+  "reference_mode": "images reference; no pinned first_frame",
+  "motion": "金紅珠寶東方龍由右上遠處飛近，龍身彎曲、鬃毛與爪子活動，再向左前方掠過",
+  "background_key": "0xE41292",
+  "alpha_video": "banker-gold-red-grok-8s-v1.webm",
+  "alpha_format": "VP9 with alpha; 1280x720; 24fps; no audio; 8.000 seconds",
+  "preview_video": "banker-gold-red-grok-8s-preview-v1.mp4",
+  "preview_format": "H264 yuv420p; synthetic roadmap background; no audio; 8.000 seconds",
+  "processing": "RGB colorkey similarity 0.14, blend 0.03; 0.12s fade-in; 0.35s fade-out ending at 8s",
+  "status": "AI生成與透明WebM已完成，供預覽；尚未替換正式莊長龍特效"
+}
