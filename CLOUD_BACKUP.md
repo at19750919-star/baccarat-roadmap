@@ -10,9 +10,9 @@
 
 實測發現舊後端只接受每局 `r/bp/pp/l6`，會以 `invalid_schema` 拒收已帶有 `l7/s7/tiger` 的新版 JSON。既有 GAS 收件網址已更新到 v17，新增三個可選欄位的嚴格型別檢查；原四欄格式、統計一致性、PNG 驗證及收件限制保留。`backend/road_entry.gs` 是替換既有 `roadEntry_` 的來源快照，需連同 `roadRound_` 使用，不可保留兩個同名函式。
 
-已從使用者的 `http://127.0.0.1:8082/roadmap/tv.html` 在隔離瀏覽器以20局特殊符號資料實際上傳；POST 與同收件碼查詢均確認 OneDrive 收齊 JSON＋PNG。這次未逐位元讀回雲端檔案；本機下載內容與送出內容一致另有模擬整合測試。184局完整六路、快照期間繼續輸入、失敗保留下載與原收件碼重試、一般版圖片輸出及原 OneDrive 7組回歸通過。證據保留於本機忽略目錄 `.preview/tv-save`。
+已從使用者的 `http://127.0.0.1:8082/roadmap/tv.html` 在隔離瀏覽器以20局特殊符號資料實際上傳；POST 與同收件碼查詢均確認 OneDrive 收齊 JSON＋PNG。這次未逐位元讀回雲端檔案；正式 Pages 驗證的本機 JSON／PNG 下載內容與實際送出內容一致。184局完整六路、快照期間繼續輸入、失敗保留下載與原收件碼重試、一般版圖片輸出及原 OneDrive 7組回歸通過。證據保留於本機忽略目錄 `.preview/tv-save`。
 
-使用者指定部署版只顯示「基本設定」「按鍵設定」兩個分頁。`tv.js` 在一般網站網址採用此限制；`file:`、`localhost`、`127.0.0.1`、`[::1]` 保留完整七個分頁。鍵盤切換略過隱藏分頁，部署版不接受直接開啟統計字級的網址參數。這是介面顯示選擇，不是登入權限。已用模擬 GitHub Pages 網址驗證；本次尚未發布 GitHub Pages。
+使用者指定部署版只顯示「基本設定」「按鍵設定」兩個分頁。`tv.js` 在一般網站網址採用此限制；`file:`、`localhost`、`127.0.0.1`、`[::1]` 保留完整七個分頁。鍵盤切換略過隱藏分頁，部署版不接受直接開啟統計字級的網址參數。這是介面顯示選擇，不是登入權限。2026-10-29 已發布至 GitHub Pages，正式入口為 https://at19750919-star.github.io/baccarat-roadmap/tv.html 。已在正式網址確認只顯示這兩個分頁，並驗證設定儲存重開、輸入／退局、圖片與語音資源、JSON＋PNG下載及 OneDrive 收齊。
 
 驗證：`python tests/tv-save.py`（模擬雲端，實際產生PNG）、`TV_REAL_CLOUD=1 python tests/tv-save.py`（實際建立一筆雲端備份）、`python tests/tv-deployment.py`、`node tests/tv-backup-schema.cjs`。正式驗證需本機8082服務及 `.preview/html2canvas.min.js` 測試快取；不要把私人授權帶入專案。
 
@@ -60,3 +60,7 @@
 Google Drive 原先寫檔失敗已取得原始 `403 userRateLimitExceeded`；容量充足，空檔可建立，但內容上傳被拒。尚無證據能指定限制種類或恢復時間，因此改用 OneDrive。原 Excel 列表與下載實測正常，Excel 上傳程式未更動且模擬測試通過；Google 真實上傳限制未因此解除。
 
 本機後端來源、診斷及測試證據保留在業主電腦的 `Documents/Codex/2026-10-23/road-cloud-takeover`。其中 `.private` 為私人授權，不可公開。Google 授權／Apps Script 及 Microsoft OneDrive 必須持續有效；業主電腦無須開機。
+
+## TV 正式發布驗證（2026-10-29）
+
+發布來源版本 `8748bdd`（`main`／根目錄，沿用既有 Pages 設定）。正式網址回200；線上設定僅兩分頁、儲存重開與輸入退局通過。9張頁面圖片成功解碼，14項程式／樣式／圖片／語音資源與本機檔案雜湊一致，兩段長龍影片可讀取。隔離瀏覽器以20局測試資料實際取得 JSON＋PNG 下載並送往 OneDrive，後端確認收齊，無頁面程式錯誤。驗證憑據保留在本機忽略目錄 `.preview/deploy-tv/result.json`；未公開收件碼或私人授權。未提交的亂路修改與未使用的素材保留在本機。
