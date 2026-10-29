@@ -412,6 +412,8 @@ function getDragonThreshold() {
 const DragonFx = (() => {
   const SHOWCASE_MS = 2800;
   const FADEOUT_MS = 550;
+  // 電視版龍分三段放大（2.4 秒），停留時間拉長讓最大那段看得到
+  const showcaseMs = () => (document.querySelector('.tv-app') ? 4000 : SHOWCASE_MS);
   let lastColor = null;
   let lastLen = 0;
   let hideTimer = null;
@@ -717,11 +719,11 @@ const DragonFx = (() => {
       video.onended = fadeOut;
       video.currentTime = 0;
       const playing = video.play();
-      if (playing) playing.catch(() => { hideTimer = setTimeout(fadeOut, SHOWCASE_MS); });
+      if (playing) playing.catch(() => { hideTimer = setTimeout(fadeOut, showcaseMs()); });
       return;
     }
     startCanvasLoop();
-    hideTimer = setTimeout(fadeOut, SHOWCASE_MS);
+    hideTimer = setTimeout(fadeOut, showcaseMs());
   }
 
   function update(dragonColor, dragonLen) {

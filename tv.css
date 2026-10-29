@@ -845,6 +845,25 @@ html.tv-color-statText .tv-app .tv-stat-head { color: var(--tv-color-statText) !
 .dragon-overlay:has(.dragon-video) .dragon-magic-circle,
 .dragon-overlay:has(.dragon-video) .golden-dragon-img { display: none; }
 
+/* 電視版巨龍分三段登場：小 → 中 → 大，每段停一下再放大 */
+.dragon-overlay.active.banker-dragon-overlay .dragon-banker-img,
+.dragon-overlay.active.player-dragon-overlay .dragon-player-img,
+.dragon-overlay.active.hit.banker-dragon-overlay .dragon-banker-img,
+.dragon-overlay.active.hit.player-dragon-overlay .dragon-player-img {
+  animation:
+    tv-dragon-three-step 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    dragon-living-float 3.2s ease-in-out infinite 2.4s;
+}
+@keyframes tv-dragon-three-step {
+  0%   { transform: scale(0.1);  opacity: 0; filter: brightness(2); }
+  9%   { transform: scale(0.42); opacity: 1; filter: brightness(1.4); }
+  30%  { transform: scale(0.4);  opacity: 1; filter: brightness(1.08); }
+  39%  { transform: scale(0.74); filter: brightness(1.4); }
+  60%  { transform: scale(0.7);  filter: brightness(1.08); }
+  69%  { transform: scale(1.04); filter: brightness(1.4); }
+  80%, 100% { transform: scale(1); opacity: 1; filter: brightness(1.08); }
+}
+
 /* Larger, readable type throughout the settings overlay. */
 .tv-settings { font-size: 18px; }
 .tv-settings h2 { font-size: 24px; }
