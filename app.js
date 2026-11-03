@@ -23,7 +23,9 @@ const state = {
 const localRoadmap = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const hostedTV = !!document.querySelector('.tv-app') && !localRoadmap;
 const beadPreview = !!document.querySelector('.tv-app') && !hostedTV && new URLSearchParams(location.search).get('preview') === 'beads';
-const LS_KEY = hostedTV ? 'baccarat_tv_tab_rounds_v1' : beadPreview ? 'baccarat_beads_preview_v1' : 'baccarat_road_rounds_v1';
+// The local dragon control page uses a separate road, never the live road key.
+const dragonPreview = !!document.querySelector('.tv-app') && localRoadmap && new URLSearchParams(location.search).get('preview') === 'dragon';
+const LS_KEY = hostedTV ? 'baccarat_tv_tab_rounds_v1' : dragonPreview ? 'baccarat_dragon_preview_v1' : beadPreview ? 'baccarat_beads_preview_v1' : 'baccarat_road_rounds_v1';
 const SAVED_ROADS_KEY = "at_baccarat_saved_roads_v1";
 
 function loadSavedRoadmaps() {
@@ -252,7 +254,8 @@ function hasAt(grid, col, row) {
 
 // ---------- 衍生路演算法 ----------
 // 傳入大路 grid(6 列 × N 欄)與 offset(大眼仔=1, 小路=2, 甲由路=3)
-// 對每一個「從 col = offset + 1 起,且該欄存在」的非和局主格子,
+// 從 col = offset 的第二格開始；若該欄僅一格，從下一欄第一格開始。
+// 對每一個到達起點且存在的非和局主格子,
 // 我們要判斷它是「紅」還是「藍」:
 //   - 當該格位於「新一欄」的開頭(row === 0,或前一列同欄是空):比較 col-offset 欄與 col-offset-1 欄的高度
 //     相等 → 紅;不等 → 藍
@@ -262,19 +265,19 @@ function hasAt(grid, col, row) {
 // 這是通用「大眼仔」式判斷,大眼仔 offset=1、小路 offset=2、甲由路 offset=3。
 
 function buildDerivedRoad(bigGrid, offset, bigCols, bigRows) {
-  // 收集「判斷點」順序:從大路遍歷,遇到 col >= offset+1 的格子才產出一筆
+  // 收集「判斷點」順序:跳過起點欄之前及起點欄第一格
   // 遍歷順序:逐欄(左到右),每欄逐列(上到下),這樣衍生路的排列順序與大路對應
   const marks = []; // 'R' | 'B'(這裡的 R/B 指紅/藍,不是莊/閒)
   for (let col = 0; col < bigCols; col++) {
     for (let row = 0; row < bigRows; row++) {
       if (!hasAt(bigGrid, col, row)) break; // 該欄到底
-      if (col < offset + 1) continue; // 還沒到判斷起點
+      if (col < offset || (col === offset && row === 0)) continue; // 還沒到判斷起點
       let mark;
       // 判斷「此格是否為該欄的第一格」:row === 0 → 新欄開頭
       if (row === 0) {
-        // 比較兩欄高度
-        const hL1 = columnHeight(bigGrid, col - offset - 1, bigRows);
-        const hL2 = columnHeight(bigGrid, col - offset, bigRows);
+        // 比較前一欄與其左方 offset 欄的高度
+        const hL1 = columnHeight(bigGrid, col - 1, bigRows);
+        const hL2 = columnHeight(bigGrid, col - offset - 1, bigRows);
         mark = (hL1 === hL2) ? 'R' : 'B';
       } else {
         // 延續:檢查「左 offset 欄、同 row」與「左 offset 欄、row-1」是否兩格都有/都沒有
@@ -654,9 +657,12 @@ const DragonFx = (() => {
     if (!overlay || !overlay.classList.contains('active')) return;
     overlay.classList.add('fading-out');
     overlay.classList.remove('active', 'hit');
+    // Freeze the last video frame during the existing 550ms exit, but cancel its callbacks.
+    window.BaccaratDragonVideo?.stop(true);
     clearTimeout(cleanupTimer);
     cleanupTimer = setTimeout(() => {
       overlay.classList.remove('fading-out', 'player-dragon-overlay', 'banker-dragon-overlay');
+      window.BaccaratDragonVideo?.stop();
       const video = document.getElementById('dragonVideo');
       if (video) video.pause();
       if (rafId) {
@@ -676,6 +682,8 @@ const DragonFx = (() => {
 
     clearTimeout(hideTimer);
     clearTimeout(cleanupTimer);
+    // Retire the previous playback before applying the next side's classes.
+    window.BaccaratDragonVideo?.stop();
     activeColor = color;
     activeLen = len;
     startAt = performance.now();
@@ -711,18 +719,13 @@ const DragonFx = (() => {
       overlay.classList.add('hit');
     }
 
-    // 有長龍影片（電視版）就播影片，播完才淡出；播不了退回原本的 2.8 秒
-    const video = document.getElementById('dragonVideo');
-    if (video) {
-      const src = color === 'P' ? video.dataset.playerSrc : video.dataset.bankerSrc;
-      if (src && video.getAttribute('src') !== src) video.setAttribute('src', src);
-      video.onended = fadeOut;
-      video.currentTime = 0;
-      const playing = video.play();
-      if (playing) playing.catch(() => { hideTimer = setTimeout(fadeOut, showcaseMs()); });
-      return;
-    }
+    // Keep native effects ready while the selected side-specific video loads.
     startCanvasLoop();
+    const fallback = () => {
+      startCanvasLoop();
+      hideTimer = setTimeout(fadeOut, showcaseMs());
+    };
+    if (window.BaccaratDragonVideo?.play(color, fadeOut, fallback)) return;
     hideTimer = setTimeout(fadeOut, showcaseMs());
   }
 
@@ -1227,6 +1230,17 @@ function toggleFullscreen() {
 function fitApp() {
   const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
   document.documentElement.style.setProperty('--app-scale', scale);
+  // Browser zoom can resolve 100vh to 0 while innerHeight is still the layout viewport.
+  // Pin only that collapse. A normal viewport already has a correct 100vh height, and an
+  // inline height there makes the unscaled 1920×1080 canvas expand the page scroll size.
+  document.documentElement.style.height = '';
+  document.body.style.height = '';
+  // clientHeight stays at the viewport even when 100vh computes to 0, so measure the body box.
+  if (document.body.getBoundingClientRect().height < window.innerHeight * 0.5) {
+    const height = window.innerHeight + 'px';
+    document.documentElement.style.height = height;
+    document.body.style.height = height;
+  }
 }
 window.addEventListener('resize', fitApp);
 
