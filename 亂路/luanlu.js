@@ -330,20 +330,21 @@ function derivedRunLengths(marks) {
 }
 function scoreDerivedRoads(outcomes) {
   const big = buildBigRoadGrid(outcomes);
-  const marks = {}, sequences = {}, result = { total: 0, redRatio: 0, marks, sequences };
-  const all = [];
+  const marks = {}, sequences = {}, result = { total: 0, redRatio: 0, redCount: 0, blueCount: 0, marks, sequences };
   for (const { key, offset } of DERIVED_ROADS) {
     const roadMarks = buildDerivedRoad(big.grid, offset, big.cols, big.rows);
     const redCount = roadMarks.filter(mark => mark === 'R').length;
+    const blueCount = roadMarks.filter(mark => mark === 'B').length;
     marks[key] = roadMarks;
     sequences[key] = derivedRunLengths(roadMarks);
-    result[key] = { redRatio: roadMarks.length ? redCount / roadMarks.length : 0 };
-    all.push(...roadMarks);
+    result[key] = { redRatio: roadMarks.length ? redCount / roadMarks.length : 0, redCount, blueCount };
+    result.redCount += redCount;
+    result.blueCount += blueCount;
   }
-  const redCount = all.filter(mark => mark === 'R').length;
-  result.redRatio = all.length ? redCount / all.length : 0;
+  const allCount = result.redCount + result.blueCount;
+  result.redRatio = allCount ? result.redCount / allCount : 0;
   // 三條路合併只扣偏紅。少於 10 顆或未超過門檻都不扣，避免同一現象重複計分。
-  if (all.length >= 10 && result.redRatio > WEIGHTS.derivedRedBase) {
+  if (allCount >= 10 && result.redRatio > WEIGHTS.derivedRedBase) {
     result.total = (result.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed;
   }
   return result;
@@ -361,6 +362,8 @@ function scoreWithCaps(runs, firstSide, opts, regular = scoreRoad(outcomesFromRu
     result.cockroachRoad = derived.cockroachRoad;
     result.derivedTotal = derived.total;
     result.derivedRedRatio = derived.redRatio;
+    result.derivedRedCount = derived.redCount;
+    result.derivedBlueCount = derived.blueCount;
     result.derivedMarks = derived.marks;
     result.derivedSequences = derived.sequences;
     result.scoreMode = mode;
@@ -830,6 +833,7 @@ function initUI() {
   };
   const points = n => Number(n.toFixed(2)).toString();
   const percent = ratio => `${Math.round((ratio || 0) * 100)}%`;
+  const beadText = item => `${item.redCount}紅 ${item.blueCount}藍（紅 ${percent(item.redRatio)}）`;
   const reasonText = reasons => reasons.length ? reasons.map(r => `${r.label}×${points(r.count)}（${points(r.points)}分）`).join('、') : '無規律扣分';
   function setBusy(value) {
     busy = value;
@@ -871,6 +875,7 @@ function initUI() {
       title.append(element('p', 'counts', roadCounts(road)));
       const derived = road.score?.derivedSequences ? {
         sequences: road.score.derivedSequences, redRatio: road.score.derivedRedRatio,
+        redCount: road.score.derivedRedCount, blueCount: road.score.derivedBlueCount,
         total: road.score.derivedTotal, bigEye: road.score.bigEye,
         smallRoad: road.score.smallRoad, cockroachRoad: road.score.cockroachRoad
       } : scoreDerivedRoads(road.nonTieOutcomes);
@@ -917,13 +922,13 @@ function initUI() {
       for (const { key, label } of DERIVED_ROADS) {
         const section = element('div', `sequence ${key}`);
         const seq = derived.sequences[key].join('、') || '無';
-        section.append(element('strong', '', `${label}：${seq} ／ 紅 ${percent(derived[key].redRatio)}`));
+        section.append(element('strong', '', `${label}：${seq} ／ ${beadText(derived[key])}`));
         card.append(section);
       }
       if (!generatedOptions.randomMode) {
         const suffix = mode === 'big' ? '（未計入總分）' : '';
         card.append(element('p', 'road-reasons derived-summary',
-          `下三路合計紅 ${percent(derived.redRatio)}，偏紅 ${points(derived.total)} 分${suffix}`));
+          `下三路合計 ${beadText(derived)}，偏紅 ${points(derived.total)} 分${suffix}`));
       }
       const reroll = element('button', 'secondary', '重抽這條'); reroll.type = 'button';
       reroll.disabled = busy; reroll.addEventListener('click', () => run(index)); card.append(reroll);

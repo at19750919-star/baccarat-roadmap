@@ -823,6 +823,42 @@ test('下三路只扣合併偏紅，低於門檻或少於十顆為 0', () => {
   assert.equal(over.total, (over.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed);
 });
 
+test('指定欄長的下三路紅藍顆數，評分總分不變', () => {
+  const runs = [6, 5, 3, 1, 5, 2, 1, 1, 1, 1, 2, 4, 5, 3, 1, 1, 1, 1, 1, 6, 4, 3, 1, 1, 1, 4, 1, 1, 1, 1, 1, 6, 2, 1, 1, 1, 1];
+  const values = outcomes(runs, '莊');
+  const scored = scoreDerivedRoads(values);
+  assert.deepEqual([scored.bigEye.redCount, scored.bigEye.blueCount], [48, 27]);
+  assert.deepEqual([scored.smallRoad.redCount, scored.smallRoad.blueCount], [37, 33]);
+  assert.deepEqual([scored.cockroachRoad.redCount, scored.cockroachRoad.blueCount], [34, 33]);
+  assert.deepEqual([scored.redCount, scored.blueCount], [119, 93]);
+  assert.equal(scored.bigEye.redRatio, 48 / 75);
+  assert.equal(scored.smallRoad.redRatio, 37 / 70);
+  assert.equal(scored.cockroachRoad.redRatio, 34 / 67);
+  assert.equal(scored.redRatio, 119 / 212);
+  assert.equal(scored.total, 0);
+  const regular = scoreRoad(values).total;
+  const capOpts = { perSideMax: '', combinedMax: '', holeMax: '', pillarMax: '' };
+  const capTotal = scoreCapExcess(runs, '莊', capOpts).total;
+  const modes = {
+    big: scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'big' }),
+    derived: scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'derived' }),
+    both: scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'both' })
+  };
+  assert.equal(modes.big.total, regular + capTotal);
+  assert.equal(modes.derived.total, capTotal);
+  assert.equal(modes.both.total, regular + capTotal);
+  for (const mode of ['derived', 'both']) {
+    const withCaps = modes[mode];
+    assert.equal(withCaps.derivedRedCount, 119);
+    assert.equal(withCaps.derivedBlueCount, 93);
+    assert.deepEqual([withCaps.bigEye.redCount, withCaps.bigEye.blueCount], [48, 27]);
+    assert.deepEqual([withCaps.smallRoad.redCount, withCaps.smallRoad.blueCount], [37, 33]);
+    assert.deepEqual([withCaps.cockroachRoad.redCount, withCaps.cockroachRoad.blueCount], [34, 33]);
+    assert.equal(withCaps.derivedRedRatio, scored.redRatio);
+    assert.equal(withCaps.derivedTotal, 0);
+  }
+});
+
 test('舊 scoreDerived 轉成評分範圍，錯誤值丟中文錯誤', () => {
   assert.equal(migrateScoreMode({ scoreDerived: true }), 'both');
   assert.equal(migrateScoreMode({ scoreDerived: false }), 'big');
