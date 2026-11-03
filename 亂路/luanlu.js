@@ -3,16 +3,15 @@
 // 規律懲罰用正數累加，越低越好。更改權重只需調整此處。
 const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
   ordered: 3, period: 4, dominant: 3,
-  derivedRed: 3, derivedLongRun: 1,
-  bigEye: 0.5, smallRoad: 0.5, cockroachRoad: 0.5 });
+  derivedRedBase: 0.65, derivedRed: 3 });
 const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
   prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
   perSideMax: 2, combinedMax: 3, includeSingles: false,
-  holeMax: '', pillarMax: '', maxHoleLength: '', randomMode: false, scoreDerived: false });
+  holeMax: '', pillarMax: '', maxHoleLength: '', randomMode: false, scoreMode: 'big' });
 const DERIVED_ROADS = Object.freeze([
-  { key: 'bigEye', label: '大眼仔', offset: 1, weightKey: 'bigEye' },
-  { key: 'smallRoad', label: '小路', offset: 2, weightKey: 'smallRoad' },
-  { key: 'cockroachRoad', label: '蟑螂路', offset: 3, weightKey: 'cockroachRoad' }
+  { key: 'bigEye', label: '大眼仔', offset: 1 },
+  { key: 'smallRoad', label: '小路', offset: 2 },
+  { key: 'cockroachRoad', label: '蟑螂路', offset: 3 }
 ]);
 const HIGHLIGHT_COLORS = Object.freeze({
   line: { stroke: '#79d7ae', fill: 'rgba(121, 215, 174, .38)' },
@@ -331,34 +330,21 @@ function derivedRunLengths(marks) {
 }
 function scoreDerivedRoads(outcomes) {
   const big = buildBigRoadGrid(outcomes);
-  const marks = {}, sequences = {}, result = { total: 0, marks, sequences };
-  for (const { key, offset, weightKey } of DERIVED_ROADS) {
+  const marks = {}, sequences = {}, result = { total: 0, redRatio: 0, marks, sequences };
+  const all = [];
+  for (const { key, offset } of DERIVED_ROADS) {
     const roadMarks = buildDerivedRoad(big.grid, offset, big.cols, big.rows);
-    const sequence = derivedRunLengths(roadMarks);
-    const scored = scoreSequence(sequence);
     const redCount = roadMarks.filter(mark => mark === 'R').length;
-    const redExcess = roadMarks.length ? Math.max(0, (redCount / roadMarks.length - 0.5) * 10) : 0;
-    const longRunExcess = sequence.reduce((sum, length) => sum + Math.max(0, length - 3), 0);
-    for (const [label, count, ruleWeight] of [
-      ['紅過多（每10個百分點）', redExcess, WEIGHTS.derivedRed],
-      ['同色過長', longRunExcess, WEIGHTS.derivedLongRun]
-    ]) {
-      if (count > 0) {
-        const points = count * ruleWeight;
-        scored.total += points;
-        scored.reasons.push({ label, count, points });
-      }
-    }
-    const weight = WEIGHTS[weightKey];
-    const item = {
-      total: scored.total * weight, weight,
-      reasons: scored.reasons.map(reason => ({ ...reason, points: reason.points * weight })),
-      hits: scored.hits
-    };
     marks[key] = roadMarks;
-    sequences[key] = sequence;
-    result[key] = item;
-    result.total += item.total;
+    sequences[key] = derivedRunLengths(roadMarks);
+    result[key] = { redRatio: roadMarks.length ? redCount / roadMarks.length : 0 };
+    all.push(...roadMarks);
+  }
+  const redCount = all.filter(mark => mark === 'R').length;
+  result.redRatio = all.length ? redCount / all.length : 0;
+  // 三條路合併只扣偏紅。少於 10 顆或未超過門檻都不扣，避免同一現象重複計分。
+  if (all.length >= 10 && result.redRatio > WEIGHTS.derivedRedBase) {
+    result.total = (result.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed;
   }
   return result;
 }
@@ -367,15 +353,18 @@ function scoreWithCaps(runs, firstSide, opts, regular = scoreRoad(outcomesFromRu
   const caps = scoreCapExcess(runs, firstSide, opts);
   const result = { ...regular, total: regular.total + caps.total, regularTotal: regular.total,
     capTotal: caps.total, capScores: caps };
-  if (opts && opts.scoreDerived && !opts.randomMode) {
+  const mode = opts && opts.scoreMode;
+  if (opts && !opts.randomMode && (mode === 'derived' || mode === 'both')) {
     const derived = scoreDerivedRoads(outcomesFromRuns(runs, firstSide));
     result.bigEye = derived.bigEye;
     result.smallRoad = derived.smallRoad;
     result.cockroachRoad = derived.cockroachRoad;
     result.derivedTotal = derived.total;
+    result.derivedRedRatio = derived.redRatio;
     result.derivedMarks = derived.marks;
     result.derivedSequences = derived.sequences;
-    result.total += derived.total;
+    result.scoreMode = mode;
+    result.total = (mode === 'both' ? regular.total : 0) + derived.total + caps.total;
   }
   return result;
 }
@@ -418,8 +407,16 @@ function getRoadHighlights(runs, firstSide = '莊', opts = {}) {
   return highlights;
 }
 
+function migrateScoreMode(saved) {
+  if (saved && typeof saved === 'object' && !Array.isArray(saved) && Object.hasOwn(saved, 'scoreMode')) {
+    return saved.scoreMode;
+  }
+  return saved && saved.scoreDerived === true ? 'both' : 'big';
+}
+
 function normalizeOptions(options = {}) {
   const o = { ...DEFAULTS, ...options };
+  if (!Object.hasOwn(options, 'scoreMode') && options.scoreDerived === true) o.scoreMode = 'both';
   const labels = { count: '條數', rounds: '局數', maxDifference: '莊閒差上限', maxRun: '長龍上限',
     startNumber: '起始編號', attempts: '每條嘗試次數', hillSteps: '爬山步數',
     perSideMax: '單邊同長度行上限', combinedMax: '莊閒合計同長度行上限' };
@@ -428,7 +425,9 @@ function normalizeOptions(options = {}) {
     if (!Number.isInteger(o[key]) || o[key] < min || o[key] > max) throw new Error(`${labels[key]}必須是 ${min}～${max} 的整數。`);
   }
   if (typeof o.randomMode !== 'boolean') throw new Error('隨機模式必須為布林值。');
-  if (typeof o.scoreDerived !== 'boolean') throw new Error('衍生路也計分必須為布林值。');
+  if (o.scoreMode !== 'big' && o.scoreMode !== 'derived' && o.scoreMode !== 'both') {
+    throw new Error('評分範圍必須是 big、derived 或 both。');
+  }
   if (!o.randomMode) for (const key of ['perSideMax', 'combinedMax']) {
     if (o[key] !== '' && (!Number.isInteger(o[key]) || o[key] < 0 || o[key] > 1000)) {
       throw new Error(`${labels[key]}必須留白或填入 0～1000 的整數。`);
@@ -786,7 +785,7 @@ function initUI() {
   let roads = [], generatedOptions, busy = false, rerollNumber = 0;
   const randomModeInput = form.elements.namedItem('randomMode');
   const randomFields = ['perSideMax', 'combinedMax', 'holeMax', 'pillarMax', 'maxHoleLength',
-    'includeSingles', 'attempts', 'hillSteps', 'scoreDerived'];
+    'includeSingles', 'attempts', 'hillSteps', 'scoreMode'];
   const settingsKey = 'luanlu.settings.v1';
   function saveSettings() {
     const settings = {};
@@ -800,9 +799,10 @@ function initUI() {
     try {
       const saved = JSON.parse(localStorage.getItem(settingsKey));
       if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
+      const migrated = { ...saved, scoreMode: migrateScoreMode(saved) };
       for (const key of Object.keys(DEFAULTS)) {
-        if (!Object.hasOwn(saved, key)) continue;
-        const value = saved[key], field = form.elements.namedItem(key);
+        if (!Object.hasOwn(migrated, key)) continue;
+        const value = migrated[key], field = form.elements.namedItem(key);
         if (typeof DEFAULTS[key] === 'boolean') {
           if (typeof value === 'boolean') field.checked = value;
         } else if (typeof value === 'string') field.value = value;
@@ -829,6 +829,7 @@ function initUI() {
     return node;
   };
   const points = n => Number(n.toFixed(2)).toString();
+  const percent = ratio => `${Math.round((ratio || 0) * 100)}%`;
   const reasonText = reasons => reasons.length ? reasons.map(r => `${r.label}×${points(r.count)}（${points(r.points)}分）`).join('、') : '無規律扣分';
   function setBusy(value) {
     busy = value;
@@ -868,11 +869,20 @@ function initUI() {
       const heading = element('div', 'card-heading'), title = element('div', '');
       title.append(element('h2', '', road.name));
       title.append(element('p', 'counts', roadCounts(road)));
+      const derived = road.score?.derivedSequences ? {
+        sequences: road.score.derivedSequences, redRatio: road.score.derivedRedRatio,
+        total: road.score.derivedTotal, bigEye: road.score.bigEye,
+        smallRoad: road.score.smallRoad, cockroachRoad: road.score.cockroachRoad
+      } : scoreDerivedRoads(road.nonTieOutcomes);
+      const mode = generatedOptions.scoreMode;
+      const part = (included, label, value) => element('span', 'score-part', `${label} ${value}${included ? '' : '（未計入）'}`);
       const score = element('div', 'score', generatedOptions.randomMode ? '不評分' : points(road.score.total));
-      score.append(element('small', '', generatedOptions.randomMode ? '隨機模式' :
-        generatedOptions.scoreDerived
-          ? `總分：規律 ${points(road.score.regularTotal)} ＋ 衍生 ${points(road.score.derivedTotal)} ＋ 超限 ${points(road.score.capTotal)}`
-          : `總分：規律 ${points(road.score.regularTotal)} ＋ 超限 ${points(road.score.capTotal)}`));
+      const caption = element('small', '');
+      if (generatedOptions.randomMode) caption.textContent = '隨機模式';
+      else caption.append('總分：', part(mode !== 'derived', '規律', points(road.score.regularTotal)),
+        ' ＋ ', part(mode !== 'big', '下三路偏紅', points(derived.total)),
+        ' ＋ ', part(true, '超限', points(road.score.capTotal)));
+      score.append(caption);
       heading.append(title, score); card.append(heading);
       card.append(roadGrid(road));
       if (generatedOptions.randomMode) {
@@ -898,27 +908,22 @@ function initUI() {
         if (generatedOptions.randomMode) section.append(element('strong', '', title));
         else {
           const reasons = element('p', '');
+          const suffix = mode === 'derived' ? '（未計入總分）' : '';
           reasons.append(element('span', `term-${key}`, `${label}：`), reasonText(road.score[key].reasons));
-          section.append(element('strong', '', `${title}　／ ${points(road.score[key].total)}分`), reasons);
+          section.append(element('strong', '', `${title}　／ ${points(road.score[key].total)}分${suffix}`), reasons);
         }
         card.append(section);
       }
-      const derived = road.score?.derivedSequences
-        ? { sequences: road.score.derivedSequences, bigEye: road.score.bigEye,
-          smallRoad: road.score.smallRoad, cockroachRoad: road.score.cockroachRoad }
-        : scoreDerivedRoads(road.nonTieOutcomes);
       for (const { key, label } of DERIVED_ROADS) {
         const section = element('div', `sequence ${key}`);
-        const title = `${label}：${derived.sequences[key].join('、') || '無'}`;
-        if (generatedOptions.randomMode) section.append(element('strong', '', title));
-        else {
-          const scored = derived[key];
-          const reasons = element('p', '');
-          const suffix = generatedOptions.scoreDerived ? '' : '（未計入總分）';
-          reasons.append(element('span', `term-${key}`, `${label}：`), reasonText(scored.reasons));
-          section.append(element('strong', '', `${title}　／ ${points(scored.total)}分${suffix}`), reasons);
-        }
+        const seq = derived.sequences[key].join('、') || '無';
+        section.append(element('strong', '', `${label}：${seq} ／ 紅 ${percent(derived[key].redRatio)}`));
         card.append(section);
+      }
+      if (!generatedOptions.randomMode) {
+        const suffix = mode === 'big' ? '（未計入總分）' : '';
+        card.append(element('p', 'road-reasons derived-summary',
+          `下三路合計紅 ${percent(derived.redRatio)}，偏紅 ${points(derived.total)} 分${suffix}`));
       }
       const reroll = element('button', 'secondary', '重抽這條'); reroll.type = 'button';
       reroll.disabled = busy; reroll.addEventListener('click', () => run(index)); card.append(reroll);
@@ -931,7 +936,7 @@ function initUI() {
       const field = form.elements.namedItem(key);
       const value = field.value;
       o[key] = typeof DEFAULTS[key] === 'boolean' ? field.checked :
-        key === 'prefix' || key === 'seed' || (['perSideMax', 'combinedMax', 'holeMax', 'pillarMax', 'maxHoleLength'].includes(key) && value === '')
+        key === 'prefix' || key === 'seed' || key === 'scoreMode' || (['perSideMax', 'combinedMax', 'holeMax', 'pillarMax', 'maxHoleLength'].includes(key) && value === '')
           ? value : Number(value);
     }
     return normalizeOptions(o);
@@ -1027,6 +1032,7 @@ if (typeof document !== 'undefined') {
 if (typeof module !== 'undefined') module.exports = { WEIGHTS, DEFAULTS, DERIVED_ROADS, toRuns, getSequences, countColumnLengths, checkLengthCaps,
   countHoleLengths, countPillarLengths, checkHoleCaps, checkPillarCaps, getViolationColumns,
   scoreSequence, scoreRoad, scoreCapExcess, scoreWithCaps, getRoadHighlights, improveSameSideRuns,
+  migrateScoreMode,
   buildBigRoadGrid, buildDerivedRoad, layoutDerivedMarks, derivedRunLengths, scoreDerivedRoads,
   generateRoad, generateRoads, toImportJson, createRng,
   roadLayout, roadmapImageLayout, drawRoadmapImage };

@@ -6,8 +6,8 @@
   <title>亂路</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="luanlu.css?v=1">
-  <script src="luanlu.js?v=1" defer></script>
+  <link rel="stylesheet" href="luanlu.css?v=4">
+  <script src="luanlu.js?v=4" defer></script>
 </head>
 <body>
   <main>
@@ -30,7 +30,7 @@
             <label class="checkbox random-toggle"><input name="randomMode" type="checkbox"><span class="field-help" tabindex="0" aria-describedby="random-help">隨機</span><span class="field-tooltip" id="random-help" role="tooltip">只保留局數、莊閒差與長龍條件；行、洞、柱限制及規律評分都暫停。取消勾選後恢復原設定。</span></label>
             <label class="checkbox"><input name="includeSingles" type="checkbox"><span>單顆<span class="term-greenBanker">行</span>也算</span></label>
           </div>
-          <label class="checkbox derived-toggle wide"><input name="scoreDerived" type="checkbox"><span class="field-help" tabindex="0" aria-describedby="derived-help">衍生路也計分</span><span class="field-tooltip" id="derived-help" role="tooltip">勾選後把大眼仔、小路、蟑螂路的同色連續規律加進總分，搜尋時一併壓低。不勾時只評大路的行、洞、柱，固定種子結果與修改前相同。隨機模式不計分。</span></label>
+          <label class="row wide score-mode"><span class="field-help" tabindex="0" aria-describedby="score-mode-help">評分範圍</span><span class="field-tooltip" id="score-mode-help" role="tooltip">只算大路：總分是大路規律加超限，下三路偏紅只顯示。只算下三路：總分是三條路合併的偏紅加超限，大路規律只顯示。一起算：三項都計入。搜尋、爬山與交換都用這個總分。紅比例超過 65% 且標記至少 10 顆才扣偏紅分。隨機模式不計分。</span><select name="scoreMode" aria-describedby="score-mode-help"><option value="big" selected>只算大路</option><option value="derived">只算下三路</option><option value="both">一起算</option></select></label>
           <label class="row">名稱前綴<input name="prefix" class="text" value="路單-AT" required></label>
           <label class="row">起始編號<input name="startNumber" type="number" min="0" max="1000000" value="1" required></label>
           <label class="row">嘗試次數<input name="attempts" type="number" min="1" max="100000" value="3000" required></label>
@@ -39,7 +39,7 @@
         </div>
         <div class="actions"><button type="submit">產生路單</button><button id="download" class="secondary" type="button" disabled>下載 JSON</button><button id="roadmap-image" class="secondary" type="button" disabled>路單圖</button></div>
         <div class="output-bar"><div class="progress-area"><p id="status" role="status" aria-live="polite">按「產生路單」開始。</p><progress id="progress" max="1" value="0" aria-label="產生進度"></progress></div></div>
-        <p class="hint">只產生莊／閒不含和；一般模式總分越低，規律與超限越少；同名匯入會覆蓋。</p>
+        <p class="hint">只產生莊／閒不含和；一般模式依評分範圍，總分越低越好；同名匯入會覆蓋。</p>
       </fieldset>
     </form>
     <section id="results" aria-label="產生的路單" aria-busy="false"></section>

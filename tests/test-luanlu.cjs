@@ -8,7 +8,7 @@ const { WEIGHTS, DEFAULTS, DERIVED_ROADS, toRuns, getSequences, scoreSequence, s
   countHoleLengths, countPillarLengths, checkHoleCaps, checkPillarCaps,
   getViolationColumns, getRoadHighlights, scoreCapExcess, scoreWithCaps,
   improveSameSideRuns, buildBigRoadGrid, buildDerivedRoad, layoutDerivedMarks,
-  derivedRunLengths, scoreDerivedRoads } = require('../亂路/luanlu.js');
+  derivedRunLengths, scoreDerivedRoads, migrateScoreMode } = require('../亂路/luanlu.js');
 const oldLuanlu = require('../亂路/備份-20261104/luanlu.js');
 
 function outcomes(runs, first = '莊') {
@@ -27,7 +27,8 @@ function checkRoad(road, rounds = 82, difference = 4, maxRun = 6) {
     for (const key of ['red', 'blue', 'greenBanker', 'greenPlayer']) assert.deepEqual(road.score[key], regular[key]);
     assert.equal(road.score.regularTotal, regular.total);
     const derivedTotal = road.score.derivedTotal || 0;
-    assert.equal(road.score.total, regular.total + road.score.capTotal + derivedTotal);
+    const regularPart = road.score.scoreMode === 'derived' ? 0 : regular.total;
+    assert.equal(road.score.total, regularPart + road.score.capTotal + derivedTotal);
   }
 }
 // 複製參考匯入器的 token 及 nonTieOutcomes 判斷；不執行或改動排牌程式。
@@ -568,7 +569,7 @@ function occupancy(grid, cols, rows) {
 }
 function asData(value) { return JSON.parse(JSON.stringify(value)); }
 
-test('不勾選衍生路時，固定種子產出與修改前完全相同', () => {
+test('只算大路時，固定種子產出與修改前完全相同', () => {
   const cases = [
     { seed: 1 },
     { seed: '單條' },
@@ -578,9 +579,11 @@ test('不勾選衍生路時，固定種子產出與修改前完全相同', () =>
   for (const options of cases) {
     if (options.count) {
       assert.deepEqual(generateRoads(options), oldLuanlu.generateRoads(options));
+      assert.deepEqual(generateRoads({ ...options, scoreMode: 'big' }), oldLuanlu.generateRoads(options));
       assert.deepEqual(generateRoads({ ...options, scoreDerived: false }), oldLuanlu.generateRoads(options));
     } else {
       assert.deepEqual(generateRoad(options), oldLuanlu.generateRoad(options));
+      assert.deepEqual(generateRoad({ ...options, scoreMode: 'big' }), oldLuanlu.generateRoad(options));
       assert.deepEqual(generateRoad({ ...options, scoreDerived: false }), oldLuanlu.generateRoad(options));
     }
   }
@@ -712,79 +715,127 @@ test('欄長1234循環，第5至8欄的下三路標記逐欄符合驗收例', ()
   }
 });
 
-test('衍生路同色連續長度與新增規律分，勾選才加進總分', () => {
-  assert.deepEqual(derivedRunLengths([]), []);
-  assert.deepEqual(derivedRunLengths(['R', 'R', 'B', 'B', 'R', 'R', 'R']), [2, 2, 3]);
-  assert.equal(WEIGHTS.bigEye, 0.5);
-  assert.equal(WEIGHTS.smallRoad, 0.5);
-  assert.equal(WEIGHTS.cockroachRoad, 0.5);
+test('三種評分範圍的總分組成，搜尋使用該總分', () => {
+  assert.equal(DEFAULTS.scoreMode, 'big');
+  assert.equal(WEIGHTS.derivedRedBase, 0.65);
   assert.equal(WEIGHTS.derivedRed, 3);
-  assert.equal(WEIGHTS.derivedLongRun, 1);
-  const values = outcomes([2, 2, 2, 2, 3, 1, 4, 2], '莊');
-  const derived = scoreDerivedRoads(values);
+  assert.equal(WEIGHTS.derivedLongRun, undefined);
+  assert.equal(WEIGHTS.bigEye, undefined);
+  assert.equal(WEIGHTS.smallRoad, undefined);
+  assert.equal(WEIGHTS.cockroachRoad, undefined);
+  const values = outcomes([2, 2, 2, 2, 2, 2, 2, 2]);
   const runs = toRuns(values);
-  const off = scoreWithCaps(runs, '莊', { perSideMax: '', combinedMax: '', holeMax: '', pillarMax: '' });
-  const on = scoreWithCaps(runs, '莊', { perSideMax: '', combinedMax: '', holeMax: '', pillarMax: '', scoreDerived: true });
-  assert.equal(off.derivedTotal, undefined);
-  assert.equal(off.total, scoreRoad(values).total);
-  assert.equal(on.derivedTotal, derived.total);
-  assert.equal(on.total, off.total + derived.total);
-  for (const { key } of DERIVED_ROADS) {
-    const expected = scoreSequence(derivedRunLengths(derived.marks[key]));
-    assert.deepEqual(derived.sequences[key], derivedRunLengths(derived.marks[key]));
-    const newReasons = derived[key].reasons.filter(r =>
-      r.label === '紅過多（每10個百分點）' || r.label === '同色過長');
-    assert.equal(derived[key].total, expected.total * WEIGHTS[key] + newReasons.reduce((sum, r) => sum + r.points, 0));
-    assert.equal(derived[key].total, derived[key].reasons.reduce((sum, r) => sum + r.points, 0));
-    assert.deepEqual(on[key].total, derived[key].total);
+  const regular = scoreRoad(values).total;
+  const derived = scoreDerivedRoads(values);
+  const capOpts = { perSideMax: '', combinedMax: '', holeMax: '', pillarMax: 0 };
+  const capTotal = scoreCapExcess(runs, '莊', capOpts).total;
+  assert(capTotal > 0);
+  assert(regular > 0);
+  assert.equal(derived.total, 10.5);
+  const big = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'big' });
+  const onlyDerived = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'derived' });
+  const both = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'both' });
+  assert.equal(big.derivedTotal, undefined);
+  assert.equal(big.scoreMode, undefined);
+  assert.equal(big.total, regular + capTotal);
+  assert.equal(big.regularTotal, regular);
+  assert.equal(onlyDerived.regularTotal, regular);
+  assert.equal(onlyDerived.derivedTotal, derived.total);
+  assert.equal(onlyDerived.total, derived.total + capTotal);
+  assert.notEqual(onlyDerived.total, regular + derived.total + capTotal);
+  assert.equal(both.total, regular + derived.total + capTotal);
+  assert.equal(both.derivedRedRatio, derived.redRatio);
+  for (const mode of ['big', 'derived', 'both']) {
+    const road = generateRoad({ seed: 1, scoreMode: mode, attempts: 30, hillSteps: 0 });
+    checkRoad(road);
+    const scored = scoreDerivedRoads(road.nonTieOutcomes);
+    if (mode === 'big') assert.equal(road.score.derivedTotal, undefined);
+    else {
+      assert.equal(road.score.derivedTotal, scored.total);
+      assert.equal(road.score.scoreMode, mode);
+    }
+    const regularPart = mode === 'derived' ? 0 : road.score.regularTotal;
+    const derivedPart = mode === 'big' ? 0 : road.score.derivedTotal;
+    assert.equal(road.score.total, regularPart + derivedPart + road.score.capTotal);
   }
-  const generatedOff = generateRoad({ seed: 1, scoreDerived: false, attempts: 30, hillSteps: 0 });
-  const generatedOn = generateRoad({ seed: 1, scoreDerived: true, attempts: 30, hillSteps: 0 });
-  checkRoad(generatedOff);
-  checkRoad(generatedOn);
-  assert.equal(generatedOff.score.derivedTotal, undefined);
-  assert.equal(generatedOn.score.derivedTotal, scoreDerivedRoads(generatedOn.nonTieOutcomes).total);
-  assert.equal(generatedOn.score.total, generatedOn.score.regularTotal + generatedOn.score.capTotal + generatedOn.score.derivedTotal);
-  const random = generateRoad({ seed: 1, randomMode: true, scoreDerived: true, attempts: 1, hillSteps: 0 });
+  const random = generateRoad({ seed: 1, randomMode: true, scoreMode: 'both', attempts: 1, hillSteps: 0 });
   assert.equal(random.score, null);
-  assert.throws(() => generateRoad({ scoreDerived: 'true' }), /衍生路也計分/);
-  assert.equal(DEFAULTS.scoreDerived, false);
+  assert.deepEqual(random.nonTieOutcomes, oldLuanlu.generateRoad({
+    seed: 1, randomMode: true, attempts: 1, hillSteps: 0
+  }).nonTieOutcomes);
 });
 
-test('全紅單跳路有紅過多及長段分數，空路與短路不誤加長段分', () => {
-  const derived = scoreDerivedRoads(outcomes(Array(10).fill(1)));
+test('下三路只扣合併偏紅，低於門檻或少於十顆為 0', () => {
+  assert.deepEqual(derivedRunLengths([]), []);
+  assert.deepEqual(derivedRunLengths(['R', 'R', 'B', 'B', 'R', 'R', 'R']), [2, 2, 3]);
+  const allRed = scoreDerivedRoads(outcomes(Array(10).fill(1)));
+  let marks = 0;
   for (const { key, offset } of DERIVED_ROADS) {
     const length = 9 - offset;
-    assert.deepEqual(derived.marks[key], Array(length).fill('R'));
-    assert.deepEqual(derived[key].reasons, [
-      { label: '紅過多（每10個百分點）', count: 5, points: 7.5 },
-      { label: '同色過長', count: length - 3, points: (length - 3) * 0.5 }
-    ]);
-    assert.equal(derived[key].total, (15 + length - 3) * 0.5);
+    marks += length;
+    assert.deepEqual(allRed.marks[key], Array(length).fill('R'));
+    assert.equal(allRed[key].redRatio, 1);
+    assert.equal(allRed[key].reasons, undefined);
+    assert.deepEqual(allRed.sequences[key], [length]);
   }
-  assert(derived.bigEye.total > 0);
+  assert.equal(marks, 21);
+  assert.equal(allRed.redRatio, 1);
+  assert.equal(allRed.total, (1 - 0.65) * 10 * 3);
+  assert.equal(allRed.total, 10.5);
+  // 同色長柱不再另扣「同色過長」；合併後仍只有偏紅 10.5。
+  const longColumns = scoreDerivedRoads(outcomes([2, 2, 2, 2, 2, 2, 2, 2]));
+  assert.equal(longColumns.redRatio, 1);
+  assert.equal(longColumns.sequences.bigEye.length, 1);
+  assert(longColumns.sequences.bigEye[0] > 3);
+  assert.equal(longColumns.total, 10.5);
+  // 同色連續序列本身有相鄰重複，但未超過紅比例門檻時總分仍是 0，不再套大路規律。
+  const patterned = scoreDerivedRoads(outcomes([1, 1, 2, 2, 1, 1, 2, 2]));
+  assert(scoreSequence(patterned.sequences.bigEye).total > 0);
+  assert(patterned.redRatio <= WEIGHTS.derivedRedBase);
+  assert.equal(patterned.total, 0);
+  const low = scoreDerivedRoads(outcomes([4, 1, 4, 1, 4, 1]));
+  const lowCount = DERIVED_ROADS.reduce((sum, { key }) => sum + low.marks[key].length, 0);
+  assert(lowCount >= 10);
+  assert.equal(low.redRatio, 0.625);
+  assert(low.redRatio <= WEIGHTS.derivedRedBase);
+  assert.equal(low.total, 0);
+  const mixed = scoreDerivedRoads(outcomes([1, 2, 1, 2, 1, 2, 1, 2, 1, 2]));
+  assert(mixed.redRatio < WEIGHTS.derivedRedBase);
+  assert(DERIVED_ROADS.reduce((sum, { key }) => sum + mixed.marks[key].length, 0) >= 10);
+  assert.equal(mixed.total, 0);
+  const short = scoreDerivedRoads(outcomes(Array(6).fill(1)));
+  const shortCount = DERIVED_ROADS.reduce((sum, { key }) => sum + short.marks[key].length, 0);
+  assert.equal(shortCount, 9);
+  assert.equal(short.redRatio, 1);
+  assert.equal(short.total, 0);
   for (const values of [[], outcomes([1, 2]), outcomes([1, 1, 2])]) {
     const scored = scoreDerivedRoads(values);
+    const count = DERIVED_ROADS.reduce((sum, { key }) => sum + scored.marks[key].length, 0);
+    assert(count < 10);
+    assert.equal(scored.total, 0);
     for (const { key } of DERIVED_ROADS) {
-      const base = scoreSequence(derivedRunLengths(scored.marks[key]));
-      assert.equal(scored[key].total, base.total * WEIGHTS[key]);
-      assert(!scored[key].reasons.some(r => r.label === '紅過多（每10個百分點）' || r.label === '同色過長'));
+      assert.deepEqual(scored.sequences[key], derivedRunLengths(scored.marks[key]));
+      assert.equal(typeof scored[key].redRatio, 'number');
     }
   }
-  // 3紅1藍：紅比例75%，超出25個百分點，連續計2.5次。
-  const fractional = scoreDerivedRoads(outcomes([1, 1, 1, 1, 2]));
-  assert.deepEqual(fractional.marks.bigEye, ['R', 'R', 'R', 'B']);
-  assert.deepEqual(fractional.bigEye.reasons, [
-    { label: '紅過多（每10個百分點）', count: 2.5, points: 3.75 }
-  ]);
-  // 全藍長段也須計分；長度3不加、長度4開始加。
-  for (const [runs, length] of [[[1, 2, 1, 1], 3], [[1, 2, 1, 2], 4], [[1, 2, 1, 2, 1], 5]]) {
-    const blue = scoreDerivedRoads(outcomes(runs));
-    assert.deepEqual(blue.marks.bigEye, Array(length).fill('B'));
-    assert.equal(blue.bigEye.total, Math.max(0, length - 3) * 0.5);
-    assert.deepEqual(blue.bigEye.reasons, length === 3 ? [] : [
-      { label: '同色過長', count: length - 3, points: (length - 3) * 0.5 }
-    ]);
-  }
+  const over = scoreDerivedRoads(outcomes([6, 1, 1, 6, 1, 1]));
+  assert(over.redRatio > WEIGHTS.derivedRedBase);
+  assert.equal(over.total, (over.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed);
+});
+
+test('舊 scoreDerived 轉成評分範圍，錯誤值丟中文錯誤', () => {
+  assert.equal(migrateScoreMode({ scoreDerived: true }), 'both');
+  assert.equal(migrateScoreMode({ scoreDerived: false }), 'big');
+  assert.equal(migrateScoreMode({}), 'big');
+  assert.equal(migrateScoreMode(null), 'big');
+  assert.equal(migrateScoreMode({ scoreMode: 'derived', scoreDerived: true }), 'derived');
+  assert.equal(migrateScoreMode({ scoreDerived: 'true' }), 'big');
+  const legacy = generateRoad({ seed: 1, scoreDerived: true, attempts: 30, hillSteps: 0 });
+  const both = generateRoad({ seed: 1, scoreMode: 'both', attempts: 30, hillSteps: 0 });
+  assert.deepEqual(legacy, both);
+  assert.equal(legacy.score.total, legacy.score.regularTotal + legacy.score.derivedTotal + legacy.score.capTotal);
+  assert.throws(() => generateRoad({ scoreMode: 'yes' }), /評分範圍必須是 big、derived 或 both/);
+  assert.throws(() => generateRoad({ scoreMode: true }), /評分範圍必須是 big、derived 或 both/);
+  assert.throws(() => generateRoad({ scoreMode: '' }), /評分範圍必須是 big、derived 或 both/);
 });
 console.log(`全部 ${passed} 項測試通過。`);
