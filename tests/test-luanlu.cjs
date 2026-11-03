@@ -717,8 +717,10 @@ test('欄長1234循環，第5至8欄的下三路標記逐欄符合驗收例', ()
 
 test('三種評分範圍的總分組成，搜尋使用該總分', () => {
   assert.equal(DEFAULTS.scoreMode, 'big');
-  assert.equal(WEIGHTS.derivedRedBase, 0.65);
-  assert.equal(WEIGHTS.derivedRed, 3);
+  assert.equal(WEIGHTS.derivedRunBase, 6);
+  assert.equal(WEIGHTS.derivedRun, 1);
+  assert.equal(WEIGHTS.derivedRedBase, undefined);
+  assert.equal(WEIGHTS.derivedRed, undefined);
   assert.equal(WEIGHTS.derivedLongRun, undefined);
   assert.equal(WEIGHTS.bigEye, undefined);
   assert.equal(WEIGHTS.smallRoad, undefined);
@@ -731,11 +733,16 @@ test('三種評分範圍的總分組成，搜尋使用該總分', () => {
   const capTotal = scoreCapExcess(runs, '莊', capOpts).total;
   assert(capTotal > 0);
   assert(regular > 0);
-  assert.equal(derived.total, 10.5);
+  assert.equal(derived.longestRun, 13);
+  assert.equal(derived.longestRoad, 'bigEye');
+  assert.equal(derived.longestColor, 'R');
+  assert.equal(derived.total, (13 - WEIGHTS.derivedRunBase) * WEIGHTS.derivedRun);
+  assert.equal(derived.total, 7);
   const big = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'big' });
   const onlyDerived = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'derived' });
   const both = scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'both' });
   assert.equal(big.derivedTotal, undefined);
+  assert.equal(big.longestRun, undefined);
   assert.equal(big.scoreMode, undefined);
   assert.equal(big.total, regular + capTotal);
   assert.equal(big.regularTotal, regular);
@@ -745,6 +752,10 @@ test('三種評分範圍的總分組成，搜尋使用該總分', () => {
   assert.notEqual(onlyDerived.total, regular + derived.total + capTotal);
   assert.equal(both.total, regular + derived.total + capTotal);
   assert.equal(both.derivedRedRatio, derived.redRatio);
+  assert.equal(both.longestRun, derived.longestRun);
+  assert.equal(both.longestRoad, derived.longestRoad);
+  assert.equal(both.longestColor, derived.longestColor);
+  assert.equal(onlyDerived.longestRun, derived.longestRun);
   for (const mode of ['big', 'derived', 'both']) {
     const road = generateRoad({ seed: 1, scoreMode: mode, attempts: 30, hillSteps: 0 });
     checkRoad(road);
@@ -765,62 +776,111 @@ test('三種評分範圍的總分組成，搜尋使用該總分', () => {
   }).nonTieOutcomes);
 });
 
-test('下三路只扣合併偏紅，低於門檻或少於十顆為 0', () => {
+test('下三路只扣三條路中最長的同色段', () => {
   assert.deepEqual(derivedRunLengths([]), []);
   assert.deepEqual(derivedRunLengths(['R', 'R', 'B', 'B', 'R', 'R', 'R']), [2, 2, 3]);
-  const allRed = scoreDerivedRoads(outcomes(Array(10).fill(1)));
-  let marks = 0;
-  for (const { key, offset } of DERIVED_ROADS) {
-    const length = 9 - offset;
-    marks += length;
-    assert.deepEqual(allRed.marks[key], Array(length).fill('R'));
-    assert.equal(allRed[key].redRatio, 1);
-    assert.equal(allRed[key].reasons, undefined);
-    assert.deepEqual(allRed.sequences[key], [length]);
-  }
-  assert.equal(marks, 21);
+  const allRed = scoreDerivedRoads(outcomes(Array(30).fill(1)));
+  assert.deepEqual(allRed.marks.bigEye, Array(28).fill('R'));
+  assert.deepEqual(allRed.marks.smallRoad, Array(27).fill('R'));
+  assert.deepEqual(allRed.marks.cockroachRoad, Array(26).fill('R'));
+  assert.equal(allRed.bigEye.longestRun, 28);
+  assert.equal(allRed.bigEye.longestColor, 'R');
+  assert.equal(allRed.smallRoad.longestRun, 27);
+  assert.equal(allRed.smallRoad.longestColor, 'R');
+  assert.equal(allRed.cockroachRoad.longestRun, 26);
+  assert.equal(allRed.cockroachRoad.longestColor, 'R');
+  assert.equal(allRed.longestRun, 28);
+  assert.equal(allRed.longestRoad, 'bigEye');
+  assert.equal(allRed.longestColor, 'R');
+  assert.equal(allRed.redCount, 81);
+  assert.equal(allRed.blueCount, 0);
   assert.equal(allRed.redRatio, 1);
-  assert.equal(allRed.total, (1 - 0.65) * 10 * 3);
-  assert.equal(allRed.total, 10.5);
-  // 同色長柱不再另扣「同色過長」；合併後仍只有偏紅 10.5。
+  assert.equal(allRed.total, 22);
+  assert.equal([28, 27, 26].reduce((sum, length) => sum + (length - WEIGHTS.derivedRunBase), 0), 63);
+  assert.notEqual(allRed.total, 63);
+  for (const { key } of DERIVED_ROADS) assert.equal(allRed[key].reasons, undefined);
+
+  const exact = scoreDerivedRoads(outcomes(Array(8).fill(1)));
+  assert.equal(exact.longestRun, 6);
+  assert.equal(exact.longestRoad, 'bigEye');
+  assert.equal(exact.longestColor, 'R');
+  assert.equal(exact.total, 0);
+  const justOver = scoreDerivedRoads(outcomes(Array(9).fill(1)));
+  assert.equal(justOver.longestRun, 7);
+  assert.equal(justOver.longestRoad, 'bigEye');
+  assert.equal(justOver.total, 1);
+
+  // 小路 9 顆全藍，長過大眼仔與蟑螂路，藍色長串一樣扣分。
+  const blue = scoreDerivedRoads(outcomes([1, 1, 2, 2, 1, 1, 2, 2]));
+  assert.deepEqual(blue.marks.smallRoad, Array(9).fill('B'));
+  assert.equal(blue.smallRoad.longestRun, 9);
+  assert.equal(blue.smallRoad.longestColor, 'B');
+  assert(blue.bigEye.longestRun < 9);
+  assert(blue.cockroachRoad.longestRun < 9);
+  assert.equal(blue.longestRun, 9);
+  assert.equal(blue.longestRoad, 'smallRoad');
+  assert.equal(blue.longestColor, 'B');
+  assert.equal(blue.total, 3);
+  assert(scoreSequence(blue.sequences.bigEye).total > 0);
+  assert.notEqual(blue.total, DERIVED_ROADS.reduce((sum, { key }) => sum + scoreSequence(blue.sequences[key]).total, 0));
+
+  // 三條都超過 6，只扣最長的大眼仔，不是 (13-6)+(11-6)+(9-6)。
   const longColumns = scoreDerivedRoads(outcomes([2, 2, 2, 2, 2, 2, 2, 2]));
-  assert.equal(longColumns.redRatio, 1);
-  assert.equal(longColumns.sequences.bigEye.length, 1);
-  assert(longColumns.sequences.bigEye[0] > 3);
-  assert.equal(longColumns.total, 10.5);
-  // 同色連續序列本身有相鄰重複，但未超過紅比例門檻時總分仍是 0，不再套大路規律。
-  const patterned = scoreDerivedRoads(outcomes([1, 1, 2, 2, 1, 1, 2, 2]));
-  assert(scoreSequence(patterned.sequences.bigEye).total > 0);
-  assert(patterned.redRatio <= WEIGHTS.derivedRedBase);
-  assert.equal(patterned.total, 0);
+  assert.equal(longColumns.bigEye.longestRun, 13);
+  assert.equal(longColumns.smallRoad.longestRun, 11);
+  assert.equal(longColumns.cockroachRoad.longestRun, 9);
+  assert.equal(longColumns.longestRoad, 'bigEye');
+  assert.equal(longColumns.longestColor, 'R');
+  assert.equal(longColumns.total, 7);
+  assert.notEqual(longColumns.total, 15);
+
+  // 紅比例 62.5% 仍低於舊門檻，但小路有 9 顆連續紅，現在要扣。
   const low = scoreDerivedRoads(outcomes([4, 1, 4, 1, 4, 1]));
-  const lowCount = DERIVED_ROADS.reduce((sum, { key }) => sum + low.marks[key].length, 0);
-  assert(lowCount >= 10);
   assert.equal(low.redRatio, 0.625);
-  assert(low.redRatio <= WEIGHTS.derivedRedBase);
-  assert.equal(low.total, 0);
-  const mixed = scoreDerivedRoads(outcomes([1, 2, 1, 2, 1, 2, 1, 2, 1, 2]));
-  assert(mixed.redRatio < WEIGHTS.derivedRedBase);
-  assert(DERIVED_ROADS.reduce((sum, { key }) => sum + mixed.marks[key].length, 0) >= 10);
-  assert.equal(mixed.total, 0);
+  assert.equal(low.longestRun, 9);
+  assert.equal(low.longestRoad, 'smallRoad');
+  assert.equal(low.longestColor, 'R');
+  assert.equal(low.total, 3);
+
+  // 9 顆、舊規則因少於 10 顆不扣；現在大眼仔連續 7 紅，扣 1。
+  const few = scoreDerivedRoads(outcomes([5, 5, 3]));
+  const fewCount = DERIVED_ROADS.reduce((sum, { key }) => sum + few.marks[key].length, 0);
+  assert.equal(fewCount, 9);
+  assert.equal(few.bigEye.longestRun, 7);
+  assert.equal(few.longestRoad, 'bigEye');
+  assert.equal(few.longestColor, 'R');
+  assert.equal(few.total, 1);
+
+  const tie = scoreDerivedRoads(outcomes([1, 1, 6]));
+  assert.equal(tie.bigEye.longestRun, 4);
+  assert.equal(tie.smallRoad.longestRun, 4);
+  assert.equal(tie.longestRoad, 'bigEye');
+  assert.equal(tie.longestColor, 'R');
+  const tieLater = scoreDerivedRoads(outcomes([1, 1, 2, 5]));
+  assert.equal(tieLater.smallRoad.longestRun, 3);
+  assert.equal(tieLater.smallRoad.longestColor, 'B');
+  assert.equal(tieLater.cockroachRoad.longestRun, 3);
+  assert.equal(tieLater.cockroachRoad.longestColor, 'R');
+  assert.equal(tieLater.bigEye.longestRun, 2);
+  assert.equal(tieLater.longestRoad, 'smallRoad');
+  assert.equal(tieLater.longestColor, 'B');
+
   const short = scoreDerivedRoads(outcomes(Array(6).fill(1)));
-  const shortCount = DERIVED_ROADS.reduce((sum, { key }) => sum + short.marks[key].length, 0);
-  assert.equal(shortCount, 9);
-  assert.equal(short.redRatio, 1);
+  assert.equal(DERIVED_ROADS.reduce((sum, { key }) => sum + short.marks[key].length, 0), 9);
+  assert.equal(short.longestRun, 4);
   assert.equal(short.total, 0);
   for (const values of [[], outcomes([1, 2]), outcomes([1, 1, 2])]) {
     const scored = scoreDerivedRoads(values);
-    const count = DERIVED_ROADS.reduce((sum, { key }) => sum + scored.marks[key].length, 0);
-    assert(count < 10);
+    assert(scored.longestRun <= WEIGHTS.derivedRunBase);
     assert.equal(scored.total, 0);
+    assert.equal(scored.longestRoad, 'bigEye');
     for (const { key } of DERIVED_ROADS) {
       assert.deepEqual(scored.sequences[key], derivedRunLengths(scored.marks[key]));
       assert.equal(typeof scored[key].redRatio, 'number');
+      assert.equal(typeof scored[key].longestRun, 'number');
     }
   }
-  const over = scoreDerivedRoads(outcomes([6, 1, 1, 6, 1, 1]));
-  assert(over.redRatio > WEIGHTS.derivedRedBase);
-  assert.equal(over.total, (over.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed);
+  assert.equal(scoreDerivedRoads([]).longestColor, null);
 });
 
 test('指定欄長的下三路紅藍顆數，評分總分不變', () => {
@@ -835,6 +895,15 @@ test('指定欄長的下三路紅藍顆數，評分總分不變', () => {
   assert.equal(scored.smallRoad.redRatio, 37 / 70);
   assert.equal(scored.cockroachRoad.redRatio, 34 / 67);
   assert.equal(scored.redRatio, 119 / 212);
+  assert.equal(scored.bigEye.longestRun, 4);
+  assert.equal(scored.bigEye.longestColor, 'R');
+  assert.equal(scored.smallRoad.longestRun, 5);
+  assert.equal(scored.smallRoad.longestColor, 'B');
+  assert.equal(scored.cockroachRoad.longestRun, 6);
+  assert.equal(scored.cockroachRoad.longestColor, 'R');
+  assert.equal(scored.longestRun, 6);
+  assert.equal(scored.longestRoad, 'cockroachRoad');
+  assert.equal(scored.longestColor, 'R');
   assert.equal(scored.total, 0);
   const regular = scoreRoad(values).total;
   const capOpts = { perSideMax: '', combinedMax: '', holeMax: '', pillarMax: '' };
@@ -845,6 +914,7 @@ test('指定欄長的下三路紅藍顆數，評分總分不變', () => {
     both: scoreWithCaps(runs, '莊', { ...capOpts, scoreMode: 'both' })
   };
   assert.equal(modes.big.total, regular + capTotal);
+  assert.equal(modes.big.longestRun, undefined);
   assert.equal(modes.derived.total, capTotal);
   assert.equal(modes.both.total, regular + capTotal);
   for (const mode of ['derived', 'both']) {
@@ -854,6 +924,14 @@ test('指定欄長的下三路紅藍顆數，評分總分不變', () => {
     assert.deepEqual([withCaps.bigEye.redCount, withCaps.bigEye.blueCount], [48, 27]);
     assert.deepEqual([withCaps.smallRoad.redCount, withCaps.smallRoad.blueCount], [37, 33]);
     assert.deepEqual([withCaps.cockroachRoad.redCount, withCaps.cockroachRoad.blueCount], [34, 33]);
+    assert.equal(withCaps.bigEye.longestRun, 4);
+    assert.equal(withCaps.smallRoad.longestRun, 5);
+    assert.equal(withCaps.smallRoad.longestColor, 'B');
+    assert.equal(withCaps.cockroachRoad.longestRun, 6);
+    assert.equal(withCaps.cockroachRoad.longestColor, 'R');
+    assert.equal(withCaps.longestRun, 6);
+    assert.equal(withCaps.longestRoad, 'cockroachRoad');
+    assert.equal(withCaps.longestColor, 'R');
     assert.equal(withCaps.derivedRedRatio, scored.redRatio);
     assert.equal(withCaps.derivedTotal, 0);
   }

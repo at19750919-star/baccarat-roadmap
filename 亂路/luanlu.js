@@ -3,7 +3,7 @@
 // 規律懲罰用正數累加，越低越好。更改權重只需調整此處。
 const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
   ordered: 3, period: 4, dominant: 3,
-  derivedRedBase: 0.65, derivedRed: 3 });
+  derivedRunBase: 6, derivedRun: 1 });
 const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
   prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
   perSideMax: 2, combinedMax: 3, includeSingles: false,
@@ -328,24 +328,45 @@ function derivedRunLengths(marks) {
   }
   return runs;
 }
+function longestSameColor(marks) {
+  let longestRun = 0, longestColor = null, run = 0, color = null;
+  for (const mark of marks) {
+    if (mark === color) run++;
+    else { run = 1; color = mark; }
+    if (run > longestRun) { longestRun = run; longestColor = color; }
+  }
+  return { longestRun, longestColor };
+}
 function scoreDerivedRoads(outcomes) {
   const big = buildBigRoadGrid(outcomes);
-  const marks = {}, sequences = {}, result = { total: 0, redRatio: 0, redCount: 0, blueCount: 0, marks, sequences };
+  const marks = {}, sequences = {}, result = {
+    total: 0, redRatio: 0, redCount: 0, blueCount: 0,
+    longestRun: 0, longestRoad: DERIVED_ROADS[0].key, longestColor: null, marks, sequences
+  };
   for (const { key, offset } of DERIVED_ROADS) {
     const roadMarks = buildDerivedRoad(big.grid, offset, big.cols, big.rows);
     const redCount = roadMarks.filter(mark => mark === 'R').length;
     const blueCount = roadMarks.filter(mark => mark === 'B').length;
+    const run = longestSameColor(roadMarks);
     marks[key] = roadMarks;
     sequences[key] = derivedRunLengths(roadMarks);
-    result[key] = { redRatio: roadMarks.length ? redCount / roadMarks.length : 0, redCount, blueCount };
+    result[key] = {
+      redRatio: roadMarks.length ? redCount / roadMarks.length : 0, redCount, blueCount,
+      longestRun: run.longestRun, longestColor: run.longestColor
+    };
     result.redCount += redCount;
     result.blueCount += blueCount;
+    if (run.longestRun > result.longestRun) {
+      result.longestRun = run.longestRun;
+      result.longestRoad = key;
+      result.longestColor = run.longestColor;
+    }
   }
   const allCount = result.redCount + result.blueCount;
   result.redRatio = allCount ? result.redCount / allCount : 0;
-  // 三條路合併只扣偏紅。少於 10 顆或未超過門檻都不扣，避免同一現象重複計分。
-  if (allCount >= 10 && result.redRatio > WEIGHTS.derivedRedBase) {
-    result.total = (result.redRatio - WEIGHTS.derivedRedBase) * 10 * WEIGHTS.derivedRed;
+  // 只扣最長的一條。紅比例抓不到長串同色；三條相加會把同一個現象扣三次。
+  if (result.longestRun > WEIGHTS.derivedRunBase) {
+    result.total = (result.longestRun - WEIGHTS.derivedRunBase) * WEIGHTS.derivedRun;
   }
   return result;
 }
@@ -366,6 +387,9 @@ function scoreWithCaps(runs, firstSide, opts, regular = scoreRoad(outcomesFromRu
     result.derivedBlueCount = derived.blueCount;
     result.derivedMarks = derived.marks;
     result.derivedSequences = derived.sequences;
+    result.longestRun = derived.longestRun;
+    result.longestRoad = derived.longestRoad;
+    result.longestColor = derived.longestColor;
     result.scoreMode = mode;
     result.total = (mode === 'both' ? regular.total : 0) + derived.total + caps.total;
   }
@@ -834,6 +858,7 @@ function initUI() {
   const points = n => Number(n.toFixed(2)).toString();
   const percent = ratio => `${Math.round((ratio || 0) * 100)}%`;
   const beadText = item => `${item.redCount}紅 ${item.blueCount}藍（紅 ${percent(item.redRatio)}）`;
+  const markColor = color => color === 'R' ? '紅' : color === 'B' ? '藍' : '';
   const reasonText = reasons => reasons.length ? reasons.map(r => `${r.label}×${points(r.count)}（${points(r.points)}分）`).join('、') : '無規律扣分';
   function setBusy(value) {
     busy = value;
@@ -877,7 +902,9 @@ function initUI() {
         sequences: road.score.derivedSequences, redRatio: road.score.derivedRedRatio,
         redCount: road.score.derivedRedCount, blueCount: road.score.derivedBlueCount,
         total: road.score.derivedTotal, bigEye: road.score.bigEye,
-        smallRoad: road.score.smallRoad, cockroachRoad: road.score.cockroachRoad
+        smallRoad: road.score.smallRoad, cockroachRoad: road.score.cockroachRoad,
+        longestRun: road.score.longestRun, longestRoad: road.score.longestRoad,
+        longestColor: road.score.longestColor
       } : scoreDerivedRoads(road.nonTieOutcomes);
       const mode = generatedOptions.scoreMode;
       const part = (included, label, value) => element('span', 'score-part', `${label} ${value}${included ? '' : '（未計入）'}`);
@@ -885,7 +912,7 @@ function initUI() {
       const caption = element('small', '');
       if (generatedOptions.randomMode) caption.textContent = '隨機模式';
       else caption.append('總分：', part(mode !== 'derived', '規律', points(road.score.regularTotal)),
-        ' ＋ ', part(mode !== 'big', '下三路偏紅', points(derived.total)),
+        ' ＋ ', part(mode !== 'big', '下三路最長同色', points(derived.total)),
         ' ＋ ', part(true, '超限', points(road.score.capTotal)));
       score.append(caption);
       heading.append(title, score); card.append(heading);
@@ -922,13 +949,18 @@ function initUI() {
       for (const { key, label } of DERIVED_ROADS) {
         const section = element('div', `sequence ${key}`);
         const seq = derived.sequences[key].join('、') || '無';
-        section.append(element('strong', '', `${label}：${seq} ／ ${beadText(derived[key])}`));
+        const color = markColor(derived[key].longestColor);
+        const runText = color ? `${derived[key].longestRun} ${color}` : String(derived[key].longestRun);
+        section.append(element('strong', '', `${label}：${seq} ／ ${beadText(derived[key])} ／ 最長 ${runText}`));
         card.append(section);
       }
       if (!generatedOptions.randomMode) {
         const suffix = mode === 'big' ? '（未計入總分）' : '';
+        const roadLabel = DERIVED_ROADS.find(item => item.key === derived.longestRoad)?.label || '';
+        const color = markColor(derived.longestColor);
+        const who = color ? `${roadLabel}·${color}` : roadLabel;
         card.append(element('p', 'road-reasons derived-summary',
-          `下三路合計 ${beadText(derived)}，偏紅 ${points(derived.total)} 分${suffix}`));
+          `下三路合計 ${beadText(derived)}，最長同色 ${derived.longestRun} 顆（${who}），扣 ${points(derived.total)} 分${suffix}`));
       }
       const reroll = element('button', 'secondary', '重抽這條'); reroll.type = 'button';
       reroll.disabled = busy; reroll.addEventListener('click', () => run(index)); card.append(reroll);
