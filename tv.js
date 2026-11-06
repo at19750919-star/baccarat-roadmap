@@ -72,7 +72,7 @@
     setTxt('legendKeyFullscreen', String(kb.keyFullscreen || 'F'));
   }
   const statsFontKeys = ["statsNameSize", "statsNumberSize", "statsHeaderSize"];
-  const defaults = { columns: 46, bigStroke: 4, eyeStroke: 2, cockroachStroke: 3, starStroke: 3, dragonThreshold: 6, statsNameSize: 32, statsNumberSize: 32, statsHeaderSize: 22 };
+  const defaults = { columns: 46, bigStroke: 4, eyeStroke: 2, cockroachStroke: 3, starStroke: 3, dragonThreshold: 6, statsNameSize: 48, statsNumberSize: 32, statsHeaderSize: 22 };
   const limits = { columns: [38, 48, 1], bigStroke: [1, 10, 0.5], eyeStroke: [1, 10, 0.5], cockroachStroke: [1, 10, 0.5], starStroke: [1, 10, 0.5], dragonThreshold: [2, 100, 1], statsNameSize: [16, 48, 1], statsNumberSize: [18, 40, 1], statsHeaderSize: [16, 36, 1] };
   const colorGroups = [
     ["畫面與文字", [
@@ -84,7 +84,7 @@
       ["watermark", "路單浮水印", "#787878"],
       ["text", "一般文字", "#fff8e0"],
       ["accent", "重點文字", "#ffd700"],
-      ["predictText", "下局指示標題", "#222222"],
+      ["predictText", "下局指示標題", "#555555"],
       ["limitHigh", "最高限額文字", "#ffe296"],
       ["limitLow", "最低限額文字", "#a8e6b0"],
       ["settings", "設定視窗背景", "#650c0c"],
@@ -103,8 +103,8 @@
       ["statPlayer", "閒贏", "#1e5ec9"],
       ["statTie", "和局", "#2ea94a"],
       ["statSix", "幸運6／老虎", "#d62121"],
-      ["statBankerPair", "莊對", "#7a2aa0"],
-      ["statPlayerPair", "閒對", "#2f6fd6"],
+      ["statBankerPair", "莊對", "#dc4242"],
+      ["statPlayerPair", "閒對", "#4076d1"],
       ["statSeven", "幸運7", "#0241af"],
       ["statSuperSeven", "超級幸運7", "#540593"],
       ["statEmpty", "空白統計格", "#5a0d0d"],
@@ -173,6 +173,7 @@
       enteringEffectIndex = -1;
     }
   };
+  const plainArt = { B: { file: 'banker-stats', label: '莊' }, P: { file: 'player-stats', label: '閒' }, T: { file: 'tie-stats', label: '和' } };
   const originalBead = renderBead;
   renderBead = function (rounds = state.rounds, target = null, columns) {
     const visible = target ? rounds : rounds.slice(-beadColumns * 6);
@@ -184,7 +185,9 @@
       const tiger = rd.r === 'B' && ['small', 'big'].includes(rd.tiger) ? rd.tiger : null;
       const cards = rd.r === 'P' ? (rd.s7 || rd.l7) : null;
       const seven = rd.r === 'P' && ((rd.s7 && [4, 5, 6].includes(rd.s7)) || (!rd.s7 && [2, 3].includes(rd.l7)));
-      if (!tiger && !seven) return;
+      // 莊／閒／和（不含幸運6）：幸運7 的金框＋統計區的底色與字型（*-stats.png）。
+      const plain = !tiger && !seven && !rd.l6 && ['B', 'P', 'T'].includes(rd.r) ? rd.r : null;
+      if (!tiger && !seven && !plain) return;
       const bead = cell.querySelector('.bead');
       bead.classList.remove('l6'); // Preserve the separate ordinary Lucky Six animation.
       bead.classList.add('tv-art-bead');
@@ -193,9 +196,9 @@
       image.className = 'bead-art';
       image.alt = '';
       image.draggable = false;
-      image.src = tiger ? animalArt[tiger].src : 'assets/beads/' + (rd.s7 ? 'purple-seven' : 'blue-seven') + '.png';
+      image.src = tiger ? animalArt[tiger].src : plain ? 'assets/beads/' + plainArt[plain].file + '.png' : 'assets/beads/' + (rd.s7 ? 'purple-seven' : 'blue-seven') + '.png';
       bead.appendChild(image);
-      bead.title = tiger ? (tiger === 'small' ? '小老虎' : '大老虎') : (rd.s7 ? '超級幸運七 · 閒7贏莊6 · 雙方合計 ' : '幸運七 · 閒家 ') + cards + ' 張';
+      bead.title = plain ? plainArt[plain].label : tiger ? (tiger === 'small' ? '小老虎' : '大老虎') : (rd.s7 ? '超級幸運七 · 閒7贏莊6 · 雙方合計 ' : '幸運七 · 閒家 ') + cards + ' 張';
       bead.setAttribute('aria-label', bead.title);
       if (seven) {
         const digit = document.createElement('span');
@@ -266,41 +269,52 @@
     const list = document.querySelector('.tv-stats .stats-list');
     if (!list) return;
     let pendingFrame = 0;
-    function fits({ cell, label }) {
-      const box = cell.getBoundingClientRect();
-      const column = label.getBoundingClientRect();
-      const padding = 4 * box.height / Math.max(1, cell.offsetHeight);
-      const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
-      const range = document.createRange();
-      let text;
-      while ((text = walker.nextNode())) {
-        if (!text.textContent.trim()) continue;
-        range.selectNodeContents(text);
-        for (const rect of range.getClientRects()) {
-          if (rect.left < column.left - .1 || rect.right > column.right + .1 ||
-              rect.top < box.top + padding || rect.bottom > box.bottom - padding) return false;
-        }
-      }
-      return true;
-    }
+    // The sole statistics fitter: change font sizes, never glyph transforms.
     function fit(targetList = list) {
-      const items = [...targetList.children].flatMap(cell => {
+      const cells = [...targetList.querySelectorAll('li:not(.tv-stat-empty)')];
+      for (const cell of cells) {
         const label = cell.querySelector('.k');
-        return label && label.clientWidth && cell.clientHeight ? [{ cell, label, low: 12, high: settings.statsNameSize }] : [];
-      });
-      // Batch writes before reads: short labels grow, long/multiline labels fit
-      // the real glyph widths and the space remaining beside the count.
-      for (let pass = 0; pass < 8; pass++) {
-        for (const item of items) {
-          item.middle = (item.low + item.high) / 2;
-          item.label.style.setProperty('--tv-stat-label-size', item.middle + 'px');
+        if (!label || !label.clientWidth || !label.clientHeight) continue;
+        const lines = [...label.children];
+        const seven = label.classList.contains('tv-stat-seven');
+        const scale = label.getBoundingClientRect().width / label.clientWidth;
+        let low = 1, high = label.clientHeight;
+        for (let pass = 0; pass < 12; pass++) {
+          const size = (low + high) / 2;
+          label.style.setProperty('--stat-fit-size', size + 'px');
+          // The top row is stretched so its ends can sit apart; measure those ends, not the row box.
+          const width = Math.max(...lines.map(line => (seven && line.classList.contains('tv-stat-seven-top')
+            ? [...line.children].reduce((sum, part) => sum + part.getBoundingClientRect().width, 0)
+            : line.getBoundingClientRect().width) / scale));
+          const height = lines.reduce((sum, line) => sum + line.getBoundingClientRect().height / scale, 0);
+          if (width <= label.clientWidth * .96 && height <= label.clientHeight * .92) low = size;
+          else high = size;
         }
-        for (const item of items) {
-          if (fits(item)) item.low = item.middle;
-          else item.high = item.middle;
-        }
+        const cap = Number(settings.statsNameSize);
+        const size = Math.min(low * .94, Number.isFinite(cap) ? cap : low * .94);
+        label.style.setProperty('--stat-fit-size', size.toFixed(2) + 'px');
       }
-      for (const item of items) item.label.style.setProperty('--tv-stat-label-size', item.low.toFixed(2) + 'px');
+      // Every count shares the same size and reserved right column, even as digits grow.
+      // 數字大小 is a px target: use it when the tightest cell can hold it, otherwise shrink to the cell.
+      const ctx = document.createElement('canvas').getContext('2d');
+      const rooms = cells.map(cell => {
+        const count = cell.querySelector('b');
+        if (!count || !count.clientWidth || !count.clientHeight) return Infinity;
+        const style = getComputedStyle(count);
+        const text = count.textContent.trim() || '0';
+        ctx.font = `${style.fontWeight} 100px ${style.fontFamily}`;
+        const unit = ctx.measureText(text).width / 100;
+        const spacing = (parseFloat(style.letterSpacing) || 0) * text.length;
+        const byWidth = unit > 0 ? (count.clientWidth - spacing) / unit : Infinity;
+        return Math.max(0, Math.min(byWidth, count.clientHeight));
+      });
+      if (rooms.length) {
+        const requested = Number(settings.statsNumberSize);
+        const room = Math.min(...rooms);
+        const limit = Number.isFinite(requested) ? requested : room;
+        const chosen = limit <= room + 0.05 ? limit : room;
+        targetList.style.setProperty('--stat-count-fit-size', (chosen === limit ? String(limit) : chosen.toFixed(2)) + 'px');
+      }
       if (targetList === list) document.dispatchEvent(new Event('baccarat:stats-typography'));
     }
     window.BaccaratTVView.fitStats = fit;
@@ -1059,7 +1073,7 @@
         });
       }
     });
-    dialog.addEventListener('close', () => button.focus());
+    dialog.addEventListener('close', () => button.focus({ preventScroll: true }));
     applyLayout();
     initStatsTypography();
     updateKeyLegend(currentKeyBindings);

@@ -10,7 +10,7 @@
   const labels = { lucky: ['幸運 7', 'LUCKY'], super: ['超級幸運 7', 'SUPER LUCKY'], 'small-tiger': ['小老虎', 'SMALL TIGER'], 'big-tiger': ['大老虎', 'BIG TIGER'] };
   const defaults = Object.fromEntries(Object.entries(labels).map(([kind, [title, english]]) => [kind, {
     title: { text: title, font: 'serif', size: 35, color: '#ffebba', weight: 700, spacing: 5, effect: 'none', strength: 50 },
-    english: { text: english, font: 'cinzel', size: 23, color: '#fff1c9', weight: 700, spacing: 5, effect: 'shadow', strength: 50 }
+    english: { text: english, font: 'cinzel', size: 46, color: '#fff1c9', weight: 700, spacing: 5, effect: 'shadow', strength: 50 }
   }]));
   const effects = ['none', 'shadow', 'glow', 'emboss'];
   const limits = { size: [14, 80, 1], spacing: [0, 20, .5], strength: [0, 100, 1] };

@@ -952,4 +952,13 @@ test('舊 scoreDerived 轉成評分範圍，錯誤值丟中文錯誤', () => {
   assert.throws(() => generateRoad({ scoreMode: true }), /評分範圍必須是 big、derived 或 both/);
   assert.throws(() => generateRoad({ scoreMode: '' }), /評分範圍必須是 big、derived 或 both/);
 });
+test('莊閒差與長龍留白代表不限，非法值仍丟中文錯誤', () => {
+  const road = generateRoad({ seed: 7, maxDifference: '', maxRun: '', attempts: 30, hillSteps: 30 });
+  assert.equal(road.nonTieOutcomes.length, 82);
+  assert.ok(generateRoad({ seed: 7, rounds: 81, maxDifference: '', attempts: 30, hillSteps: 0 }));
+  const dragon = generateRoad({ seed: 1, rounds: 20, maxDifference: '', maxRun: '', randomMode: true });
+  assert.equal(dragon.runs.reduce((a, b) => a + b, 0), 20);
+  assert.throws(() => generateRoad({ maxRun: 0 }), /長龍上限必須留白或填入/);
+  assert.throws(() => generateRoad({ maxDifference: -1 }), /莊閒差上限必須留白或填入/);
+});
 console.log(`全部 ${passed} 項測試通過。`);

@@ -38,13 +38,15 @@
 .tv-shortcuts { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 
 .tv-table-board {
-  height: 108px;
+  /* 吃掉頂列上下 6px 內距，外框貼齊頂列上下緣，高度 108 + 12 = 120 */
+  margin: -6px 0;
+  height: 120px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 4px;
-  padding: 4px 14px;
+  gap: 6px;
+  padding: 8px 14px;
   background: rgba(22, 7, 7, .62);
   border: 1px solid #d4a64a;
   border-radius: 4px;
@@ -137,34 +139,38 @@
   display: grid;
   grid-template-columns: 64px repeat(8, minmax(0, 1fr));
   gap: 0 4px;
-  padding: 4px 10px;
+  /* 吃掉頂列上下 6px 內距，框貼齊頂列上下緣（LOGO 本身就比頂列高） */
+  margin: -6px 0;
+  padding: 1px 10px;
   background: rgba(22, 7, 7, .62);
   border: 1px solid #d4a64a;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px rgba(255, 215, 120, .25);
   min-width: 0;
 }
-.tv-limit-col { display: grid; grid-template-rows: 1.5fr 1fr 1fr; align-items: center; min-width: 0; text-align: center; }
+.tv-limit-col { display: grid; grid-template-rows: auto auto auto; align-content: space-evenly; row-gap: 0; align-items: center; min-width: 0; text-align: center; }
 .tv-limit-name {
   font-family: "Noto Serif TC", serif;
-  font-size: 23px;
+  font-size: 27px;
   font-weight: 900;
   letter-spacing: -1px;
+  line-height: 1.1;
+  min-height: 1.1em; /* 最高／最低那欄的空標題也佔一行，才會跟數字對齊 */
   color: #fff;
   white-space: nowrap;
   text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
 }
-.tv-limit-key { font-family: "Noto Serif TC", serif; font-size: 17px; font-weight: 700; white-space: nowrap; }
+.tv-limit-key { font-family: "Noto Serif TC", serif; font-size: 22px; font-weight: 700; white-space: nowrap; line-height: 1.1; }
 .tv-limit-key-high, .tv-limit .limit-input[data-k$="Max"] { color: #ffe296; }
 .tv-limit-key-low, .tv-limit .limit-input[data-k$="Min"] { color: #a8e6b0; }
 .tv-limit .limit-input {
-  height: 26px;
-  padding: 0 2px;
+  height: 32px;
+  padding: 0 1px;
   border: 1px solid transparent;
   background: transparent;
   color: #fff;
-  font-size: 19px;
-  line-height: 24px;
+  font-size: 23px;
+  line-height: 30px;
   text-align: center;
 }
 .tv-limit .limit-input:hover { border-color: rgba(255, 215, 120, .35); }
@@ -237,23 +243,43 @@
 .tv-stats .stats-list .k small { font-size: clamp(11px, .55em, 18px); margin-left: 2px; white-space: nowrap; }
 .tv-stats .stats-list li > b {
   min-width: 2ch;
-  font: 700 var(--tv-stat-count-size, 32px)/1 Arial, sans-serif;
-  letter-spacing: 0;
-  font-variant-numeric: tabular-nums;
+  font: 800 var(--tv-stat-count-size, 32px)/1 "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  letter-spacing: 1.5px;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums;
   text-align: right;
   white-space: nowrap;
 }
-.tv-stats .stat-banker, .tv-stats .stat-lucky6 { background: #d62121; }
+.tv-stats .stat-banker { background: #d62121; }
+/* 幸運6／小老虎／大老虎：紅色系頂光，與莊贏區別；box-shadow 沿用共用立體樣式 */
+.tv-stats .stat-lucky6 { background: radial-gradient(ellipse 120% 90% at 50% 0%, #e24a3a 0%, #b81a1a 55%, #8f1010 100%); }
 .tv-stats .stat-tie { background: #2ea94a; }
 .tv-stats .stat-player, .tv-stats .tv-stat-blue { background: #1e5ec9; }
-.tv-stats .tv-lucky7 { background: #0241af; }
-.tv-stats .tv-super-lucky7 { background: #540593; }
-.tv-stats .stat-banker-pair { background: #7a2aa0; }
-.tv-stats .stat-player-pair { background: #2f6fd6; }
+/* 幸運7／超級幸運7：同樣的頂光，維持原色相 */
+.tv-stats .tv-lucky7 { background: radial-gradient(ellipse 120% 90% at 50% 0%, #2f6be0 0%, #0241af 55%, #012a78 100%); }
+.tv-stats .tv-super-lucky7 { background: radial-gradient(ellipse 120% 90% at 50% 0%, #8233c8 0%, #540593 55%, #36025f 100%); }
+.tv-stats .stat-banker-pair { background: #dc4242; }
+.tv-stats .stat-player-pair { background: #4076d1; }
 .tv-stats .tv-stat-empty { background: #5a0d0d; box-shadow: none; }
 
 .tv-app .bead { font-size: 36px; box-shadow: inset 0 3px 4px #ffffff73, inset 0 -2px 3px #0004, 0 2px 3px #0005; }
 .tv-app .bead.l6 { font-size: 44px; }
+/* 莊／閒／和珠：跟開獎提示圓牌同款（金邊＋寶石光澤＋內細環），字用白色；自選色經由變數帶入 */
+.tv-app .bead.B:not(.l6):not(.tv-art-bead) { --bead-color: var(--tv-color-red, #d62121); }
+.tv-app .bead.P:not(.l6):not(.tv-art-bead) { --bead-color: var(--tv-color-blue, #1e5ec9); }
+.tv-app .bead.T:not(.l6):not(.tv-art-bead) { --bead-color: var(--tv-color-green, #2ea94a); }
+.tv-app .bead:is(.B, .P, .T):not(.l6):not(.tv-art-bead) {
+  box-sizing: border-box;
+  width: 92%; height: 92%; margin: 4%;
+  border: max(1px, calc(var(--cell-bead) * .027)) solid transparent;
+  background:
+    radial-gradient(ellipse 34% 22% at 34% 20%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 100%) padding-box,
+    radial-gradient(circle at 30% 24%, color-mix(in srgb, var(--bead-color) 80%, white) 0%, var(--bead-color) 30%, color-mix(in srgb, var(--bead-color) 82%, black) 62%, color-mix(in srgb, var(--bead-color) 55%, black) 100%) padding-box,
+    linear-gradient(145deg, #fffbd2 0%, #fde48f 28%, #e8b23e 55%, #fff4b4 76%, #efc257 100%) border-box;
+  box-shadow: 0 0 0 1px #a8590a, inset 0 0 0 1.5px color-mix(in srgb, var(--bead-color) 35%, black), inset -2px -3px 5px rgba(0, 0, 0, .3), 0 2px 3px rgba(0, 0, 0, .3);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .45);
+}
 .tv-app .lucky7-mark {
   position: absolute; top: -4%; right: -5%; z-index: 2;
   padding: 3px 5px; border: 1px solid #fff0b3; border-radius: 10px;
@@ -264,14 +290,9 @@
 }
 .tv-app .lucky7-mark.super { background: linear-gradient(135deg, #fff0cf, #a97736); border-color: #fff6dc; }
 .tv-app .predict-legend { grid-template-rows: repeat(4, minmax(0, 1fr)); }
-.tv-app .leg-mark, .tv-app .leg-tag { width: 44px; height: 44px; }
-.tv-app .leg-tag { font-size: 26px; }
-.tv-app .predict-title { font-size: 24px; }
-
-[data-theme="black-gold"] .tv-app .key-legend,
-[data-theme="black-gold"] .tv-app .key-legend b,
-[data-theme="black-gold"] .tv-app .tv-stat-head,
-[data-theme="black-gold"] .tv-app .tv-stat-head b { color: var(--skin-light); }
+.tv-app .leg-mark, .tv-app .leg-tag { width: 64px; height: 64px; }
+.tv-app .leg-tag { font-size: 34px; }
+.tv-app .predict-title { font-size: 32px; }
 
 /* 三星路：每欄三個大格，格子邊長等於大路一格。 */
 .tv-star-mark {
@@ -316,7 +337,7 @@
 .tv-resizer-bottom { left: 16px; right: 16px; bottom: 0; height: 14px; cursor: ns-resize; }
 .tv-resizer-bottom-left { left: 0; bottom: 0; width: 24px; height: 24px; cursor: nesw-resize; }
 .tv-resizer-bottom-right { position: absolute; right: 0; bottom: 0; width: 32px; height: 32px; cursor: nwse-resize; touch-action: none; z-index: 30; }
-.tv-resizer-bottom-right::after { content: ''; position: absolute; right: 6px; bottom: 6px; width: 12px; height: 12px; border-right: 3px solid #ffd700; border-bottom: 3px solid #ffd700; opacity: .8; transition: opacity .15s, transform .15s; }
+.tv-resizer-bottom-right::after { content: ""; position: absolute; right: 6px; bottom: 6px; width: 12px; height: 12px; border-right: 3px solid #ffd700; border-bottom: 3px solid #ffd700; opacity: .8; transition: opacity .15s, transform .15s; }
 .tv-resizer-bottom-right:hover::after, .tv-settings.is-resizing .tv-resizer-bottom-right::after { opacity: 1; transform: scale(1.2); border-color: #fff; }
 .tv-settings-size-btn { padding: 2px 8px !important; font-size: 15px !important; line-height: 1.2 !important; background: rgba(255, 215, 0, 0.15) !important; border: 1px solid rgba(255, 215, 0, 0.5) !important; color: #ffd700 !important; border-radius: 4px; margin-left: auto; cursor: pointer; }
 .tv-settings-size-btn:hover { background: #ffd700 !important; color: #521111 !important; }
@@ -379,6 +400,14 @@
 /* Pair markers stay above artwork, entrance flashes and orbit effects. */
 .tv-app .tv-art-bead.pair-bp::before,
 .tv-app .tv-art-bead.pair-pp::after { z-index: 4; }
+/* 對子點：左上高光＋邊緣漸暗＋底部內陰影，做出跟珠子一樣的立體光澤 */
+.tv-app .bead.pair-bp::before,
+.tv-app .bead.pair-pp::after {
+  background-image:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, .3) 20%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 45% 40%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, .4) 100%);
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .55);
+}
 .tv-app .bead.pair-bp::before {
   left: var(--tv-symbol-bead-banker-x, -4%); top: var(--tv-symbol-bead-banker-y, -4%);
   width: var(--tv-symbol-bead-banker-size, 38%); height: var(--tv-symbol-bead-banker-size, 38%);
@@ -707,8 +736,8 @@
 .tv-settings .tv-target-menu button { display: block; width: 100%; padding: 7px 8px; border: 0 !important; border-radius: 3px; background: #fff !important; color: #222 !important; font-size: 14px; line-height: 20px; text-align: left; }
 .tv-settings .tv-target-menu button[aria-selected="true"] { background: #fff0b2 !important; }
 .tv-settings .tv-target-menu button:hover, .tv-settings .tv-target-menu button:focus { background: #e7edfa !important; outline: 1px solid #3260b0; outline-offset: -1px; }
-.tv-color-settings { display: none; }
-.tv-color-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; align-content: start; }
+.tv-settings .tv-color-settings { display: none; }
+.tv-settings .tv-color-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; align-content: start; }
 .tv-settings button.tv-color-swatch { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-width: 0; height: 46px; padding: 8px 10px; background: #ffffff08 !important; border: 1px solid #ffffff20 !important; border-radius: 5px; color: #fff8e0; font-size: 17px; text-align: left; }
 .tv-settings button.tv-color-swatch[aria-pressed="true"] { border-color: #ffd700 !important; background: #ffd70018 !important; }
 .tv-color-swatch i { display: block; width: 44px; height: 26px; background: var(--swatch-color); border: 1px solid #fff8; border-radius: 4px; flex-shrink: 0; }
@@ -726,6 +755,8 @@
 .tv-settings #tvColorHex:invalid { border: 2px solid #ff7c7c; }
 
 html.tv-color-page body { background: var(--tv-color-page) !important; }
+/* 擋掉共用 version-snapshot.css 的全域 html/body 背景 #151716，回到 style.css 的深紅 */
+html:root, html:root body { background: #7a0b0b; }
 
 html.tv-color-panel .tv-app .panel,
 html.tv-color-panel .tv-app .tv-limit { background: var(--tv-color-panel) !important; }
@@ -770,7 +801,6 @@ html.tv-color-red .tv-app .leg-mark.circle:not(.blue) { border-color: var(--tv-c
 
 html.tv-color-red .tv-app .big-circle.B { background: linear-gradient(-45deg, transparent, color-mix(in srgb, var(--tv-color-red) 18%, transparent), transparent); }
 
-html.tv-color-red .tv-app .bead.B:not(.l6):not(.tv-art-bead),
 html.tv-color-red .tv-app .leg-tag.banker,
 html.tv-color-red .tv-app .leg-mark.solid:not(.blue),
 html.tv-color-red .tv-app .leg-mark.slash:not(.blue)::before { background: var(--tv-color-red) !important; }
@@ -785,7 +815,6 @@ html.tv-color-blue .tv-app .leg-mark.circle.blue { border-color: var(--tv-color-
 
 html.tv-color-blue .tv-app .big-circle.P { background: linear-gradient(-45deg, transparent, color-mix(in srgb, var(--tv-color-blue) 18%, transparent), transparent); }
 
-html.tv-color-blue .tv-app .bead.P:not(.l6):not(.tv-art-bead),
 html.tv-color-blue .tv-app .leg-tag.player,
 html.tv-color-blue .tv-app .leg-mark.solid.blue,
 html.tv-color-blue .tv-app .leg-mark.slash.blue::before { background: var(--tv-color-blue) !important; }
@@ -793,16 +822,16 @@ html.tv-color-blue .tv-app .leg-mark.slash.blue::before { background: var(--tv-c
 html.tv-color-blue .tv-app .derived-dot.shape-solid.blue,
 html.tv-color-blue .tv-app .derived-dot.shape-slash.blue::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--tv-color-blue) 50%, white), var(--tv-color-blue) 35%, color-mix(in srgb, var(--tv-color-blue) 65%, black)) !important; }
 
-html.tv-color-green .tv-app .bead.T,
 html.tv-color-green .tv-app .big-circle.tie-mark::before { background: var(--tv-color-green) !important; }
 
 html.tv-color-markText .tv-app .bead:not(.tv-art-bead),
 html.tv-color-markText .tv-app .leg-tag { color: var(--tv-color-markText) !important; }
 
-html.tv-color-pairBanker .tv-app .pair-bp::before,
+/* 珠子路對子點只換底色，保留上面的立體光澤 */
+html.tv-color-pairBanker .tv-app .pair-bp::before { background-color: var(--tv-color-pairBanker) !important; }
 html.tv-color-pairBanker .tv-app .big-circle .mark-bp { background: var(--tv-color-pairBanker) !important; }
 
-html.tv-color-pairPlayer .tv-app .pair-pp::after,
+html.tv-color-pairPlayer .tv-app .pair-pp::after { background-color: var(--tv-color-pairPlayer) !important; }
 html.tv-color-pairPlayer .tv-app .big-circle .mark-pp { background: var(--tv-color-pairPlayer) !important; }
 
 html.tv-color-statBanker .tv-app .tv-stats .stat-banker { background: var(--tv-color-statBanker) !important; }
@@ -811,15 +840,24 @@ html.tv-color-statPlayer .tv-app .tv-stats .stat-player { background: var(--tv-c
 
 html.tv-color-statTie .tv-app .tv-stats .stat-tie { background: var(--tv-color-statTie) !important; }
 
-html.tv-color-statSix .tv-app .tv-stats .stat-lucky6 { background: var(--tv-color-statSix) !important; }
+html.tv-color-statSix .tv-app .tv-stats .stat-lucky6 {
+  background-color: var(--tv-color-statSix) !important;
+  background-image: radial-gradient(ellipse 120% 90% at 50% 0%, rgba(255, 255, 255, .18) 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .28) 100%) !important;
+}
 
 html.tv-color-statBankerPair .tv-app .tv-stats .stat-banker-pair { background: var(--tv-color-statBankerPair) !important; }
 
 html.tv-color-statPlayerPair .tv-app .tv-stats .stat-player-pair { background: var(--tv-color-statPlayerPair) !important; }
 
-html.tv-color-statSeven .tv-app .tv-stats .tv-lucky7 { background: var(--tv-color-statSeven) !important; }
+html.tv-color-statSeven .tv-app .tv-stats .tv-lucky7 {
+  background-color: var(--tv-color-statSeven) !important;
+  background-image: radial-gradient(ellipse 120% 90% at 50% 0%, rgba(255, 255, 255, .18) 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .28) 100%) !important;
+}
 
-html.tv-color-statSuperSeven .tv-app .tv-stats .tv-super-lucky7 { background: var(--tv-color-statSuperSeven) !important; }
+html.tv-color-statSuperSeven .tv-app .tv-stats .tv-super-lucky7 {
+  background-color: var(--tv-color-statSuperSeven) !important;
+  background-image: radial-gradient(ellipse 120% 90% at 50% 0%, rgba(255, 255, 255, .18) 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .28) 100%) !important;
+}
 
 html.tv-color-statEmpty .tv-app .tv-stats .tv-stat-empty { background: var(--tv-color-statEmpty) !important; }
 
@@ -829,10 +867,11 @@ html.tv-color-statText .tv-app .tv-stats .k,
 html.tv-color-statText .tv-app .tv-stats b,
 html.tv-color-statText .tv-app .tv-stat-head { color: var(--tv-color-statText) !important; }
 
-/* 長龍影片特效：透明背景 webm 直接疊在路單上，舊的程式畫面特效全部隱藏 */
-.dragon-overlay.banker-dragon-overlay:has(.dragon-video),
-.dragon-overlay.player-dragon-overlay:has(.dragon-video) { background: transparent; }
+/* Only a successfully playing side-specific video hides the native fallback.
+   Each video retains its own baked animation/particles; idle or failed media hides nothing. */
+.dragon-overlay.dragon-video-mode { background: transparent; }
 .dragon-overlay .dragon-video {
+  display: none;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -840,10 +879,11 @@ html.tv-color-statText .tv-app .tv-stat-head { color: var(--tv-color-statText) !
   object-fit: cover;
   pointer-events: none;
 }
-.dragon-overlay:has(.dragon-video) .dragon-fx-canvas,
-.dragon-overlay:has(.dragon-video) .dragon-aura-ring,
-.dragon-overlay:has(.dragon-video) .dragon-magic-circle,
-.dragon-overlay:has(.dragon-video) .golden-dragon-img { display: none; }
+.dragon-overlay.dragon-video-mode .dragon-video { display: block; }
+.dragon-overlay.dragon-video-mode .dragon-fx-canvas,
+.dragon-overlay.dragon-video-mode .dragon-aura-ring,
+.dragon-overlay.dragon-video-mode .dragon-magic-circle,
+.dragon-overlay.dragon-video-mode .golden-dragon-img { display: none; }
 
 /* 電視版巨龍分三段登場：小 → 中 → 大，每段停一下再放大 */
 .dragon-overlay.active.banker-dragon-overlay .dragon-banker-img,
@@ -879,3 +919,886 @@ html.tv-color-statText .tv-app .tv-stat-head { color: var(--tv-color-statText) !
 .tv-settings button.tv-mini-audio-btn { font-size: 15px !important; }
 .tv-settings #tvColorTarget, .tv-settings .tv-target-menu button { font-size: 16px; }
 .tv-settings #tvColorReset { font-size: 15px; }
+
+/* ===== 賭場綠金風格（html[data-skin="green"]，2026-11-02 新增；紅金為預設，不受影響） ===== */
+.tv-save-stack { position: relative; display: flex; }
+.tv-save-stack > .tv-skin-btn { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; z-index: 5; }
+.tv-skin-btn { padding: 3px 10px; border: 1px solid #d4a64a; border-radius: 5px; background: #590d0d; color: #ffe28a; font: 700 14px/1.3 "Noto Serif TC", "Cinzel", serif; white-space: nowrap; cursor: pointer; }
+.tv-skin-btn:focus-visible { outline: 3px solid #ffd700; outline-offset: 3px; }
+html[data-skin="green"] {
+  --g-ink: #07090b; --g-felt-1: #123a2c; --g-felt-2: #0a241b;
+  --g-panel: linear-gradient(160deg,#182021,#0b1113);
+  --g-gold-1: #f4dfa4; --g-gold-2: #d9b568; --g-gold-3: #a67c35; --g-gold-4: #6b4c1d;
+  --g-line: linear-gradient(135deg,#6b4c1d,#e8c97a,#8a6a2f,#f4dfa4,#6b4c1d);
+  --g-txt: #e8e4d8;
+}
+html[data-skin="green"], html[data-skin="green"] body {
+  background-color: var(--g-felt-2);
+  background-image:
+    repeating-radial-gradient(circle at 17% 23%, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    repeating-radial-gradient(circle at 71% 64%, rgba(0,0,0,.05) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse 75% 70% at 50% 42%, #1b5540 0%, var(--g-felt-1) 45%, var(--g-felt-2) 80%, #06170f 100%);
+  background-attachment: fixed;
+  font-family: "Noto Serif TC", "Cinzel", serif;
+}
+html[data-skin="green"] .tv-app .tv-table-board,
+html[data-skin="green"] .tv-app .limit-panel {
+  background: var(--g-panel) !important;
+  border: 1px solid var(--g-gold-3) !important;
+  border-image: var(--g-line) 1 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 10px 30px #0008, inset 0 0 40px #0005 !important;
+}
+html[data-skin="green"] .tv-app .panel:not(.limit-panel) { border-color: var(--g-gold-2); border-radius: 0; }
+html[data-skin="green"] .tv-app .grid-board { border-radius: 0; }
+html[data-skin="green"] .tv-app .stats-panel { background: var(--g-panel); border-color: var(--g-gold-2); }
+html[data-skin="green"] .tv-stats .tv-stat-empty { background: #0b1210; }
+html[data-skin="green"] .tv-save-btn,
+html[data-skin="green"] .tv-skin-btn {
+  border: 1px solid var(--g-gold-3); border-radius: 2px;
+  background: linear-gradient(155deg,#141d1c,#0a1210); color: var(--g-gold-1);
+  box-shadow: inset 0 1px 0 rgba(244,223,164,.18), 0 2px 6px #0008;
+}
+html[data-skin="green"] .tv-save-btn:hover,
+html[data-skin="green"] .tv-skin-btn:hover { border-color: var(--g-gold-1); }
+html[data-skin="green"] .tv-skin-btn[aria-pressed="true"] { border-color: var(--g-gold-2); }
+
+/* ===== 綠金 r2（2026-11-02，對照 ATLL-穿越排牌/賭場綠金風格.md；只作用於 html[data-skin="green"]） ===== */
+html[data-skin="green"] { --g-line: linear-gradient(135deg,#6b4c1d 0%,#e8c97a 25%,#8a6a2f 50%,#f4dfa4 75%,#6b4c1d 100%); --g-banker: #e05c4f; --g-player: #4fa3d8; --g-tie: #5cbf8a; --g-pit: #0b1210; --g-txt-dim: #9a9584; }
+/* 牌桌氈布：細絨顆粒（同 .felt::after 的 feTurbulence）＋中央亮、四周暗 */
+html[data-skin="green"], html[data-skin="green"] body {
+  background-color: var(--g-felt-2);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23f)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 120% 100% at 50% 0%, rgba(255,255,255,.06), transparent 40%),
+    radial-gradient(ellipse 70% 65% at 50% 48%, #1d5a43 0%, var(--g-felt-1) 42%, var(--g-felt-2) 78%, #05130d 100%);
+  background-attachment: fixed;
+}
+/* 面板一律 .gframe：近黑金屬漸層、1px --gold-line、直角、14px 對角角飾 */
+html[data-skin="green"] .tv-app .panel,
+html[data-skin="green"] .tv-app .tv-table-board {
+  background: linear-gradient(160deg, rgba(24,32,33,.92), rgba(11,17,19,.94)) !important;
+  border: 1px solid !important; border-image: var(--g-line) 1 !important; border-radius: 0 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.55), inset 0 0 40px rgba(0,0,0,.35) !important;
+}
+html[data-skin="green"] .tv-app .tv-table-board { position: relative; }
+html[data-skin="green"] .tv-app .panel::before, html[data-skin="green"] .tv-app .panel::after,
+html[data-skin="green"] .tv-app .tv-table-board::before, html[data-skin="green"] .tv-app .tv-table-board::after {
+  content: ""; position: absolute; z-index: 3; width: 14px; height: 14px; pointer-events: none;
+  border-color: var(--g-gold-1); border-style: solid; box-sizing: border-box;
+}
+html[data-skin="green"] .tv-app .panel::before, html[data-skin="green"] .tv-app .tv-table-board::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+html[data-skin="green"] .tv-app .panel::after, html[data-skin="green"] .tv-app .tv-table-board::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+/* 統計格：金屬面板＋金線，莊閒和只用語意色細條與字 */
+html[data-skin="green"] .tv-app .tv-stats .tv-stat-head { background: linear-gradient(180deg,#161f21,#0d1315); color: var(--g-gold-2); border-color: rgba(217,181,104,.35); text-shadow: 0 1px 2px #000; }
+html[data-skin="green"] .tv-app .tv-stats .tv-stat-head b, html[data-skin="green"] .tv-app .tv-stats #totalCount { font-family: "Cinzel", "Noto Serif TC", serif; }
+html[data-skin="green"] .tv-app .tv-stats .stats-list { background: rgba(166,124,53,.45); }
+html[data-skin="green"] .tv-app .tv-stats .stats-list li {
+  --g-sem: var(--g-gold-3);
+  background: linear-gradient(160deg,#182021,#0b1113) !important;
+  box-shadow: inset 4px 0 0 var(--g-sem), inset 0 1px 0 rgba(244,223,164,.08) !important;
+  color: var(--g-gold-2);
+}
+html[data-skin="green"] .tv-app .tv-stats .stats-list li > b { color: var(--g-gold-1); }
+html[data-skin="green"] .tv-app .tv-stats li.stat-banker, html[data-skin="green"] .tv-app .tv-stats li.stat-banker-pair { --g-sem: var(--g-banker); }
+html[data-skin="green"] .tv-app .tv-stats li.stat-player, html[data-skin="green"] .tv-app .tv-stats li.stat-player-pair { --g-sem: var(--g-player); }
+html[data-skin="green"] .tv-app .tv-stats li.stat-tie { --g-sem: var(--g-tie); }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-banker,.stat-banker-pair) .k { color: var(--g-banker); }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-player,.stat-player-pair) .k { color: var(--g-player); }
+html[data-skin="green"] .tv-app .tv-stats li.stat-tie .k { color: var(--g-tie); }
+html[data-skin="green"] .tv-app .tv-stats li.tv-stat-empty { background: var(--g-pit) !important; box-shadow: none !important; }
+/* 按鈕照 .tool-btn：深色漸層、600 襯線、低亮度描邊；圓角依使用者「盡量直角」用 2px（md 為 8px） */
+html[data-skin="green"] .tv-save-btn, html[data-skin="green"] .tv-skin-btn {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 32px; padding: 0 12px;
+  font: 600 16px/1 "Noto Serif TC", "Cinzel", serif; letter-spacing: .08em;
+  color: var(--g-txt); background: linear-gradient(180deg,#161f21,#0d1315);
+  border: 1px solid #2c3634; border-radius: 2px; box-shadow: none;
+}
+html[data-skin="green"] .tv-skin-btn { font-size: 15px; height: 30px; }
+html[data-skin="green"] .tv-save-btn:hover, html[data-skin="green"] .tv-skin-btn:hover { border-color: #c9a25a; color: var(--g-gold-1); }
+html[data-skin="green"] .tv-save-stack > .tv-skin-btn { margin-top: 4px; }
+
+
+html[data-skin="green"] .tv-app .tv-stats .stats-list .k { color: var(--g-gold-2) !important; }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-banker,.stat-banker-pair) .k { color: var(--g-banker) !important; }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-player,.stat-player-pair) .k { color: var(--g-player) !important; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-tie .k { color: var(--g-tie) !important; }
+/* ===== 綠金 r3（2026-11-02；只作用於 html[data-skin="green"]，紅金不動） ===== */
+html[data-skin="green"] { --g-disp: "Cinzel", "Noto Serif TC", serif; --g-serif: "Noto Serif TC", "Cinzel", serif; }
+/* 1. 氈布 #123a2c→#0a241b：feTurbulence 細絨＋中央亮四周暗 */
+html[data-skin="green"], html[data-skin="green"] body {
+  background-color: #0a241b;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23f)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 70% 65% at 50% 48%, #1a4a38 0%, #123a2c 38%, #0a241b 78%, #051a12 100%);
+  background-attachment: fixed;
+}
+/* 3. 統計格：分色深金屬漸層＋金線 */
+html[data-skin="green"] .tv-app .tv-stats .stats-list li {
+  --g-t1: #1c2425; --g-t2: #0b1113; --g-k: #e8d6a4;
+  background: linear-gradient(160deg, var(--g-t1) 0%, var(--g-t2) 100%) !important;
+  border: 1px solid !important; border-image: var(--g-line) 1 !important;
+  box-shadow: inset 0 1px 0 rgba(244,223,164,.10), inset 0 0 18px rgba(0,0,0,.45) !important;
+}
+html[data-skin="green"] .tv-app .tv-stats li.stat-banker { --g-t1: #5a221c; --g-t2: #230d0b; --g-k: #f4b2a9; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-banker-pair { --g-t1: #4c2420; --g-t2: #1f0e0c; --g-k: #efb7af; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-player { --g-t1: #1a4462; --g-t2: #0a1a27; --g-k: #a9d5f1; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-player-pair { --g-t1: #1d3d55; --g-t2: #0b1823; --g-k: #b2d6ee; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-tie { --g-t1: #1f5138; --g-t2: #0a2016; --g-k: #a8e3c3; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-lucky6 { --g-t1: #4e2a1c; --g-t2: #1f100b; --g-k: #f0bfa3; }
+html[data-skin="green"] .tv-app .tv-stats li.tv-lucky7 { --g-t1: #1d3558; --g-t2: #0a1424; --g-k: #b3c9ef; }
+html[data-skin="green"] .tv-app .tv-stats li.tv-super-lucky7 { --g-t1: #3a2552; --g-t2: #150c22; --g-k: #d2bdf0; }
+html[data-skin="green"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1210 !important; border-image: none !important; border-color: rgba(166,124,53,.25) !important; box-shadow: none !important; }
+html[data-skin="green"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--g-k) !important; font-family: var(--g-serif) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+html[data-skin="green"] .tv-app .tv-stats .stats-list li .k { color: var(--g-k) !important; }
+/* 4. 數字：var(--disp) 700 #f4dfa4 */
+html[data-skin="green"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, #totalCount, .stats-list li > b) {
+  font-family: var(--g-disp) !important; font-weight: 700 !important; color: #f4dfa4 !important; -webkit-text-fill-color: #f4dfa4;
+}
+/* 5. 標題、標籤：Noto Serif TC 600 */
+html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) {
+  font-family: var(--g-serif) !important; font-weight: 600 !important;
+}
+html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: #d9b568 !important; }
+html[data-skin="green"] .tv-app .tv-limit-name { color: #e8e4d8 !important; }
+/* 6. 按鈕照 .tool-btn：8px 圓角；儲存與切換同尺寸 */
+html[data-skin="green"] .tv-save-btn, html[data-skin="green"] .tv-skin-btn{
+  border-radius: 8px; font-family: var(--g-serif); font-weight: 600; font-size: 15px; letter-spacing: .08em;
+  height: 30px; padding: 0 12px; color: #e8e4d8; background: linear-gradient(180deg,#161f21,#0d1315); border: 1px solid #2c3634; box-shadow: none; transition: .2s;
+}
+html[data-skin="green"] .tv-save-btn:hover, html[data-skin="green"] .tv-skin-btn:hover{ border-color: #c9a25a; color: #f4dfa4; box-shadow: 0 6px 14px rgba(0,0,0,.5), 0 0 10px rgba(212,176,106,.2); }
+
+html[data-skin="green"] .tv-skin-btn[aria-pressed="true"] { border-color: #2c3634; }
+html[data-skin="green"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
+
+
+/* ===== 三種風格下拉選單（2026-11-04）：觸發鈕沿用 #tvSkinToggle，清單由 tv-skin.js 控制開關 ===== */
+.tv-skin-menu { position: absolute; z-index: 40; margin: 0; padding: 0; list-style: none; box-sizing: border-box; background: #590d0d; border: 1px solid #d4a64a; border-radius: 0; box-shadow: 0 6px 18px rgba(0,0,0,.55); }
+.tv-skin-menu[hidden] { display: none; }
+.tv-skin-menu > li { display: block; padding: 5px 14px 5px 9px; border-left: 3px solid transparent; color: #ffe28a; font: 700 14px/1.3 "Noto Serif TC", "Cinzel", serif; white-space: nowrap; cursor: pointer; outline: none; }
+.tv-skin-menu > li:hover, .tv-skin-menu > li:focus { background: #7a1717; }
+.tv-skin-menu > li[aria-selected="true"] { color: #ffd700; border-left-color: #ffd700; }
+html[data-skin="green"] .tv-skin-menu { background: linear-gradient(160deg,#182021,#0b1113); border: 1px solid #a67c35; border-image: var(--g-line) 1; box-shadow: 0 10px 30px rgba(0,0,0,.55); }
+html[data-skin="green"] .tv-skin-menu > li { padding: 6px 14px 6px 9px; color: #e8e4d8; font: 600 15px/1.3 "Noto Serif TC", "Cinzel", serif; letter-spacing: .08em; }
+html[data-skin="green"] .tv-skin-menu > li:hover, html[data-skin="green"] .tv-skin-menu > li:focus { background: rgba(217,181,104,.12); }
+html[data-skin="green"] .tv-skin-menu > li[aria-selected="true"] { color: #f4dfa4; border-left-color: #d9b568; }
+
+/* ===== 黑金（2026-11-04；只作用於 html[data-skin="black"]；數值取自路單頁 themes.css 黑金實測；紅金、綠金不動） ===== */
+html[data-skin="black"] {
+  color-scheme: dark;
+  --k-ink: #07090b; --k-txt: #e8e4d8; --k-dim: #9a9584; --k-gold: #d9b568; --k-light: #f4dfa4; --k-gold-3: #a67c35; --k-gold-4: #6b4c1d;
+  --k-line: linear-gradient(135deg,#6b4c1d,#e8c97a,#8a6a2f,#f4dfa4,#6b4c1d);
+  --k-panel: linear-gradient(160deg,#182021,#0b1113);
+  --k-grid: #293136; --k-banker: #e05c4f; --k-player: #4fa3d8; --k-tie: #5cbf8a;
+  --k-disp: "Cinzel", "Noto Serif TC", serif; --k-serif: "Noto Serif TC", "Cinzel", serif;
+}
+html[data-skin="black"], html[data-skin="black"] body { background: var(--k-ink); color: var(--k-txt); font-family: var(--k-serif); }
+/* 面板：面板漸層、1px 金線、直角、左上／右下 L 角飾 */
+html[data-skin="black"] .tv-app .panel,
+html[data-skin="black"] .tv-app .tv-table-board {
+  background: var(--k-panel) !important; color: var(--k-txt);
+  border: 1px solid var(--k-gold-3) !important; border-image: var(--k-line) 1 !important; border-radius: 0 !important;
+  box-shadow: 0 10px 30px #0008, inset 0 0 40px #0005 !important;
+}
+html[data-skin="black"] .tv-app .tv-table-board { position: relative; }
+html[data-skin="black"] .tv-app .panel::after, html[data-skin="black"] .tv-app .tv-table-board::after {
+  content: ""; position: absolute; inset: -1px; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(var(--k-light),var(--k-light)) left top / 14px 2px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) left top / 2px 14px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) right bottom / 14px 2px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) right bottom / 2px 14px no-repeat;
+}
+/* 牌桌看板：英文標題金色漸層字；標籤、分隔線用金 */
+html[data-skin="black"] .tv-app .tv-board-brand { border-bottom-color: #d9b56830; }
+html[data-skin="black"] .tv-app .tv-board-brand-icon { color: var(--k-light); text-shadow: none; }
+html[data-skin="black"] .tv-app .tv-board-title-en {
+  font-family: var(--k-disp); color: var(--k-light);
+  background: linear-gradient(180deg,#f4dfa4,#d9b568 55%,#a67c35); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;
+}
+html[data-skin="black"] .tv-app .tv-board-divider { color: #a67c3599; }
+html[data-skin="black"] .tv-app .tv-board-item { background: #0d1417; border-color: #d9b56830; border-radius: 0; }
+/* 數字：Cinzel 700 */
+html[data-skin="black"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, #totalCount, .stats-list li > b) {
+  font-family: var(--k-disp) !important; font-weight: 700 !important; text-shadow: none !important;
+}
+html[data-skin="black"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
+/* 標題、標籤 */
+html[data-skin="black"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) { font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="black"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: var(--k-gold) !important; }
+html[data-skin="black"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: var(--k-txt) !important; }
+html[data-skin="black"] .tv-app .predict-title { letter-spacing: 4px; }
+/* 限紅：.limit-label 金、.limit-input #f4dfa4（tv 維持透明底、不加框，版面不動） */
+html[data-skin="black"] .tv-app .tv-limit .limit-input { color: var(--k-light) !important; }
+html[data-skin="black"] .tv-app .tv-limit .limit-input:hover { border-color: #d9b56855; }
+html[data-skin="black"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid var(--k-gold); background: #182021; border-color: transparent; }
+/* 路單格：底 #0d1417、格線 #293136、框 #374047、直角、浮水印 #d9b56830 */
+html[data-skin="black"] .tv-app .grid-board {
+  background-color: #0d1417;
+  background-image: linear-gradient(var(--k-grid) 1px, transparent 1px), linear-gradient(90deg, var(--k-grid) 1px, transparent 1px);
+  border-color: #374047; border-radius: 0;
+}
+html[data-skin="black"] .tv-app .grid-board::before { color: #d9b56830; text-shadow: none; }
+html[data-skin="black"] .tv-app .big-circle.B { border-color: var(--k-banker); }
+html[data-skin="black"] .tv-app .big-circle.P { border-color: var(--k-player); }
+html[data-skin="black"] .tv-app .derived-dot.shape-hollow { box-shadow: inset 0 0 0 1px #ffffff18, 0 1px 2px #0004; }
+html[data-skin="black"] .tv-app :is(.derived-dot.shape-hollow, .leg-mark.circle) { border-color: var(--k-banker); }
+html[data-skin="black"] .tv-app :is(.derived-dot.shape-hollow.blue, .leg-mark.circle.blue) { border-color: var(--k-player); }
+html[data-skin="black"] .tv-app .leg-mark.solid { background: var(--k-banker); }
+html[data-skin="black"] .tv-app .leg-mark.solid.blue { background: var(--k-player); }
+html[data-skin="black"] .tv-app .leg-mark.slash::before { background: var(--k-banker); }
+html[data-skin="black"] .tv-app .leg-mark.slash.blue::before { background: var(--k-player); }
+/* 統計：面板漸層格、1px #d9b56830、直角、無陰影；字與數字用各注別語意色 */
+html[data-skin="black"] .tv-app .tv-stats .tv-stat-head { background: transparent; border-color: #d9b56830; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list { background: var(--k-ink); }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li {
+  --k-c: var(--k-txt);
+  background: var(--k-panel) !important; border: 1px solid #d9b56830 !important; border-radius: 0 !important; box-shadow: none !important; color: var(--k-c);
+}
+html[data-skin="black"] .tv-app .tv-stats li.stat-banker { --k-c: var(--k-banker); }
+html[data-skin="black"] .tv-app .tv-stats li.stat-player { --k-c: var(--k-player); }
+html[data-skin="black"] .tv-app .tv-stats li.stat-tie { --k-c: var(--k-tie); }
+html[data-skin="black"] .tv-app .tv-stats li.stat-banker-pair { --k-c: #d68cba; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-player-pair { --k-c: #a99de0; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-lucky6 { --k-c: var(--k-light); }
+/* tv 專屬（幸運7、超級幸運7）路單頁沒有：用主金 */
+html[data-skin="black"] .tv-app .tv-stats li:is(.tv-lucky7, .tv-super-lucky7) { --k-c: var(--k-gold); }
+html[data-skin="black"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1113 !important; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li .k { color: var(--k-c) !important; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li > b { color: var(--k-c) !important; }
+
+html[data-skin="black"] .tv-save-btn, html[data-skin="black"] .tv-skin-btn{
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 30px; padding: 0 12px;
+  font: 600 15px/1 var(--k-serif); letter-spacing: .08em;
+  color: var(--k-txt); background: var(--k-panel); border: 1px solid var(--k-gold-4); border-radius: 8px; box-shadow: inset 0 1px 0 #ffffff0d;
+}
+html[data-skin="black"] .tv-save-btn:hover, html[data-skin="black"] .tv-skin-btn:hover{ border-color: var(--k-gold-3); color: var(--k-light); }
+
+html[data-skin="black"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
+
+/* 下拉清單：面板漸層、金框、直角；選項底 #10171a；已選亮金字＋左金線 */
+html[data-skin="black"] .tv-skin-menu { padding: 0; background: var(--k-panel); border: 1px solid var(--k-gold-3); border-image: var(--k-line) 1; box-shadow: 0 10px 30px #0008; }
+html[data-skin="black"] .tv-skin-menu > li { padding: 6px 14px 6px 9px; background: #10171a; color: var(--k-txt); font: 600 15px/1.3 var(--k-serif); letter-spacing: .08em; }
+html[data-skin="black"] .tv-skin-menu > li:hover, html[data-skin="black"] .tv-skin-menu > li:focus { background: #1b2427; }
+html[data-skin="black"] .tv-skin-menu > li[aria-selected="true"] { color: var(--k-light); border-left-color: var(--k-gold); }
+
+/* 黑金：統計格文字色比照 index.html 黑金模式（themes.css black-gold 實測 computed color；標籤與數字同色） */
+html[data-skin="black"] .tv-app .tv-stats li.stat-banker { --k-tc: #e05c4f; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-tie { --k-tc: #5cbf8a; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-player { --k-tc: #4fa3d8; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-banker-pair { --k-tc: #d68cba; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-player-pair { --k-tc: #a99de0; }
+html[data-skin="black"] .tv-app .tv-stats li.stat-lucky6 { --k-tc: #d68cba; }
+html[data-skin="black"] .tv-app .tv-stats li.tv-lucky7 { --k-tc: #a99de0; }
+html[data-skin="black"] .tv-app .tv-stats li.tv-super-lucky7 { --k-tc: #9283d8; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult), html[data-skin="black"] .tv-app .tv-stats .stats-list li > b { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
+/* 黑金：五路紅藍統一為 --k-banker #e05c4f／--k-player #4fa3d8（使用者自訂色 html.tv-color-* 時不覆寫） */
+html[data-skin="black"]:not(.tv-color-red) .tv-app .derived-dot.shape-solid:not(.blue),
+html[data-skin="black"]:not(.tv-color-red) .tv-app .derived-dot.shape-slash:not(.blue)::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-banker) 60%, white) 0%, var(--k-banker) 32%); }
+html[data-skin="black"]:not(.tv-color-blue) .tv-app .derived-dot.shape-solid.blue,
+html[data-skin="black"]:not(.tv-color-blue) .tv-app .derived-dot.shape-slash.blue::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-player) 60%, white) 0%, var(--k-player) 32%); }
+/* 三星路：原 #d62121／#1e5ec9 */
+html[data-skin="black"]:not(.tv-color-red) .tv-app .tv-star-mark.B { border-color: var(--k-banker); }
+html[data-skin="black"]:not(.tv-color-blue) .tv-app .tv-star-mark.P { border-color: var(--k-player); }
+/* 珠盤路圖檔不改色，只給自色光暈 */
+html[data-skin="black"] .tv-app .bead.B { --k-glow: #e05c4f; }
+html[data-skin="black"] .tv-app .bead.P { --k-glow: #4fa3d8; }
+html[data-skin="black"] .tv-app .bead.T { --k-glow: #5cbf8a; }
+/* 黑金：符號與文字的霓虹自色光暈（雙層） */
+html[data-skin="black"] .tv-app .big-circle.B { filter: drop-shadow(0 0 3px #e05c4fe6) drop-shadow(0 0 8px #e05c4fa6); }
+html[data-skin="black"] .tv-app .big-circle.P { filter: drop-shadow(0 0 3px #4fa3d8e6) drop-shadow(0 0 8px #4fa3d8a6); }
+html[data-skin="black"] .tv-app .derived-dot.shape-hollow { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c, inset 0 0 3px #e05c4f80; }
+html[data-skin="black"] .tv-app .derived-dot.shape-hollow.blue { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c, inset 0 0 3px #4fa3d880; }
+html[data-skin="black"] .tv-app .derived-dot.shape-solid:not(.blue) { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c; }
+html[data-skin="black"] .tv-app .derived-dot.shape-solid.blue { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c; }
+html[data-skin="black"] .tv-app .derived-dot.shape-slash:not(.blue)::before { box-shadow: 0 0 3px #e05c4fe6, 0 0 8px #e05c4f99; }
+html[data-skin="black"] .tv-app .derived-dot.shape-slash.blue::before { box-shadow: 0 0 3px #4fa3d8e6, 0 0 8px #4fa3d899; }
+html[data-skin="black"] .tv-app .tv-star-mark.B { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c, inset 0 0 4px #e05c4f99; }
+html[data-skin="black"] .tv-app .tv-star-mark.P { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c, inset 0 0 4px #4fa3d899; }
+html[data-skin="black"] .tv-app .bead-art { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--k-glow, #f4dfa4) 90%, transparent)) drop-shadow(0 0 8px color-mix(in srgb, var(--k-glow, #f4dfa4) 60%, transparent)); }
+html[data-skin="black"] .tv-app :is(.tv-board-val, .tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .limit-input, .tv-stat-head, .tv-stat-head b, #totalCount),
+html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult),
+html[data-skin="black"] .tv-app .tv-stats .stats-list li > b { text-shadow: 0 0 4px color-mix(in srgb, currentColor 85%, transparent), 0 0 12px color-mix(in srgb, currentColor 60%, transparent) !important; }
+html[data-skin="black"] .tv-app :is(.tv-board-title-en, .tv-board-brand-icon) { filter: drop-shadow(0 0 3px #f4dfa4cc) drop-shadow(0 0 9px #d9b56899); }
+
+/* ===== 電子看板 基底：複製自黑金結構規則（選擇器改 led） ===== */
+html[data-skin="led"] {
+  color-scheme: dark;
+  --k-ink: #07090b; --k-txt: #e8e4d8; --k-dim: #9a9584; --k-gold: #d9b568; --k-light: #f4dfa4; --k-gold-3: #a67c35; --k-gold-4: #6b4c1d;
+  --k-line: linear-gradient(135deg,#6b4c1d,#e8c97a,#8a6a2f,#f4dfa4,#6b4c1d);
+  --k-panel: linear-gradient(160deg,#182021,#0b1113);
+  --k-grid: #293136; --k-banker: #e05c4f; --k-player: #4fa3d8; --k-tie: #5cbf8a;
+  --k-disp: "Cinzel", "Noto Serif TC", serif; --k-serif: "Noto Serif TC", "Cinzel", serif;
+}
+html[data-skin="led"], html[data-skin="led"] body { background: var(--k-ink); color: var(--k-txt); font-family: var(--k-serif); }
+/* 面板：面板漸層、1px 金線、直角、左上／右下 L 角飾 */
+html[data-skin="led"] .tv-app .panel,
+html[data-skin="led"] .tv-app .tv-table-board {
+  background: var(--k-panel) !important; color: var(--k-txt);
+  border: 1px solid var(--k-gold-3) !important; border-image: var(--k-line) 1 !important; border-radius: 0 !important;
+  box-shadow: 0 10px 30px #0008, inset 0 0 40px #0005 !important;
+}
+html[data-skin="led"] .tv-app .tv-table-board { position: relative; }
+html[data-skin="led"] .tv-app .panel::after, html[data-skin="led"] .tv-app .tv-table-board::after {
+  content: ""; position: absolute; inset: -1px; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(var(--k-light),var(--k-light)) left top / 14px 2px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) left top / 2px 14px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) right bottom / 14px 2px no-repeat,
+    linear-gradient(var(--k-light),var(--k-light)) right bottom / 2px 14px no-repeat;
+}
+/* 牌桌看板：英文標題金色漸層字；標籤、分隔線用金 */
+html[data-skin="led"] .tv-app .tv-board-brand { border-bottom-color: #d9b56830; }
+html[data-skin="led"] .tv-app .tv-board-brand-icon { color: var(--k-light); text-shadow: none; }
+html[data-skin="led"] .tv-app .tv-board-title-en {
+  font-family: var(--k-disp); color: var(--k-light);
+  background: linear-gradient(180deg,#f4dfa4,#d9b568 55%,#a67c35); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;
+}
+html[data-skin="led"] .tv-app .tv-board-divider { color: #a67c3599; }
+html[data-skin="led"] .tv-app .tv-board-item { background: #0d1417; border-color: #d9b56830; border-radius: 0; }
+/* 數字：Cinzel 700 */
+html[data-skin="led"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, .stats-list li > b) {
+  font-family: var(--k-disp) !important; font-weight: 700 !important; text-shadow: none !important;
+}
+html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
+/* 標題、標籤 */
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) { font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: var(--k-gold) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: var(--k-txt) !important; }
+html[data-skin="led"] .tv-app .predict-title { letter-spacing: 4px; }
+/* 限紅：.limit-label 金、.limit-input #f4dfa4（tv 維持透明底、不加框，版面不動） */
+html[data-skin="led"] .tv-app .tv-limit .limit-input { color: var(--k-light) !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #d9b56855; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid var(--k-gold); background: #182021; border-color: transparent; }
+/* 路單格：底 #0d1417、格線 #293136、框 #374047、直角、浮水印 #d9b56830 */
+html[data-skin="led"] .tv-app .grid-board {
+  background-color: #0d1417;
+  background-image: linear-gradient(var(--k-grid) 1px, transparent 1px), linear-gradient(90deg, var(--k-grid) 1px, transparent 1px);
+  border-color: #374047; border-radius: 0;
+}
+html[data-skin="led"] .tv-app .grid-board::before { color: #d9b56830; text-shadow: none; }
+html[data-skin="led"] .tv-app .big-circle.B { border-color: var(--k-banker); }
+html[data-skin="led"] .tv-app .big-circle.P { border-color: var(--k-player); }
+html[data-skin="led"] .tv-app .derived-dot.shape-hollow { box-shadow: inset 0 0 0 1px #ffffff18, 0 1px 2px #0004; }
+html[data-skin="led"] .tv-app :is(.derived-dot.shape-hollow, .leg-mark.circle) { border-color: var(--k-banker); }
+html[data-skin="led"] .tv-app :is(.derived-dot.shape-hollow.blue, .leg-mark.circle.blue) { border-color: var(--k-player); }
+html[data-skin="led"] .tv-app .leg-mark.solid { background: var(--k-banker); }
+html[data-skin="led"] .tv-app .leg-mark.solid.blue { background: var(--k-player); }
+html[data-skin="led"] .tv-app .leg-mark.slash::before { background: var(--k-banker); }
+html[data-skin="led"] .tv-app .leg-mark.slash.blue::before { background: var(--k-player); }
+/* 統計：面板漸層格、1px #d9b56830、直角、無陰影；字與數字用各注別語意色 */
+html[data-skin="led"] .tv-app .tv-stats .tv-stat-head { background: transparent; border-color: #d9b56830; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list { background: var(--k-ink); }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li {
+  --k-c: var(--k-txt);
+  background: var(--k-panel) !important; border: 1px solid #d9b56830 !important; border-radius: 0 !important; box-shadow: none !important; color: var(--k-c);
+}
+html[data-skin="led"] .tv-app .tv-stats li.stat-banker { --k-c: var(--k-banker); }
+html[data-skin="led"] .tv-app .tv-stats li.stat-player { --k-c: var(--k-player); }
+html[data-skin="led"] .tv-app .tv-stats li.stat-tie { --k-c: var(--k-tie); }
+html[data-skin="led"] .tv-app .tv-stats li.stat-banker-pair { --k-c: #d68cba; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-player-pair { --k-c: #a99de0; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-lucky6 { --k-c: var(--k-light); }
+/* tv 專屬（幸運7、超級幸運7）路單頁沒有：用主金 */
+html[data-skin="led"] .tv-app .tv-stats li:is(.tv-lucky7, .tv-super-lucky7) { --k-c: var(--k-gold); }
+html[data-skin="led"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1113 !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li .k { color: var(--k-c) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: var(--k-c) !important; }
+
+html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn{
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 30px; padding: 0 12px;
+  font: 600 15px/1 var(--k-serif); letter-spacing: .08em;
+  color: var(--k-txt); background: var(--k-panel); border: 1px solid var(--k-gold-4); border-radius: 8px; box-shadow: inset 0 1px 0 #ffffff0d;
+}
+html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover{ border-color: var(--k-gold-3); color: var(--k-light); }
+
+html[data-skin="led"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
+
+/* 下拉清單：面板漸層、金框、直角；選項底 #10171a；已選亮金字＋左金線 */
+html[data-skin="led"] .tv-skin-menu { padding: 0; background: var(--k-panel); border: 1px solid var(--k-gold-3); border-image: var(--k-line) 1; box-shadow: 0 10px 30px #0008; }
+html[data-skin="led"] .tv-skin-menu > li { padding: 6px 14px 6px 9px; background: #10171a; color: var(--k-txt); font: 600 15px/1.3 var(--k-serif); letter-spacing: .08em; }
+html[data-skin="led"] .tv-skin-menu > li:hover, html[data-skin="led"] .tv-skin-menu > li:focus { background: #1b2427; }
+html[data-skin="led"] .tv-skin-menu > li[aria-selected="true"] { color: var(--k-light); border-left-color: var(--k-gold); }
+
+/* 黑金：統計格文字色比照 index.html 黑金模式（themes.css black-gold 實測 computed color；標籤與數字同色） */
+html[data-skin="led"] .tv-app .tv-stats li.stat-banker { --k-tc: #e05c4f; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-tie { --k-tc: #5cbf8a; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-player { --k-tc: #4fa3d8; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-banker-pair { --k-tc: #d68cba; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-player-pair { --k-tc: #a99de0; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-lucky6 { --k-tc: #d68cba; }
+html[data-skin="led"] .tv-app .tv-stats li.tv-lucky7 { --k-tc: #a99de0; }
+html[data-skin="led"] .tv-app .tv-stats li.tv-super-lucky7 { --k-tc: #9283d8; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult), html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
+/* 黑金：五路紅藍統一為 --k-banker #e05c4f／--k-player #4fa3d8（使用者自訂色 html.tv-color-* 時不覆寫） */
+html[data-skin="led"]:not(.tv-color-red) .tv-app .derived-dot.shape-solid:not(.blue),
+html[data-skin="led"]:not(.tv-color-red) .tv-app .derived-dot.shape-slash:not(.blue)::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-banker) 60%, white) 0%, var(--k-banker) 32%); }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .derived-dot.shape-solid.blue,
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .derived-dot.shape-slash.blue::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-player) 60%, white) 0%, var(--k-player) 32%); }
+/* 三星路：原 #d62121／#1e5ec9 */
+html[data-skin="led"]:not(.tv-color-red) .tv-app .tv-star-mark.B { border-color: var(--k-banker); }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .tv-star-mark.P { border-color: var(--k-player); }
+/* 珠盤路圖檔不改色，只給自色光暈 */
+html[data-skin="led"] .tv-app .bead.B { --k-glow: #e05c4f; }
+html[data-skin="led"] .tv-app .bead.P { --k-glow: #4fa3d8; }
+html[data-skin="led"] .tv-app .bead.T { --k-glow: #5cbf8a; }
+/* 黑金：符號與文字的霓虹自色光暈（雙層） */
+html[data-skin="led"] .tv-app .big-circle.B { filter: drop-shadow(0 0 3px #e05c4fe6) drop-shadow(0 0 8px #e05c4fa6); }
+html[data-skin="led"] .tv-app .big-circle.P { filter: drop-shadow(0 0 3px #4fa3d8e6) drop-shadow(0 0 8px #4fa3d8a6); }
+html[data-skin="led"] .tv-app .derived-dot.shape-hollow { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c, inset 0 0 3px #e05c4f80; }
+html[data-skin="led"] .tv-app .derived-dot.shape-hollow.blue { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c, inset 0 0 3px #4fa3d880; }
+html[data-skin="led"] .tv-app .derived-dot.shape-solid:not(.blue) { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c; }
+html[data-skin="led"] .tv-app .derived-dot.shape-solid.blue { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c; }
+html[data-skin="led"] .tv-app .derived-dot.shape-slash:not(.blue)::before { box-shadow: 0 0 3px #e05c4fe6, 0 0 8px #e05c4f99; }
+html[data-skin="led"] .tv-app .derived-dot.shape-slash.blue::before { box-shadow: 0 0 3px #4fa3d8e6, 0 0 8px #4fa3d899; }
+html[data-skin="led"] .tv-app .tv-star-mark.B { box-shadow: 0 0 4px #e05c4fd9, 0 0 10px #e05c4f8c, inset 0 0 4px #e05c4f99; }
+html[data-skin="led"] .tv-app .tv-star-mark.P { box-shadow: 0 0 4px #4fa3d8d9, 0 0 10px #4fa3d88c, inset 0 0 4px #4fa3d899; }
+html[data-skin="led"] .tv-app .bead-art { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--k-glow, #f4dfa4) 90%, transparent)) drop-shadow(0 0 8px color-mix(in srgb, var(--k-glow, #f4dfa4) 60%, transparent)); }
+html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .limit-input, .tv-stat-head, .tv-stat-head b),
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult),
+html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { text-shadow: 0 0 4px color-mix(in srgb, currentColor 85%, transparent), 0 0 12px color-mix(in srgb, currentColor 60%, transparent) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-title-en, .tv-board-brand-icon) { filter: drop-shadow(0 0 3px #f4dfa4cc) drop-shadow(0 0 9px #d9b56899); }
+
+/* ===== 電子看板（2026-11-04；只作用於 html[data-skin="led"]；底層沿用黑金結構規則，以下覆寫色票與材質，取自 路單風格預覽/style-led.html；紅金、綠金、黑金不動） ===== */
+html[data-skin="led"] {
+  --k-ink: #050505; --k-txt: #f3efe2; --k-dim: #a8a294; --k-gold: #ffb12a; --k-light: #ffd27a; --k-gold-3: #4a4d52; --k-gold-4: #4a4d52;
+  --k-line: linear-gradient(180deg,#5a5e64,#2c2f34);
+  --k-panel: linear-gradient(180deg,#2a2c30,#16171a);
+  --k-grid: #3a3a3c; --k-banker: #ff3b30; --k-player: #2f9bff; --k-tie: #30e060;
+  --l-metal: linear-gradient(180deg,#3d4045,#23252a 40%,#2c2f34 70%,#1b1c20);
+  --l-glass: linear-gradient(115deg,rgba(255,255,255,.09),rgba(255,255,255,0) 38%);
+  --l-flap: linear-gradient(#2b2b2e,#1d1d20);
+}
+/* 外殼：金屬機殼漸層、#4a4d52 框、直角；不用黑金的 L 角飾，改玻璃反光 */
+html[data-skin="led"] .tv-app .panel,
+html[data-skin="led"] .tv-app .tv-table-board {
+  background: var(--l-metal) !important; border: 1px solid #4a4d52 !important; border-image: none !important;
+  box-shadow: 0 3px 0 #000, inset 0 1px 0 #6a6d72, inset 0 0 24px #0006 !important;
+}
+html[data-skin="led"] .tv-app .panel::after, html[data-skin="led"] .tv-app .tv-table-board::after { background: var(--l-glass); }
+html[data-skin="led"] .tv-app .tv-board-brand { border-bottom-color: #4a4d52; }
+html[data-skin="led"] .tv-app .tv-board-brand-icon { color: #ffb12a; text-shadow: 0 0 2px rgba(255,140,0,.9); }
+html[data-skin="led"] .tv-app .tv-board-title-en { background: none; -webkit-text-fill-color: #ffb12a; color: #ffb12a; text-shadow: 0 0 2px rgba(255,140,0,.9); }
+html[data-skin="led"] .tv-app .tv-board-divider { color: #6a6d72; }
+html[data-skin="led"] .tv-app .tv-board-item { background: linear-gradient(180deg,#1a1b1e,#0f1012); border-color: #4a4d52; }
+/* 翻牌數字：深灰翻牌底、#f3efe2 900；不畫中線與卡榫，數字 0 不被劃過 */
+html[data-skin="led"] .tv-app .tv-board-val {
+  font-weight: 900 !important; background: var(--l-flap); box-shadow: inset 0 0 0 1px #000, 0 1px 0 #ffffff14; border-radius: 0; padding: 0 .12em;
+}
+html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: #f3efe2 !important; -webkit-text-fill-color: #f3efe2; }
+/* 標籤：橘金點陣色，小字不加點陣遮罩、光暈 ≤2px */
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: #ffb12a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: #f3efe2 !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input { color: #ffd27a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #6a6d72; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid #ffb12a; background: #111; }
+/* 路單螢幕：純黑底＋#1d140c 點陣，格線 #3a3a3c 看得見 */
+html[data-skin="led"] .tv-app .grid-board {
+  background-color: #050505;
+  background-image: linear-gradient(var(--k-grid) 1px, transparent 1px), linear-gradient(90deg, var(--k-grid) 1px, transparent 1px), radial-gradient(circle, #1d140c 2.2px, transparent 2.6px);
+  border-color: #4a4d52; box-shadow: inset 0 0 0 1px #000;
+}
+html[data-skin="led"] .tv-app .grid-board::before { color: #ffb12a2e; text-shadow: none; }
+/* 統計格：深灰面板、上緣 3px 類型色；標籤用樣本 tag 色 */
+html[data-skin="led"] .tv-app .tv-stats .stats-list li {
+  background: linear-gradient(#1a1b1e,#0f1012) !important; border: 1px solid #2a2c30 !important; border-top: 3px solid var(--l-sc, #4a4d52) !important;
+}
+html[data-skin="led"] .tv-app .tv-stats li:is(.stat-banker, .stat-lucky6, .stat-banker-pair) { --l-sc: #ff3b30; --k-tc: #ff8a7a; --k-c: #ff8a7a; --l-gl: #ff2010; }
+html[data-skin="led"] .tv-app .tv-stats li.stat-tie { --l-sc: #30e060; --k-tc: #8affa8; --k-c: #8affa8; --l-gl: #10c040; }
+html[data-skin="led"] .tv-app .tv-stats li:is(.stat-player, .stat-player-pair, .tv-lucky7) { --l-sc: #2f9bff; --k-tc: #8ac8ff; --k-c: #8ac8ff; --l-gl: #1a7dff; }
+html[data-skin="led"] .tv-app .tv-stats li.tv-super-lucky7 { --l-sc: #c050ff; --k-tc: #e0a8ff; --k-c: #e0a8ff; --l-gl: #a020ff; }
+html[data-skin="led"] .tv-app .tv-stats li.tv-stat-empty { background: #0b0b0c !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { text-shadow: 0 0 2px var(--l-gl, #ff8c00) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: #f3efe2 !important; }
+/* 按鈕：樣本 .pb 金屬鈕、8px 圓角、#ffe1a0 字 */
+html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn{
+  color: #ffe1a0; background: linear-gradient(#45484d,#1d1f22); border: 1px solid #000; border-radius: 8px; box-shadow: 0 2px 0 #000, inset 0 1px 0 #777; text-shadow: 0 0 2px #ff9a00;
+}
+html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover{ border-color: #000; color: #fff0c8; background: linear-gradient(#55585d,#2a2c30); }
+
+html[data-skin="led"] .tv-skin-menu { background: var(--l-metal); border: 1px solid #4a4d52; border-image: none; }
+html[data-skin="led"] .tv-skin-menu > li { background: #111214; color: #f3efe2; }
+html[data-skin="led"] .tv-skin-menu > li:hover, html[data-skin="led"] .tv-skin-menu > li:focus { background: #23252a; }
+html[data-skin="led"] .tv-skin-menu > li[aria-selected="true"] { color: #ffb12a; border-left-color: #ffb12a; }
+/* 霓虹燈號：沿用黑金的「不蓋使用者自訂色」寫法 */
+html[data-skin="led"]:not(.tv-color-red) .tv-app .big-circle.B { border-color: #ff3b30; box-shadow: 0 0 6px #ff2010, 0 0 14px rgba(255,40,20,.55), inset 0 0 6px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .big-circle.P { border-color: #2f9bff; box-shadow: 0 0 6px #1a7dff, 0 0 14px rgba(26,125,255,.55), inset 0 0 6px #1a7dff; }
+html[data-skin="led"]:not(.tv-color-red) .tv-app :is(.derived-dot.shape-hollow:not(.blue), .leg-mark.circle:not(.blue)) { border-color: #ff4a3a; box-shadow: 0 0 4px #ff2010, inset 0 0 3px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app :is(.derived-dot.shape-hollow.blue, .leg-mark.circle.blue) { border-color: #3aa4ff; box-shadow: 0 0 4px #1a7dff, inset 0 0 3px #1a7dff; }
+html[data-skin="led"]:not(.tv-color-red) .tv-app :is(.derived-dot.shape-solid:not(.blue), .leg-mark.solid:not(.blue)) { background: radial-gradient(circle at 40% 35%, #ffe0d8, #ff3020 60%); box-shadow: 0 0 5px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app :is(.derived-dot.shape-solid.blue, .leg-mark.solid.blue) { background: radial-gradient(circle at 40% 35%, #dff0ff, #1f8cff 60%); box-shadow: 0 0 5px #1a7dff; }
+html[data-skin="led"]:not(.tv-color-red) .tv-app .derived-dot.shape-slash:not(.blue)::before { background: #ff5a4a; box-shadow: 0 0 4px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .derived-dot.shape-slash.blue::before { background: #4ab0ff; box-shadow: 0 0 4px #1a7dff; }
+html[data-skin="led"] .tv-app .big-circle.B { filter: drop-shadow(0 0 2px #ff2010) drop-shadow(0 0 7px rgba(255,40,20,.6)); }
+html[data-skin="led"] .tv-app .big-circle.P { filter: drop-shadow(0 0 2px #1a7dff) drop-shadow(0 0 7px rgba(26,125,255,.6)); }
+html[data-skin="led"]:not(.tv-color-red) .tv-app .tv-star-mark.B { border-color: #ff3b30; box-shadow: 0 0 4px #ff2010, 0 0 10px rgba(255,40,20,.55), inset 0 0 4px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .tv-star-mark.P { border-color: #2f9bff; box-shadow: 0 0 4px #1a7dff, 0 0 10px rgba(26,125,255,.55), inset 0 0 4px #1a7dff; }
+html[data-skin="led"] .tv-app .bead.B { --k-glow: #ff3b30; }
+html[data-skin="led"] .tv-app .bead.P { --k-glow: #2f9bff; }
+html[data-skin="led"] .tv-app .bead.T { --k-glow: #30e060; }
+
+/* ===== 電子看板 v2（2026-11-04；只作用於 html[data-skin="led"]）：照 路單風格預覽/style-led.html 逐元素重做。
+   樣本 px 在 1704×943 實測，換算 tv 的 1920 設計 px（÷0.873）。字型只用襯線；外框直角、按鈕 8px。 ===== */
+html[data-skin="led"] {
+  --l-dm: radial-gradient(circle, #000 58%, transparent 62%) 0 0 / 3.4px 3.4px;
+  --l-bay: linear-gradient(180deg, #4a4d52 0 1px, #2a2c30 1px, #16171a);
+  --l-screen-sh: inset 0 0 0 1px #3a3c40, inset 0 0 0 3px #000, inset 0 4px 14px #000, 0 2px 4px #000;
+  --l-glass2: linear-gradient(115deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 28%, transparent 29%, transparent 70%, rgba(255,255,255,.03) 71%, transparent 85%);
+}
+/* 機殼：金屬漸層＋3px 直紋、#4a4d52 框、上方兩顆螺絲 */
+html[data-skin="led"] .tv-app {
+  background:
+    radial-gradient(circle 5px at 5px 4.5px, #d8dce0, transparent) 6px 6px / 14px 14px no-repeat,
+    radial-gradient(circle 5px at 5px 4.5px, #d8dce0, transparent) right 6px top 6px / 14px 14px no-repeat,
+    radial-gradient(circle 7px at 7px 7px, #7a7f86 0 3.5px, #3a3d42 6.2px, transparent 6.8px) 6px 6px / 14px 14px no-repeat,
+    radial-gradient(circle 7px at 7px 7px, #7a7f86 0 3.5px, #3a3d42 6.2px, transparent 6.8px) right 6px top 6px / 14px 14px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3d4045, #23252a 40%, #2c2f34 70%, #1b1c20);
+  box-shadow: inset 0 0 0 2px #4a4d52, inset 0 3px 0 #6b6f75, inset 0 -2px 0 #000;
+}
+/* 面板＝樣本 .bay（金屬槽），路單格＝.screen（黑底＋點陣）；版面尺寸由 tv.js 算，槽框不加厚 */
+html[data-skin="led"] .tv-app .panel {
+  background: linear-gradient(180deg, #2a2c30, #16171a) !important; border: 1px solid #0c0c0d !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 4px #000 !important;
+}
+html[data-skin="led"] .tv-app .panel::after { background: var(--l-glass2); }
+/* LED 點陣底：#1d140c 圓點（樣本 10px 間距、半徑 2.2→2.8px），對齊格子（大路 4 點／格、下三路 2 點／格、珠盤 6 點／格） */
+html[data-skin="led"] .tv-app .grid-board {
+  --l-grid: #202023;
+  background-color: #050505;
+  background-image: linear-gradient(var(--l-grid) 1px, transparent 1px), linear-gradient(90deg, var(--l-grid) 1px, transparent 1px), radial-gradient(circle, #1d140c 2.5px, transparent 3.2px);
+  border-color: #000; box-shadow: inset 0 0 0 1px #000, inset 0 4px 14px #000, 0 0 0 1px #3a3c40;
+}
+html[data-skin="led"] .tv-app .big-road, html[data-skin="led"] .tv-app #starRoad { background-size: 100% var(--cell-big), var(--cell-big) 100%, calc(var(--cell-big) / 4) calc(var(--cell-big) / 4); }
+html[data-skin="led"] .tv-app .derived-road:not(#starRoad) { background-size: 100% var(--cell-derived), var(--cell-derived) 100%, calc(var(--cell-derived) / 2) calc(var(--cell-derived) / 2); }
+html[data-skin="led"] .tv-app .bead-board { background-size: 100% var(--cell-bead), var(--cell-bead) 100%, calc(var(--cell-bead) / 6) calc(var(--cell-bead) / 6); }
+/* 路名：大浮水印改成右下角金色小名牌（樣本 .plate：right 26、bottom 2、22px／大路 34px） */
+html[data-skin="led"] .tv-app .grid-board::before {
+  right: 30px; bottom: 2px; padding: 2px 18px;
+  font: 900 25px/1.2 "Noto Serif TC", "Noto Serif CJK TC", serif; letter-spacing: 4.6px;
+  background: linear-gradient(#ffe7a8, #ffbf3a); border: 2px solid #6b4a10; border-radius: 0;
+  box-shadow: 0 0 14px rgba(255,180,40,.75), inset 0 1px 0 #fff6d8; text-shadow: none;
+}
+html[data-skin="led"]:not(.tv-color-watermark) .tv-app .grid-board::before { color: #2a1700; }
+html[data-skin="led"] .tv-app .big-road::before { font-size: 39px; padding: 2px 27px; }
+/* 兩字路名比照樣本「大　路／小　路」拉開一字寬 */
+html[data-skin="led"] .tv-app :is(#bigRoad, #smallRoad)::before { letter-spacing: calc(1em + 4.6px); width: calc(3em + 13.8px); text-align: left; }
+
+/* ---------- 頂列：樣本 .hdr 330 | 1fr | 104 | 104（÷0.873 → 378 | 1fr | 119 | 119），上方留 brandline ---------- */
+html[data-skin="led"] .tv-app .title-bar { grid-template-columns: 378px minmax(0, 1fr) auto; gap: 0 11px; padding: 26px 10px 0; }
+/* brandline：置中、#9aa0a8、字距 7px、浮雕陰影（固定定位＝相對已 transform 的 .tv-app） */
+html[data-skin="led"] .tv-app .tv-board-brand {
+  position: fixed; top: 6px; left: 0; right: 0; z-index: 4; gap: 7px;
+  padding: 0; border: 0; pointer-events: none;
+}
+html[data-skin="led"] .tv-app .tv-board-brand-icon { display: none; }
+html[data-skin="led"] .tv-app .tv-board-brand > :is(.tv-board-title-en, .tv-board-divider, .tv-board-title-zh) {
+  font: 700 16px/1.2 "Cinzel", "Noto Serif TC", serif !important; letter-spacing: 7px;
+  background: none; color: #9aa0a8 !important; -webkit-text-fill-color: #9aa0a8;
+  text-shadow: 0 1px 0 #000, 0 -1px 0 rgba(255,255,255,.15) !important; filter: none;
+}
+html[data-skin="led"] .tv-app .tv-board-brand > .tv-board-title-zh { font-family: "Noto Serif TC", "Cinzel", serif !important; }
+html[data-skin="led"] .tv-app .tv-board-title-zh::after { content: " ‧ 即時路單看板"; }
+/* 牌桌看板＝金屬槽包黑螢幕：9px 槽框＋螢幕內陰影 */
+html[data-skin="led"] .tv-app .title-bar .tv-table-board,
+html[data-skin="led"] .tv-app .title-bar .panel.tv-limit {
+  height: 100px; margin: -6px 0 0;
+  background: #050505 !important; border: 9px solid #222 !important; border-image: var(--l-bay) 9 !important;
+  box-shadow: var(--l-screen-sh) !important;
+}
+html[data-skin="led"] .tv-app .title-bar :is(.tv-table-board, .tv-limit)::after { inset: 0; background: var(--l-glass2); }
+html[data-skin="led"] .tv-app .title-bar .tv-table-board { justify-content: center; padding: 0 6px; }
+html[data-skin="led"] .tv-app .tv-board-stats { flex: none; grid-template-columns: repeat(3, auto); justify-content: space-evenly; gap: 0 8px; }
+html[data-skin="led"] .tv-app .tv-board-item { gap: 2px; padding: 0; background: none; border: 0; }
+/* 橘金點陣小字（樣本 .dm：#ffb12a、6px 光暈、3px 點陣遮罩；字型用襯線代替） */
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-name, .tv-limit-key, .predict-title) {
+  -webkit-mask: var(--l-dm); mask: var(--l-dm);
+}
+html[data-skin="led"] .tv-app .tv-board-label {
+  display: block; width: calc(2em + 4px); overflow: hidden; white-space: nowrap; text-align: left;
+  font: 900 18px/1.15 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 2px;
+}
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-name, .tv-limit-key, .predict-title) {
+  color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; text-shadow: 0 0 6px rgba(255,140,0,.9) !important;
+}
+
+/* ---------- 翻牌數字（樣本 .flaps b）：只用 CSS。::first-line 畫格子（上下半、接縫刻口、左卡榫、頂亮線），
+   ::before／::after 把每位數字置中進格、吃掉尾端字距。中線只畫在格子左右邊緣，不穿過字，0 保持空心。 ---------- */
+html[data-skin="led"] .tv-app .tv-table-board .tv-board-val {
+  /* --fa 數字字寬（Noto Serif TC 900 實測 .61em）；--fc 格寬、--fg 格距、--fh 格高；--fr 字級比、--L 元素字距 */
+  --fa: .61em; --fc: 1em; --fg: .125em; --fh: 1.333em; --fr: 1;
+  --L: calc(var(--fc) + var(--fg) - var(--fa));
+  --P: calc(var(--fa) / var(--fr) + var(--L)); --C: calc(var(--P) - var(--fg));
+  --fbg: #2b2b2e; --fbg2: #1d1d20;
+  display: block; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
+  font-family: "Noto Serif TC", "Noto Serif CJK TC", serif !important; font-weight: 900 !important; font-style: normal;
+  font-variant-numeric: tabular-nums lining-nums; letter-spacing: 0 !important; white-space: nowrap;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 2px rgba(255,236,190,.35) !important;
+}
+html[data-skin="led"] .tv-app .tv-table-board .tv-board-val::first-line {
+  font-size: calc(var(--fr) * 1em);
+  letter-spacing: calc(var(--fa) * (1 - var(--fr)) / var(--fr) + var(--L));
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.2) 0 var(--C), transparent 0) 0 calc(50% - var(--fh) / 2 + .5px) / var(--P) 1px repeat-x,
+    linear-gradient(90deg, #000 0 .12em, transparent 0 calc(var(--C) - .12em), #000 0 var(--C), transparent 0) 0 50% / var(--P) 2px repeat-x,
+    linear-gradient(90deg, #555 0 .07em, transparent 0) 0 50% / var(--P) .22em repeat-x,
+    linear-gradient(90deg, var(--fbg) 0 var(--C), transparent 0) 0 calc(50% - var(--fh) / 4) / var(--P) calc(var(--fh) / 2) repeat-x,
+    linear-gradient(90deg, var(--fbg2) 0 var(--C), transparent 0) 0 calc(50% + var(--fh) / 4) / var(--P) calc(var(--fh) / 2) repeat-x,
+    linear-gradient(90deg, rgba(0,0,0,.85) 0 var(--C), transparent 0) 0 calc(50% + var(--fh) / 2 + 1px) / var(--P) 2px repeat-x;
+}
+html[data-skin="led"] .tv-app .tv-table-board .tv-board-val::before {
+  content: ""; display: inline-block; width: calc((var(--fa) + var(--L) - (var(--fg) + var(--fa)) * var(--fr)) / 2);
+}
+html[data-skin="led"] .tv-app .tv-table-board .tv-board-val::after {
+  content: ""; display: inline-block; width: 0;
+  margin-left: calc(-1 * ((var(--fa) + var(--L) - (var(--fg) + var(--fa)) * var(--fr)) / 2 + var(--fg) * var(--fr)));
+}
+/* 頂列看板：樣本 34×46 格、36px 字（→ 41px） */
+html[data-skin="led"] .tv-app .tv-table-board .tv-board-val { --fc: .944em; --fg: .083em; --fh: 1.278em; font-size: 41px !important; line-height: 1.278; }
+
+/* ---------- 限紅：整條面板、左欄「限紅／最高／最低」、欄線 #1a1a1a、列線 #1c1c1c ---------- */
+html[data-skin="led"] .tv-app .title-bar .panel.tv-limit { padding: 0; gap: 0; grid-template-columns: 64px repeat(8, minmax(0, 1fr)); }
+html[data-skin="led"] .tv-app .tv-limit .tv-limit-col { grid-template-rows: repeat(3, minmax(0, 1fr)); align-content: stretch; align-items: stretch; }
+html[data-skin="led"] .tv-app .tv-limit .tv-limit-col + .tv-limit-col { border-left: 1px solid #1a1a1a; }
+html[data-skin="led"] .tv-app .tv-limit :is(.tv-limit-name, .tv-limit-key) {
+  display: flex; align-items: center; justify-content: center; min-height: 0;
+  font: 900 18px/1 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 1px;
+}
+html[data-skin="led"] .tv-app .tv-limit .tv-limit-keys .tv-limit-name::before { content: "限紅"; }
+html[data-skin="led"] .tv-app .tv-limit .tv-limit-col > * + * { border-top: 1px solid #1c1c1c; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input {
+  height: 100%; min-height: 0; padding: 0 1px; line-height: normal; border: 1px solid transparent; border-top-color: #1c1c1c; border-radius: 0;
+  font: 900 20px/1 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 1px;
+  -webkit-mask: var(--l-dm); mask: var(--l-dm);
+}
+html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .limit-input[data-k$="Max"] { color: #ffcf4a !important; }
+html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .limit-input[data-k$="Min"] { color: #7dff9a !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input[data-k$="Max"] { text-shadow: 0 0 6px rgba(255,140,0,.9) !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input[data-k$="Min"] { text-shadow: 0 0 6px #20d050 !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #6a6d72; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { -webkit-mask: none; mask: none; outline: 2px solid #ffb12a; outline-offset: -2px; background: #111; text-shadow: none !important; }
+html[data-skin="led"]:not(.tv-color-text) .tv-app .tv-limit .tv-limit-name { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
+html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .tv-limit-key-high,
+html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .tv-limit-key-low { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
+
+/* ---------- 右上：三顆 .pb 金屬鈕（燈帽：金／金／紅）＋ .emb 圓徽 ---------- */
+html[data-skin="led"] .tv-app .tv-identity { gap: 11px; margin-top: -6px; align-items: stretch; }
+html[data-skin="led"] .tv-app .tv-save-stack {
+  flex-direction: column; justify-content: flex-start; gap: 5px; width: 119px; padding-top: 36px; box-sizing: border-box;
+}
+html[data-skin="led"] .tv-save-stack > .tv-skin-btn { position: relative; top: auto; margin: 0; }
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn) {
+  position: relative; justify-content: center; width: 119px; height: 28px; padding: 0 0 0 18px; border: 0;
+  font: 900 15px/1 "Noto Serif TC", "Noto Serif CJK TC", serif; letter-spacing: 1px; color: #ffe1a0;
+  background: linear-gradient(#45484d, #1d1f22); border-radius: 8px;
+  box-shadow: 0 3px 0 #000, inset 0 1px 0 #777; text-shadow: 0 0 6px #ff9a00;
+}
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn)::before {
+  content: ""; position: absolute; left: 10px; top: 50%; width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff6c8, #ffb000 60%, #a05a00); box-shadow: 0 0 10px #ffb000;
+}
+html[data-skin="led"] .tv-skin-btn::before { background: radial-gradient(circle at 40% 35%, #ffd0d0, #ff2a2a 60%, #900); box-shadow: 0 0 10px #ff2a2a; }
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn):hover { color: #fff0c8; background: linear-gradient(#55585d, #2a2c30); }
+
+
+
+html[data-skin="led"] .tv-app .tv-logo-btn {
+  width: 119px; margin: 0; border-radius: 8px;
+  background: linear-gradient(180deg, #2a2c30, #16171a); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 4px #000;
+}
+html[data-skin="led"] .tv-app .tv-logo-btn .tv-logo,
+html[data-skin="led"] .tv-app .tv-logo-btn:is(:hover, :active) .tv-logo {
+  width: 96px; height: 96px; padding: 14px; box-sizing: border-box; border-radius: 50%; transform: none;
+  background: radial-gradient(circle, #2e3035, #17181b); box-shadow: inset 0 2px 4px #000, 0 1px 0 #555;
+  filter: grayscale(1) brightness(1.45) contrast(1.15) drop-shadow(0 1px 1px #000);
+}
+
+/* ---------- 統計：#0a0a0a 螢幕、標題列「桌號／局數」小字＋翻牌數字、4×4 色條小格 ---------- */
+html[data-skin="led"] .tv-app .panel.tv-stats { background: #0a0a0a !important; }
+html[data-skin="led"] .tv-app .tv-stats .tv-stat-head { background: transparent; }
+/* 標題字點陣：只套在文字（background-clip:text），數字翻牌不受影響 */
+html[data-skin="led"]:not(.tv-color-statText):not(.tv-color-statHeader) .tv-app .tv-stats .tv-stat-head {
+  background: radial-gradient(circle, #ffb12a 58%, transparent 62%) 0 0 / 3.4px 3.4px; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: #ffb12a !important; text-shadow: 0 0 6px rgba(255,140,0,.55) !important;
+}
+html[data-skin="led"] .tv-app .tv-stats .stats-list { background: #000; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { text-shadow: 0 0 6px var(--l-gl, #ff8c00) !important; }
+/* 下局指示標題：樣本 .nt 20px（→ 23px） */
+html[data-skin="led"] .tv-app .predict-title { font: 900 23px/1.2 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 3px; }
+/* 設定視窗等不在 .tv-app 內的介面字型改襯線 */
+html[data-skin="led"] .tv-settings { font-family: "Noto Serif TC", "Cinzel", serif; }
+/* 統計／下局指示：樣本是「金屬槽＋黑螢幕」，用內陰影畫槽框（不改版面尺寸） */
+html[data-skin="led"] .tv-app .panel:is(.tv-stats, .predict-panel) {
+  box-shadow: inset 0 0 0 6px #1f2024, inset 0 1px 0 6px #2e3034, inset 0 0 0 7px #3a3c40, inset 0 0 0 9px #000, inset 0 12px 18px #000, 0 2px 4px #000 !important;
+}
+html[data-skin="led"] .tv-app .panel.predict-panel { background: #050505 !important; }
+/* 電子看板下的彈窗／設定／時鐘也只用襯線字（原本有 monospace、Arial、微軟正黑體、新細明體） */
+html[data-skin="led"] :is(#bossClockTime, #bossClockDate, [id^="tvKey"], #tvAutoCommitDelay, #tvSoundVolume, #tvColorHex, #tvSettingsClose, [id^="backup"], .cp-mode-select, .cp-mode-select option, .result-title) {
+  font-family: "Noto Serif TC", "Cinzel", serif !important; font-feature-settings: normal;
+}
+
+/* ---------- v62：四角螺絲、珠子路霓虹燈珠、下局指示比例、限紅底部留白 ---------- */
+/* 螺絲：樣本 .bay .sc 8px＠3px（÷0.873 → 9px＠3.5px）；機殼四角 9px 貼邊。畫在最上層的 ::after，面板 overflow 也不會裁掉 */
+html[data-skin="led"] {
+  --l-screws:
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) left 5.21px top 5.21px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) left 3.5px top 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) left 3.5px top 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) left 3.5px top 3.5px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) right 5.21px top 5.21px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) right 3.5px top 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) right 3.5px top 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) right 3.5px top 3.5px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) left 5.21px bottom 5.21px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) left 3.5px bottom 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) left 3.5px bottom 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) left 3.5px bottom 3.5px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) right 5.21px bottom 5.21px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) right 3.5px bottom 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) right 3.5px bottom 3.5px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) right 3.5px bottom 3.5px / 10px 10px no-repeat;
+  --l-screws-housing:
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) left 2.71px top 2.71px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) left 1px top 1px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) left 1px top 1px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) left 1px top 1px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) right 2.71px top 2.71px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) right 1px top 1px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) right 1px top 1px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) right 1px top 1px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) left 2.71px bottom 2.71px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) left 1px bottom 1px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) left 1px bottom 1px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) left 1px bottom 1px / 10px 10px no-repeat,
+    linear-gradient(125deg, transparent 0 43%, #33363a 43% 59%, transparent 59%) right 2.71px bottom 2.71px / 5.58px 5.58px no-repeat,
+    radial-gradient(circle 4.05px at 3.15px 2.70px, rgba(216,220,224,.95), rgba(216,220,224,0)) right 1px bottom 1px / 10px 10px no-repeat,
+    radial-gradient(circle 4.50px at 4.50px 4.50px, #7a7f86 0 2.25px, #3a3d42 4.10px, transparent 4.50px) right 1px bottom 1px / 10px 10px no-repeat,
+    radial-gradient(circle 5.50px at 4.50px 5.50px, rgba(0,0,0,.85) 4.00px, transparent 5.50px) right 1px bottom 1px / 10px 10px no-repeat;
+}
+html[data-skin="led"] .tv-app {
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px), linear-gradient(180deg, #3d4045, #23252a 40%, #2c2f34 70%, #1b1c20);
+}
+html[data-skin="led"] .tv-app::after { content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: var(--l-screws-housing); }
+html[data-skin="led"] .tv-app .panel::after,
+html[data-skin="led"] .tv-app .title-bar :is(.tv-table-board, .tv-limit)::after { background: var(--l-screws), var(--l-glass2); }
+html[data-skin="led"] .tv-app .tv-stats::after { inset: 0; }
+html[data-skin="led"] .tv-app .title-bar :is(.tv-table-board, .tv-limit)::after { inset: -9px; background: var(--l-screws), var(--l-glass2) 9px 9px / calc(100% - 18px) calc(100% - 18px) no-repeat; }
+
+/* 限紅：內容高度＝螢幕高度（原本欄高 93px 溢出 82px 螢幕，「最低」列壓到下框）；三列均分，比照樣本 table height:100% */
+html[data-skin="led"] .tv-app .title-bar .panel.tv-limit { grid-template-rows: minmax(0, 1fr); padding: 0 0 3px; }
+html[data-skin="led"] .tv-app .tv-limit .tv-limit-col { height: 100%; min-height: 0; overflow: hidden; }
+
+/* 珠子路：樣本 em.lamp（34px／40px 格＝85%，光點 40% 35%，外光 12px＝0.3 格，白字 18px＝0.53 珠＋白光） */
+html[data-skin="led"] .tv-app .bead.tv-art-bead:has(> .bead-art[src*="-stats.png"]) {
+  isolation: auto; width: 85%; height: 85%; margin: 7.5%;
+  background: radial-gradient(circle at 40% 35%, var(--lb-hi), var(--lb) 65%, var(--lb-lo));
+  box-sizing: border-box; border: calc(var(--cell-bead) * .125) solid var(--lb-ring);
+  box-shadow: 0 0 calc(var(--cell-bead) * .3) var(--lb-gl);
+}
+html[data-skin="led"] .tv-app .bead.tv-art-bead > .bead-art[src*="-stats.png"] { visibility: hidden; }
+html[data-skin="led"] .tv-app .bead.B { --lb-hi: #ff9a8a; --lb: #e01a0a; --lb-lo: #700; --lb-gl: #ff2010; --lb-ring: #ff3b30; }
+html[data-skin="led"] .tv-app .bead.P { --lb-hi: #9ad0ff; --lb: #0a6ae0; --lb-lo: #003070; --lb-gl: #1a7dff; --lb-ring: #2f9bff; }
+html[data-skin="led"] .tv-app .bead.T { --lb-hi: #9affb4; --lb: #0aa83a; --lb-lo: #004a18; --lb-gl: #10c040; --lb-ring: #2fd25a; }
+html[data-skin="led"].tv-color-red .tv-app .bead.B { --lb-hi: color-mix(in srgb, var(--tv-color-red) 45%, white); --lb: var(--tv-color-red); --lb-lo: color-mix(in srgb, var(--tv-color-red) 45%, black); --lb-gl: var(--tv-color-red); --lb-ring: color-mix(in srgb, var(--tv-color-red) 80%, white); }
+html[data-skin="led"].tv-color-blue .tv-app .bead.P { --lb-hi: color-mix(in srgb, var(--tv-color-blue) 45%, white); --lb: var(--tv-color-blue); --lb-lo: color-mix(in srgb, var(--tv-color-blue) 45%, black); --lb-gl: var(--tv-color-blue); --lb-ring: color-mix(in srgb, var(--tv-color-blue) 80%, white); }
+html[data-skin="led"].tv-color-green .tv-app .bead.T { --lb-hi: color-mix(in srgb, var(--tv-color-green) 45%, white); --lb: var(--tv-color-green); --lb-lo: color-mix(in srgb, var(--tv-color-green) 45%, black); --lb-gl: var(--tv-color-green); --lb-ring: color-mix(in srgb, var(--tv-color-green) 80%, white); }
+/* 字原本烤在 PNG 裡：改由格子 ::after 寫字，疊在珠上、對子點（z 4）下 */
+html[data-skin="led"] .tv-app #beadBoard .cell:has(> .bead.tv-art-bead > .bead-art[src*="-stats.png"])::after {
+  position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; pointer-events: none;
+  font: 900 calc(var(--cell-bead) * .45)/1 "Noto Serif TC", "Noto Serif CJK TC", serif; color: #fff; text-shadow: 0 0 calc(var(--cell-bead) * .1) #fff;
+}
+html[data-skin="led"] .tv-app #beadBoard .cell:has(> .bead > .bead-art[src*="banker-stats"])::after { content: "莊"; }
+html[data-skin="led"] .tv-app #beadBoard .cell:has(> .bead > .bead-art[src*="player-stats"])::after { content: "閒"; }
+html[data-skin="led"] .tv-app #beadBoard .cell:has(> .bead > .bead-art[src*="tie-stats"])::after { content: "和"; }
+html[data-skin="led"].tv-color-markText .tv-app #beadBoard .cell:has(> .bead.tv-art-bead > .bead-art[src*="-stats.png"])::after { color: var(--tv-color-markText); }
+
+/* 下局指示：樣本 .ng（欄 63×列 50 → 燈 34＝54% 欄寬，環 5px，實心 30，斜槓 40×5）；tv 欄 74 → 40／6／35／47×6，光暈同比例 */
+html[data-skin="led"] .tv-app .predict-legend .leg-tag {
+  width: 40px; height: 40px; font: 900 21px/1 "Noto Serif TC", "Noto Serif CJK TC", serif; color: #fff; text-shadow: 0 0 5px #fff;
+}
+html[data-skin="led"]:not(.tv-color-red) .tv-app .leg-tag.banker { background: radial-gradient(circle at 40% 35%, #ff9a8a, #e01a0a 65%, #700); }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .leg-tag.player { background: radial-gradient(circle at 40% 35%, #9ad0ff, #0a6ae0 65%, #003070); }
+html[data-skin="led"] .tv-app .leg-tag.banker { box-shadow: 0 0 14px #ff2010; }
+/* 樣本 .lamp.B/.P 帶 5px 亮環（34px 燈）→ 40px 燈 6px 環 */
+html[data-skin="led"] .tv-app .predict-legend .leg-tag { box-sizing: border-box; border: 6px solid var(--lt-ring); }
+html[data-skin="led"] .tv-app .predict-legend .leg-tag.banker { --lt-ring: #ff3b30; }
+html[data-skin="led"] .tv-app .predict-legend .leg-tag.player { --lt-ring: #2f9bff; }
+html[data-skin="led"].tv-color-red .tv-app .predict-legend .leg-tag.banker { --lt-ring: color-mix(in srgb, var(--tv-color-red) 80%, white); }
+html[data-skin="led"].tv-color-blue .tv-app .predict-legend .leg-tag.player { --lt-ring: color-mix(in srgb, var(--tv-color-blue) 80%, white); }
+html[data-skin="led"] .tv-app .leg-tag.player { box-shadow: 0 0 14px #1a7dff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark { width: 40px; height: 40px; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.circle { box-sizing: border-box; border-style: solid; }
+/* #pBE_* 以 ID 吃 --tv-eye-stroke（預設 2px）：led 以 3 倍保留使用者粗細設定 → 預設 6px */
+html[data-skin="led"] .tv-app .predict-legend :is(#pBE_B, #pBE_P) { border-width: calc(var(--tv-eye-stroke, 2px) * 3); }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.circle:not(.blue) { box-shadow: 0 0 9px #ff2010, 0 0 21px rgba(255,40,20,.6), inset 0 0 9px #ff2010; background: radial-gradient(circle, transparent 50%, rgba(255,60,40,.15)); }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.circle.blue { box-shadow: 0 0 9px #1a7dff, 0 0 21px rgba(30,130,255,.6), inset 0 0 9px #1a7dff; background: radial-gradient(circle, transparent 50%, rgba(40,140,255,.15)); }
+html[data-skin="led"]:not(.tv-color-red) .tv-app .predict-legend .leg-mark.circle:not(.blue) { border-color: #ff3b30; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .predict-legend .leg-mark.circle.blue { border-color: #2f9bff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.solid { width: 35px; height: 35px; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.solid:not(.blue) { box-shadow: 0 0 9px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.solid.blue { box-shadow: 0 0 9px #1a7dff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.slash::before { left: calc(50% - 23.5px); width: 47px; border-radius: 3px; }
+/* #pCR_* 以 ID 吃 --tv-cockroach-stroke（預設 3px）：led 2 倍 → 預設 6px */
+html[data-skin="led"] .tv-app .predict-legend :is(#pCR_B, #pCR_P)::before { --led-sl: calc(var(--tv-cockroach-stroke, 3px) * 2); height: var(--led-sl); top: calc(50% - var(--led-sl) / 2); }
+html[data-skin="led"]:not(.tv-color-red) .tv-app .predict-legend .leg-mark.slash:not(.blue)::before { background: #ff5a4a; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .predict-legend .leg-mark.slash.blue::before { background: #4ab0ff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.slash:not(.blue)::before { box-shadow: 0 0 8px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.slash.blue::before { box-shadow: 0 0 8px #1a7dff; }
+
+/* v63 螺絲不壓內容：面板左右留 14px 框（螺絲 9px 位於 3.5px → 外緣 13.5px），路格數不變、只縮格。
+   tv.js 以面板 clientWidth 算 bigCell＝(W−2)/欄數，故大路格縮 26px/欄數 → 左右各讓出 13px。 */
+html[data-skin="led"] .tv-app .big-panel { --led-cb: calc(var(--cell-big) - 26px / var(--cols-big)); }
+html[data-skin="led"] .tv-app .big-panel > #bigRoad { --cell-big: var(--led-cb); }
+/* 下三路面板內寬＝欄數×大格÷2−3（兩面板夾 6px 縫）；格寬上限使路寬 ≤ 內寬−28 */
+html[data-skin="led"] .tv-app .derived-panel { --led-cd: min(var(--cell-derived), (var(--cols-big) * var(--cell-big) / 2 - 31px) / var(--cols-derived)); }
+html[data-skin="led"] .tv-app .derived-panel > .derived-road:not(#starRoad) { --cell-derived: var(--led-cd); }
+html[data-skin="led"] .tv-app .panel.predict-panel { padding-left: 13px; padding-right: 13px; }
+/* v64-1 三星路左右框＝樣本 12px：欄寬放寬到與大眼仔盤面同寬（列高、格數不變），燈維持正圓置中 */
+html[data-skin="led"] .tv-app .derived-panel > #starRoad {
+  --led-cs: calc(var(--cols-derived) * var(--led-cd) / var(--cols-star, 23));
+  grid-template-columns: repeat(var(--cols-star, 23), var(--led-cs));
+  width: calc(var(--cols-star, 23) * var(--led-cs) + 2px);
+  background-size: 100% var(--cell-big), var(--led-cs) 100%, calc(var(--led-cs) / 4) calc(var(--cell-big) / 4);
+}
+html[data-skin="led"] .tv-app .derived-panel > #starRoad > .tv-star-mark { width: calc(var(--cell-big) - 6px); justify-self: center; margin: 3px 0; }
+/* v64-3 光暈＝樣本畫面像素：大路 8/18/8px（÷0.873）、珠子路 12px＋白字 4px、下局提示 12/4、8/18/8、8、7px（÷0.855）；拿掉樣本沒有的 drop-shadow */
+html[data-skin="led"] .tv-app .big-circle:is(.B, .P) { filter: none; }
+html[data-skin="led"]:not(.tv-color-red) .tv-app .big-circle.B { box-shadow: 0 0 9.16px #ff2010, 0 0 20.62px rgba(255,40,20,.6), inset 0 0 9.16px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app .big-circle.P { box-shadow: 0 0 9.16px #1a7dff, 0 0 20.62px rgba(30,130,255,.6), inset 0 0 9.16px #1a7dff; }
+html[data-skin="led"] .tv-app .bead-art { filter: none; }
+html[data-skin="led"] .tv-app .bead.tv-art-bead:has(> .bead-art[src*="-stats.png"]) { box-shadow: 0 0 14.04px var(--lb-gl); }
+html[data-skin="led"] .tv-app #beadBoard .cell:has(> .bead.tv-art-bead > .bead-art[src*="-stats.png"])::after { text-shadow: 0 0 4.68px #fff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-tag { text-shadow: 0 0 4.68px #fff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-tag.banker { box-shadow: 0 0 14.04px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-tag.player { box-shadow: 0 0 14.04px #1a7dff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.circle:not(.blue) { box-shadow: 0 0 9.36px #ff2010, 0 0 21.05px rgba(255,40,20,.6), inset 0 0 9.36px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.circle.blue { box-shadow: 0 0 9.36px #1a7dff, 0 0 21.05px rgba(30,130,255,.6), inset 0 0 9.36px #1a7dff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.solid:not(.blue) { box-shadow: 0 0 9.36px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.solid.blue { box-shadow: 0 0 9.36px #1a7dff; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.slash:not(.blue)::before { box-shadow: 0 0 8.19px #ff2010; }
+html[data-skin="led"] .tv-app .predict-legend .leg-mark.slash.blue::before { box-shadow: 0 0 8.19px #1a7dff; }
+/* v65 統計區：字級、粗細、位置、排版改回與綠金相同（版面交給共用規則與 tv.js 擬合），只保留 led 的顏色與質感 */
+html[data-skin="led"] .tv-app .tv-stats .stats-list li { border: 1px solid #2a2c30 !important; box-shadow: inset 0 3px 0 var(--l-sc, #4a4d52) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li.tv-stat-empty { border-color: #1a1b1e !important; box-shadow: none !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { font-weight: 600 !important; }
+html[data-skin="led"] .tv-app .tv-stats .tv-stat-head { font-weight: 600 !important; }
+html[data-skin="led"] .tv-app .tv-stats :is(.tv-stat-head b, #totalCount, .stats-list li > b) { font-family: "Cinzel", "Noto Serif TC", serif !important; font-weight: 700 !important; }
+/* v65 大路圈＝樣本 .lamp：直徑 34px／環 5px（畫面 px，÷0.873 ≈ 格 96%、環＝預設筆寬×1.43），圈內實心深底不透格線 */
+html[data-skin="led"] .tv-app #bigRoad .big-circle:is(.B, .P) { width: 96%; height: 96%; margin: 2%; border-width: calc(var(--tv-big-stroke, 4px) * 1.25); }
+html[data-skin="led"]:not(.tv-color-red) .tv-app #bigRoad .big-circle.B { background: radial-gradient(circle, transparent 50%, rgba(255,60,40,.15)) #050505; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app #bigRoad .big-circle.P { background: radial-gradient(circle, transparent 50%, rgba(40,140,255,.15)) #050505; }
+/* v65 三星路上下框＝樣本 12px：列高縮 7.86px（上下各讓 13.74 css px），燈＝樣本 .road.sm 27/31 格、環 4/31 格 */
+html[data-skin="led"] .tv-app .derived-panel > #starRoad {
+  --led-sr: calc(var(--cell-big) - 7.86px);
+  grid-template-rows: repeat(3, var(--led-sr)); height: calc(3 * var(--led-sr) + 2px);
+  background-size: 100% var(--led-sr), var(--led-cs) 100%, calc(var(--led-cs) / 4) calc(var(--led-sr) / 4);
+}
+html[data-skin="led"] .tv-app .derived-panel > #starRoad > .tv-star-mark {
+  width: calc(var(--led-sr) * 27 / 31); height: calc(var(--led-sr) * 27 / 31); align-self: center; justify-self: center; margin: 0;
+  border-width: round(up, calc(var(--led-sr) * 4 / 31), 1px);
+}
+html[data-skin="led"]:not(.tv-color-red) .tv-app #starRoad .tv-star-mark.B { background: radial-gradient(circle, transparent 50%, rgba(255,60,40,.15)) #050505; box-shadow: 0 0 9.16px #ff2010, 0 0 20.62px rgba(255,40,20,.6), inset 0 0 9.16px #ff2010; }
+html[data-skin="led"]:not(.tv-color-blue) .tv-app #starRoad .tv-star-mark.P { background: radial-gradient(circle, transparent 50%, rgba(40,140,255,.15)) #050505; box-shadow: 0 0 9.16px #1a7dff, 0 0 20.62px rgba(30,130,255,.6), inset 0 0 9.16px #1a7dff; }

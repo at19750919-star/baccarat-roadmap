@@ -164,13 +164,13 @@
   min-width: 500px;
   margin: 30px 0 0;
   color: #fff1c9;
-  font: 700 35px/1.4 "Cinzel", Georgia, serif;
-  letter-spacing: 7px;
+  font: 700 70px/1.3 "Cinzel", Georgia, serif;
+  letter-spacing: 10px;
   text-shadow: 0 2px 8px #0008;
 }
 .result-english::before, .result-english::after { content: ""; width: 140px; height: 1px; background: linear-gradient(90deg, transparent, #e2ba6da6); }
 .result-english::after { transform: rotate(180deg); }
-.has-art .result-english { font-size: 23px; margin-top: 7px; letter-spacing: 5px; }
+.has-art .result-english { font-size: 46px; margin-top: 7px; letter-spacing: 5px; }
 .has-art .result-title, .has-art .result-english { max-width: 100%; text-align: center; overflow-wrap: anywhere; }
 .has-art .result-english:empty { display: none; }
 .result-pairs { display: flex; justify-content: center; gap: 16px; min-height: 34px; margin-top: 17px; }
@@ -210,3 +210,8 @@
   .result-announcement, .result-ribbon, .result-content { transition: none; }
   .result-shimmer::after, .result-orbit { animation: none !important; }
 }
+
+/* 幸運6：下排中文字用襯線中文字型 */
+.has-six .result-english { font-family: "Cinzel", "Noto Serif TC", Georgia, serif; }
+/* 數字 6 比中文字矮，放大到跟「莊」差不多高 */
+.has-six .result-symbol { font-size: 215px; line-height: 1; transform: translateY(-2px); }

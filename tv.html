@@ -5,15 +5,62 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>百家樂路單・電視版</title>
+<link rel="icon" href="data:,"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&amp;family=Cinzel:wght@500;700;900&amp;family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&amp;family=Noto+Serif+TC:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
-<link href="style.css?v=8" rel="stylesheet"/>
-<link href="themes.css?v=1" rel="stylesheet"/>
-<script src="themes.js?v=1"></script>
-<link href="tv.css?v=26" rel="stylesheet"/>
-<link href="result-announcement.css?v=8" rel="stylesheet"/></head>
+<link href="style.css?v=9" rel="stylesheet"/>
+<script src="tv-skin.js?v=3"></script>
+<link href="tv.css?v=65" rel="stylesheet"/>
+
+
+
+
+
+
+<link href="result-announcement.css?v=10" rel="stylesheet"/>
+<style>
+/* Equal cells; natural glyph proportions with one fitter in tv.js. */
+.tv-app .tv-stats .stats-list { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.tv-app .tv-stats .stats-list li {
+  grid-template-columns: minmax(0, 1fr) 25%;
+  gap: 3%; padding: 3% 6% 3% 3%; min-width: 0; overflow: hidden;
+}
+.tv-app .tv-stats .stats-list .k {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  align-self: stretch; min-height: 0; min-width: 0;
+  font-size: var(--stat-fit-size, 1px); line-height: 1.08;
+  letter-spacing: 0; text-align: left;
+}
+.tv-app .tv-stats .stats-list .k { color: #fff !important; }
+.tv-app .tv-stats .stats-list .tv-stat-main { display: block; flex: none; width: max-content; white-space: nowrap; }
+.tv-app .tv-stats .tv-stat-prefix { display: block; flex: none; width: max-content; font-size: .7em; line-height: 1.12; }
+.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top {
+  display: flex; flex: none; align-self: stretch; align-items: baseline; justify-content: space-between;
+  width: 100%; min-width: 0; font-size: .55em; line-height: 1.08; white-space: nowrap;
+}
+.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-prefix,
+.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-mult {
+  flex: none; width: max-content; font-size: 1em; line-height: 1.08; white-space: nowrap;
+}
+.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-mult { margin-left: auto; }
+.tv-app .tv-stats .stats-list .k.tv-stat-seven .tv-stat-mult small { font-size: .7em; margin-left: 0; }
+.tv-app .tv-stats .stats-list .k small { font-size: 1em; margin-left: 0; }
+.tv-app .tv-stats .stats-list li > b {
+  display: flex; align-items: center; justify-content: center;
+  align-self: center; box-sizing: border-box; width: 100%; height: 76%; min-width: 0;
+  padding: 0; border: 0; border-radius: 0;
+  background: none; box-shadow: none;
+  font: 800 var(--stat-count-fit-size, 1px)/1 "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
+  letter-spacing: 1.5px; font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums; text-shadow: 0 1px 1px #261800;
+}
+.tv-app .tv-stats .stats-list li > b { color: #fdf8c9 !important; }
+.tv-app .tv-stats .tv-stat-head b { color: #E8C877 !important; }
+</style>
+</head>
 <body>
+
 <div class="app tv-app">
 <header class="title-bar"><div class="tv-shortcuts">
 <div class="tv-table-board">
@@ -262,12 +309,7 @@
 <circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
 </svg>
 </button>
-</div><label class="theme-control" for="themeSelect">造型
-            <select aria-label="路單造型" id="themeSelect">
-<option value="classic">經典紅金</option>
-<option value="black-gold">黑金</option>
-</select>
-</label></div><button type="button" class="tv-save-btn" id="saveBtn" title="下載 JSON、PNG 並備份至 OneDrive">儲存路單</button><button type="button" class="tv-logo-btn" id="tvSettingsButton" aria-label="路單設定" aria-haspopup="dialog" aria-controls="tvSettings" title="路單設定"><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo-transparent.png" width="130"/></button></div></header>
+</div></div><div class="tv-save-stack"><button type="button" class="tv-save-btn" id="saveBtn" title="下載 JSON、PNG 並備份至 OneDrive">儲存路單</button><button type="button" class="tv-skin-btn" id="tvSkinToggle" aria-haspopup="listbox" aria-expanded="false" aria-controls="tvSkinMenu" title="選擇畫面風格">紅金風格</button><ul class="tv-skin-menu" id="tvSkinMenu" role="listbox" aria-label="畫面風格" hidden><li role="option" tabindex="-1" data-skin-value="red" aria-selected="true">紅金風格</li><li role="option" tabindex="-1" data-skin-value="green" aria-selected="false">綠金風格</li><li role="option" tabindex="-1" data-skin-value="black" aria-selected="false">黑金風格</li><li role="option" tabindex="-1" data-skin-value="led" aria-selected="false">電子看板</li></ul></div><button type="button" class="tv-logo-btn" id="tvSettingsButton" aria-label="路單設定" aria-haspopup="dialog" aria-controls="tvSettings" title="路單設定"><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo-transparent.png" width="130"/></button></div></header>
 <!-- 大路 (full width on top) -->
 <section class="panel big-panel">
 <div class="grid-board big-road" data-label="大路" id="bigRoad"></div>
@@ -292,19 +334,19 @@
 <div class="tv-stat-head tv-stat-table">桌號：<b>001</b></div>
 <div class="tv-stat-head">局數：<b id="totalCount">0</b></div>
 <ul class="stats-list">
-<li class="stat-banker"><span class="k">莊贏</span><b id="cntB">0</b></li>
-<li class="stat-tie"><span class="k">和局</span><b id="cntT">0</b></li>
-<li class="stat-player"><span class="k">閒贏</span><b id="cntP">0</b></li>
-<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×4</small></span></span><b id="cntS74">0</b></li>
-<li class="stat-lucky6"><span class="k">幸運6</span><b id="cntL6">0</b></li>
-<li class="stat-banker-pair"><span class="k">莊對</span><b id="cntBP">0</b></li>
-<li class="tv-stat-blue tv-lucky7"><span class="k">幸運7<small>×2</small></span><b id="cntL72">0</b></li>
-<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×5</small></span></span><b id="cntS75">0</b></li>
-<li class="stat-lucky6"><span class="k">幸運6<br>小老虎</span><b id="cntST">0</b></li>
-<li class="stat-player-pair"><span class="k">閒對</span><b id="cntPP">0</b></li>
-<li class="tv-stat-blue tv-lucky7"><span class="k">幸運7<small>×3</small></span><b id="cntL73">0</b></li>
-<li class="tv-stat-blue tv-super-lucky7"><span class="k">超級<br><span class="tv-stat-seven-line">幸運7<small>×6</small></span></span><b id="cntS76">0</b></li>
-<li class="stat-lucky6"><span class="k">幸運6<br>大老虎</span><b id="cntBT">0</b></li>
+<li class="stat-banker"><span class="k tv-stat-short"><span class="tv-stat-main">莊贏</span></span><b id="cntB">0</b></li>
+<li class="stat-tie"><span class="k tv-stat-short"><span class="tv-stat-main">和局</span></span><b id="cntT">0</b></li>
+<li class="stat-player"><span class="k tv-stat-short"><span class="tv-stat-main">閒贏</span></span><b id="cntP">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k tv-stat-seven"><span class="tv-stat-seven-top"><span class="tv-stat-prefix">超級</span><span class="tv-stat-mult"><small>×</small>4</span></span><span class="tv-stat-main tv-stat-seven-line">幸運7</span></span><b id="cntS74">0</b></li>
+<li class="stat-lucky6"><span class="k"><span class="tv-stat-main">幸運6</span></span><b id="cntL6">0</b></li>
+<li class="stat-banker-pair"><span class="k tv-stat-short"><span class="tv-stat-main">莊對</span></span><b id="cntBP">0</b></li>
+<li class="tv-stat-blue tv-lucky7"><span class="k tv-stat-seven"><span class="tv-stat-seven-top"><span class="tv-stat-mult"><small>×</small>2</span></span><span class="tv-stat-main">幸運7</span></span><b id="cntL72">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k tv-stat-seven"><span class="tv-stat-seven-top"><span class="tv-stat-prefix">超級</span><span class="tv-stat-mult"><small>×</small>5</span></span><span class="tv-stat-main tv-stat-seven-line">幸運7</span></span><b id="cntS75">0</b></li>
+<li class="stat-lucky6"><span class="k"><span class="tv-stat-main">小老虎</span></span><b id="cntST">0</b></li>
+<li class="stat-player-pair"><span class="k tv-stat-short"><span class="tv-stat-main">閒對</span></span><b id="cntPP">0</b></li>
+<li class="tv-stat-blue tv-lucky7"><span class="k tv-stat-seven"><span class="tv-stat-seven-top"><span class="tv-stat-mult"><small>×</small>3</span></span><span class="tv-stat-main">幸運7</span></span><b id="cntL73">0</b></li>
+<li class="tv-stat-blue tv-super-lucky7"><span class="k tv-stat-seven"><span class="tv-stat-seven-top"><span class="tv-stat-prefix">超級</span><span class="tv-stat-mult"><small>×</small>6</span></span><span class="tv-stat-main tv-stat-seven-line">幸運7</span></span><b id="cntS76">0</b></li>
+<li class="stat-lucky6"><span class="k"><span class="tv-stat-main">大老虎</span></span><b id="cntBT">0</b></li>
 <li class="tv-stat-empty"></li>
 <li class="tv-stat-empty"></li>
 <li class="tv-stat-empty"></li>
@@ -445,6 +487,7 @@
 </div>
 <!-- 巨龍特效層 -->
 <div class="dragon-overlay" id="dragonOverlay" aria-hidden="true">
+<video id="dragonVideo" class="dragon-video" muted playsinline preload="none" data-banker-src="assets/dragons/dragon-gold-transparent-v2.webm" data-player-src="特效/dragon-long-v2.webm" aria-hidden="true"></video>
 <canvas id="dragonFxCanvas" class="dragon-fx-canvas"></canvas>
 <div class="dragon-stage">
 <div class="dragon-aura-ring"></div>
@@ -488,10 +531,20 @@
 </aside>
 <script src="tv-export.js?v=2"></script>
 <script src="road_backup.js?v=7"></script>
-<script src="app.js?v=12"></script>
-<script src="tv-caption-settings.js?v=2"></script>
+<script src="app.js?v=17"></script>
+<script src="tv-caption-settings.js?v=3"></script>
 <script src="tv-symbol-settings.js?v=6"></script>
-<script src="tv.js?v=13"></script>
-<script src="result-announcement.js?v=4"></script>
+<script src="tv.js?v=22"></script>
+<script src="tv-dragon-video.js?v=3"></script>
+<script src="result-announcement.js?v=6"></script>
+
+
+
+
+
+
+
+
+
 </body>
 </html>

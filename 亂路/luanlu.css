@@ -8,7 +8,7 @@
   --txt: #e8e4d8;
   --txt-dim: #9a9584;
   --serif: "Noto Serif TC", "Cinzel", serif;
-  --sans: "Noto Sans TC", sans-serif;
+  --sans: "Noto Serif TC", "Cinzel", serif;
   --disp: "Cinzel", "Noto Serif TC", serif;
   color-scheme: dark;
   font-family: var(--sans);

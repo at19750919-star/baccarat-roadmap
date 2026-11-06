@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>亂路</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="luanlu.css?v=4">
-  <script src="luanlu.js?v=4" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="luanlu.css?v=6">
+  <script src="luanlu.js?v=6" defer></script>
 </head>
 <body>
   <main>
@@ -19,8 +19,8 @@
         <div class="fields">
           <label class="row">條數<input name="count" type="number" min="1" max="100" value="5" required></label>
           <label class="row">局數(不含和)<input name="rounds" type="number" min="1" max="1000" value="82" required></label>
-          <label class="row">莊閒差上限<input name="maxDifference" type="number" min="0" max="1000" value="4" required></label>
-          <label class="row">長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" required></label>
+          <label class="row">莊閒差上限<input name="maxDifference" type="number" min="0" max="1000" value="4" placeholder="不限"></label>
+          <label class="row">長龍上限<input name="maxRun" type="number" min="1" max="1000" value="6" placeholder="不限"></label>
           <label class="row cap-row"><span class="field-help" tabindex="0" aria-describedby="per-side-help">單邊<span class="term-greenBanker">行</span></span><span class="field-tooltip" id="per-side-help" role="tooltip">每種欄長分開算莊、閒各出現幾次；此數字是各邊上限。預設只算兩顆以上的欄，勾選「單顆行也算」才納入單顆欄。留空＝不限。</span><input name="perSideMax" type="number" min="0" max="1000" value="2" placeholder="不限" aria-describedby="per-side-help"></label>
           <label class="row cap-row"><span class="field-help" tabindex="0" aria-describedby="combined-help">合計<span class="term-greenBanker">行</span></span><span class="field-tooltip" id="combined-help" role="tooltip">每種欄長把莊、閒出現次數合計；此數字是合計上限。預設只算兩顆以上的欄，勾選「單顆行也算」才納入單顆欄。留空＝不限。</span><input name="combinedMax" type="number" min="0" max="1000" value="3" placeholder="不限" aria-describedby="combined-help"></label>
           <label class="row cap-row"><span class="field-help" tabindex="0" aria-describedby="hole-help">同長<span class="term-red">洞</span></span><span class="field-tooltip" id="hole-help" role="tooltip">連續單顆欄形成一段洞，以連續欄數為長度；此數字限制每種長度的洞在整條路出現幾次。莊閒混看；留空＝不限。</span><input name="holeMax" type="number" min="0" max="1000" placeholder="不限" aria-describedby="hole-help"></label>

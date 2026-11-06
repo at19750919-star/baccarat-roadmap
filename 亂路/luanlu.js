@@ -449,7 +449,9 @@ function normalizeOptions(options = {}) {
     perSideMax: '單邊同長度行上限', combinedMax: '莊閒合計同長度行上限' };
   for (const [key, min, max] of [['count', 1, 100], ['rounds', 1, 1000], ['maxDifference', 0, 1000],
     ['maxRun', 1, 1000], ['startNumber', 0, 1000000], ['attempts', 1, 100000], ['hillSteps', 0, 100000]]) {
-    if (!Number.isInteger(o[key]) || o[key] < min || o[key] > max) throw new Error(`${labels[key]}必須是 ${min}～${max} 的整數。`);
+    const optional = key === 'maxDifference' || key === 'maxRun';
+    if (optional && o[key] === '') continue; // 留白＝不限
+    if (!Number.isInteger(o[key]) || o[key] < min || o[key] > max) throw new Error(`${labels[key]}必須${optional ? '留白或填入' : '是'} ${min}～${max} 的整數。`);
   }
   if (typeof o.randomMode !== 'boolean') throw new Error('隨機模式必須為布林值。');
   if (o.scoreMode !== 'big' && o.scoreMode !== 'derived' && o.scoreMode !== 'both') {
@@ -469,7 +471,7 @@ function normalizeOptions(options = {}) {
   if (!o.randomMode && o.maxHoleLength !== '' && (!Number.isInteger(o.maxHoleLength) || o.maxHoleLength < 0 || o.maxHoleLength > 1000)) {
     throw new Error('洞最長必須留白或填入 0～1000 的整數。');
   }
-  if (o.rounds % 2 > o.maxDifference) throw new Error('奇數局至少有 1 局莊閒差，請調整局數或莊閒差上限。');
+  if (o.maxDifference !== '' && o.rounds % 2 > o.maxDifference) throw new Error('奇數局至少有 1 局莊閒差，請調整局數或莊閒差上限。');
   o.prefix = String(o.prefix).trim();
   if (!o.prefix) throw new Error('請填寫名稱前綴。');
   o.seed = String(o.seed);
@@ -503,14 +505,14 @@ function allowedHoleLength(runs, maxHoleLength) {
   return true;
 }
 function validRuns(runs, o) {
-  return runs.length > 0 && runs.every(n => n >= 1 && n <= o.maxRun && Number.isInteger(n)) &&
+  return runs.length > 0 && runs.every(n => n >= 1 && (o.maxRun === '' || n <= o.maxRun) && Number.isInteger(n)) &&
     runs.reduce((a, n) => a + n, 0) === o.rounds &&
-    Math.abs(runs.reduce((a, n, i) => a + (i % 2 ? -n : n), 0)) <= o.maxDifference &&
+    (o.maxDifference === '' || Math.abs(runs.reduce((a, n, i) => a + (i % 2 ? -n : n), 0)) <= o.maxDifference) &&
     (o.randomMode || allowedHoleLength(runs, o.maxHoleLength));
 }
 
 function randomCandidate(o, rng) {
-  const cap = Math.min(o.maxRun, o.rounds);
+  const cap = o.maxRun === '' ? o.rounds : Math.min(o.maxRun, o.rounds);
   const weights = Array.from({ length: cap }, (_, i) => [50, 25, 12, 7, 4, 2][i] || 2 * Math.pow(0.5, i - 5));
   const sum = weights.reduce((a, b) => a + b, 0);
   for (let retry = 0; retry < 100; retry++) {
@@ -604,7 +606,7 @@ function* improveSameSideSteps(runs, firstSide, options) {
     const origin = best, seen = new Set([origin.runs.join(',')]), plateau = [];
     let improved = null;
     function* inspect(state, rememberPlateau) {
-      for (const next of sameSideNeighbors(state.runs, options.maxRun)) {
+      for (const next of sameSideNeighbors(state.runs, options.maxRun === '' ? Infinity : options.maxRun)) {
         if (checks >= maxChecks) break;
         const key = next.join(',');
         if (seen.has(key)) continue;
@@ -765,7 +767,7 @@ function drawRoadmapImage(canvas, roads, scale = 2) {
   const gold = styles?.getPropertyValue('--gold-3').trim() || '#a67c35';
   ctx.scale(scale, scale);
   ctx.fillStyle = ink; ctx.fillRect(0, 0, layout.width, layout.height);
-  ctx.font = '15px "Noto Sans TC", sans-serif'; ctx.textBaseline = 'top';
+  ctx.font = '15px "Noto Serif TC", serif'; ctx.textBaseline = 'top';
   for (const entry of layout.entries) {
     ctx.fillStyle = txt; ctx.fillText(entry.title, entry.x, entry.y);
     ctx.fillStyle = '#0a100f'; ctx.fillRect(entry.x, entry.gridY, entry.gridWidth, entry.gridHeight);
@@ -973,7 +975,7 @@ function initUI() {
       const field = form.elements.namedItem(key);
       const value = field.value;
       o[key] = typeof DEFAULTS[key] === 'boolean' ? field.checked :
-        key === 'prefix' || key === 'seed' || key === 'scoreMode' || (['perSideMax', 'combinedMax', 'holeMax', 'pillarMax', 'maxHoleLength'].includes(key) && value === '')
+        key === 'prefix' || key === 'seed' || key === 'scoreMode' || (['maxDifference', 'maxRun', 'perSideMax', 'combinedMax', 'holeMax', 'pillarMax', 'maxHoleLength'].includes(key) && value === '')
           ? value : Number(value);
     }
     return normalizeOptions(o);

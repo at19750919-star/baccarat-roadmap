@@ -10,6 +10,8 @@
     P: { kind: 'player', symbol: '閒', english: 'PLAYER', label: '閒贏' },
     T: { kind: 'tie', symbol: '和', english: 'TIE', label: '和局' }
   };
+  // 莊／閒／和：跟珠子路同一套圖（幸運7 金框＋統計區底色與字型）。
+  const plainArt = { B: 'banker-stats', P: 'player-stats', T: 'tie-stats' };
   const overlay = document.createElement('div');
   overlay.id = 'resultAnnouncement';
   overlay.className = 'result-announcement';
@@ -85,9 +87,13 @@
     const animal = round.r === 'B' && ['small', 'big'].includes(round.tiger) ? window.BaccaratAnimalArt?.[round.tiger] : null;
     const kind = animal ? `${round.tiger}-tiger` : cards ? (superSeven ? 'super' : 'lucky') : base.kind;
     const label = animal ? animal.label : cards ? (superSeven ? '超級幸運 7' : '幸運 7') : base.label;
+    // 幸運6（不含小老虎、大老虎）：圓牌顯示 6，下排寫幸運6。
+    const six = round.r === 'B' && !!round.l6 && !animal;
+    const plain = !animal && !cards && !six ? plainArt[round.r] : null;
     overlay.dataset.kind = kind;
     overlay.classList.toggle('has-seven', !!cards);
-    overlay.classList.toggle('has-art', !!animal || !!cards);
+    overlay.classList.toggle('has-six', six);
+    overlay.classList.toggle('has-art', !!animal || !!cards || !!plain);
     overlay.classList.toggle('has-orbit', (!!animal && round.tiger === 'big') || (superSeven && cards === 6));
     overlay.classList.toggle('has-banker-pair', !!round.bp);
     overlay.classList.toggle('has-player-pair', !!round.pp);
@@ -95,22 +101,22 @@
     $('.result-pair-marker-pp').hidden = !round.pp;
     const disc = $('.result-disc');
     disc.replaceChildren();
-    if (animal || cards) {
+    if (animal || cards || plain) {
       const art = document.createElement('img');
       art.className = 'result-art';
       art.alt = '';
       art.draggable = false;
-      art.src = animal ? animal.src : `assets/beads/${superSeven ? 'purple-seven' : 'blue-seven'}.png`;
+      art.src = animal ? animal.src : plain ? `assets/beads/${plain}.png` : `assets/beads/${superSeven ? 'purple-seven' : 'blue-seven'}.png`;
       disc.appendChild(art);
     } else {
       const symbol = document.createElement('span');
       symbol.className = 'result-symbol';
-      symbol.textContent = base.symbol;
+      symbol.textContent = six ? '6' : base.symbol;
       disc.appendChild(symbol);
     }
     $('.result-card-count').textContent = cards ? String(cards) : '';
     $('.result-title').textContent = animal || cards ? label : '';
-    $('.result-english').textContent = animal ? animal.english : cards ? (superSeven ? 'SUPER LUCKY' : 'LUCKY') : base.english;
+    $('.result-english').textContent = animal ? animal.english : cards ? (superSeven ? 'SUPER LUCKY' : 'LUCKY') : six ? '幸運6' : base.english;
     window.BaccaratCaptionSettings?.render(overlay);
     const pairs = $('.result-pairs');
     pairs.replaceChildren();
@@ -121,7 +127,7 @@
       chip.textContent = text;
       pairs.appendChild(chip);
     }
-    live.textContent = (cards ? $('.result-title').textContent || label : label) + (cards ? `，${cards} 張` : '') + (pairs.textContent ? '，' + pairs.textContent : '');
+    live.textContent = (cards ? $('.result-title').textContent || label : six ? '幸運6' : label) + (cards ? `，${cards} 張` : '') + (pairs.textContent ? '，' + pairs.textContent : '');
     overlay.hidden = false;
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.remove('is-visible', 'is-leaving');
@@ -166,7 +172,7 @@
   if (boss) new MutationObserver(() => {
     if (boss.classList.contains('active')) dismiss();
   }).observe(boss, { attributes: true, attributeFilter: ['class'] });
-  for (const src of ['assets/beads/blue-seven.png', 'assets/beads/purple-seven.png', ...Object.values(window.BaccaratAnimalArt || {}).map(art => art.src)]) {
+  for (const src of ['assets/beads/blue-seven.png', 'assets/beads/purple-seven.png', ...Object.values(plainArt).map(file => `assets/beads/${file}.png`), ...Object.values(window.BaccaratAnimalArt || {}).map(art => art.src)]) {
     const art = new Image();
     art.src = src;
   }
