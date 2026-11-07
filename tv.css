@@ -178,8 +178,8 @@
 
 .tv-identity { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
 .tv-logo {
-  width: 132px;
-  height: 132px;
+  width: 136px;
+  height: 136px;
   object-fit: contain;
   flex-shrink: 0;
   transform: translateY(-2px) scale(1.10);
@@ -337,7 +337,7 @@
 .tv-resizer-bottom { left: 16px; right: 16px; bottom: 0; height: 14px; cursor: ns-resize; }
 .tv-resizer-bottom-left { left: 0; bottom: 0; width: 24px; height: 24px; cursor: nesw-resize; }
 .tv-resizer-bottom-right { position: absolute; right: 0; bottom: 0; width: 32px; height: 32px; cursor: nwse-resize; touch-action: none; z-index: 30; }
-.tv-resizer-bottom-right::after { content: ""; position: absolute; right: 6px; bottom: 6px; width: 12px; height: 12px; border-right: 3px solid #ffd700; border-bottom: 3px solid #ffd700; opacity: .8; transition: opacity .15s, transform .15s; }
+.tv-resizer-bottom-right::after { content: ''; position: absolute; right: 6px; bottom: 6px; width: 12px; height: 12px; border-right: 3px solid #ffd700; border-bottom: 3px solid #ffd700; opacity: .8; transition: opacity .15s, transform .15s; }
 .tv-resizer-bottom-right:hover::after, .tv-settings.is-resizing .tv-resizer-bottom-right::after { opacity: 1; transform: scale(1.2); border-color: #fff; }
 .tv-settings-size-btn { padding: 2px 8px !important; font-size: 15px !important; line-height: 1.2 !important; background: rgba(255, 215, 0, 0.15) !important; border: 1px solid rgba(255, 215, 0, 0.5) !important; color: #ffd700 !important; border-radius: 4px; margin-left: auto; cursor: pointer; }
 .tv-settings-size-btn:hover { background: #ffd700 !important; color: #521111 !important; }
@@ -863,9 +863,9 @@ html.tv-color-statEmpty .tv-app .tv-stats .tv-stat-empty { background: var(--tv-
 
 html.tv-color-statHeader .tv-app .tv-stats .tv-stat-head { background: var(--tv-color-statHeader) !important; }
 
-html.tv-color-statText .tv-app .tv-stats .k,
-html.tv-color-statText .tv-app .tv-stats b,
-html.tv-color-statText .tv-app .tv-stat-head { color: var(--tv-color-statText) !important; }
+html.tv-color-statText .tv-app .tv-stats .k:not([data-tv-edit-color]),
+html.tv-color-statText .tv-app .tv-stats b:not([data-tv-edit-color]),
+html.tv-color-statText .tv-app .tv-stat-head:not([data-tv-edit-color]) { color: var(--tv-color-statText) !important; }
 
 /* Only a successfully playing side-specific video hides the native fallback.
    Each video retains its own baked animation/particles; idle or failed media hides nothing. */
@@ -962,7 +962,7 @@ html[data-skin="green"] .tv-skin-btn {
 html[data-skin="green"] .tv-save-btn:hover,
 html[data-skin="green"] .tv-skin-btn:hover { border-color: var(--g-gold-1); }
 html[data-skin="green"] .tv-skin-btn[aria-pressed="true"] { border-color: var(--g-gold-2); }
-
+/* 編輯模式選取提示（#tvEditSelBox .tv-edit-selbox）刻意不在此覆寫，維持獨立白金色直角框。 */
 /* ===== 綠金 r2（2026-11-02，對照 ATLL-穿越排牌/賭場綠金風格.md；只作用於 html[data-skin="green"]） ===== */
 html[data-skin="green"] { --g-line: linear-gradient(135deg,#6b4c1d 0%,#e8c97a 25%,#8a6a2f 50%,#f4dfa4 75%,#6b4c1d 100%); --g-banker: #e05c4f; --g-player: #4fa3d8; --g-tie: #5cbf8a; --g-pit: #0b1210; --g-txt-dim: #9a9584; }
 /* 牌桌氈布：細絨顆粒（同 .felt::after 的 feTurbulence）＋中央亮、四周暗 */
@@ -1017,12 +1017,16 @@ html[data-skin="green"] .tv-save-btn, html[data-skin="green"] .tv-skin-btn {
 html[data-skin="green"] .tv-skin-btn { font-size: 15px; height: 30px; }
 html[data-skin="green"] .tv-save-btn:hover, html[data-skin="green"] .tv-skin-btn:hover { border-color: #c9a25a; color: var(--g-gold-1); }
 html[data-skin="green"] .tv-save-stack > .tv-skin-btn { margin-top: 4px; }
-
-
-html[data-skin="green"] .tv-app .tv-stats .stats-list .k { color: var(--g-gold-2) !important; }
-html[data-skin="green"] .tv-app .tv-stats li:is(.stat-banker,.stat-banker-pair) .k { color: var(--g-banker) !important; }
-html[data-skin="green"] .tv-app .tv-stats li:is(.stat-player,.stat-player-pair) .k { color: var(--g-player) !important; }
-html[data-skin="green"] .tv-app .tv-stats li.stat-tie .k { color: var(--g-tie) !important; }
+/* 編輯鈕：綠金下移到黑桃左側、儲存鈕正上方，與黑桃分開（右緣對齊儲存鈕） */
+html[data-skin="green"] .tv-edit-toggle {
+  top: 6px; right: 172px; height: 30px; padding: 0 12px; box-sizing: border-box;
+  font: 600 15px/1 "Noto Serif TC", "Cinzel", serif; letter-spacing: .08em;
+  color: var(--g-txt); background: linear-gradient(180deg,#161f21,#0d1315); border: 1px solid #2c3634; border-radius: 2px;
+}
+html[data-skin="green"] .tv-edit-toggle[aria-pressed="true"] { color: #120e04; border-color: #8a6a2f; background: linear-gradient(180deg,#f4dfa4,#c9a25a); }html[data-skin="green"] .tv-app .tv-stats .stats-list .k:not([data-tv-edit-color]) { color: var(--g-gold-2) !important; }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-banker,.stat-banker-pair) .k:not([data-tv-edit-color]) { color: var(--g-banker) !important; }
+html[data-skin="green"] .tv-app .tv-stats li:is(.stat-player,.stat-player-pair) .k:not([data-tv-edit-color]) { color: var(--g-player) !important; }
+html[data-skin="green"] .tv-app .tv-stats li.stat-tie .k:not([data-tv-edit-color]) { color: var(--g-tie) !important; }
 /* ===== 綠金 r3（2026-11-02；只作用於 html[data-skin="green"]，紅金不動） ===== */
 html[data-skin="green"] { --g-disp: "Cinzel", "Noto Serif TC", serif; --g-serif: "Noto Serif TC", "Cinzel", serif; }
 /* 1. 氈布 #123a2c→#0a241b：feTurbulence 細絨＋中央亮四周暗 */
@@ -1049,29 +1053,32 @@ html[data-skin="green"] .tv-app .tv-stats li.stat-lucky6 { --g-t1: #4e2a1c; --g-
 html[data-skin="green"] .tv-app .tv-stats li.tv-lucky7 { --g-t1: #1d3558; --g-t2: #0a1424; --g-k: #b3c9ef; }
 html[data-skin="green"] .tv-app .tv-stats li.tv-super-lucky7 { --g-t1: #3a2552; --g-t2: #150c22; --g-k: #d2bdf0; }
 html[data-skin="green"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1210 !important; border-image: none !important; border-color: rgba(166,124,53,.25) !important; box-shadow: none !important; }
-html[data-skin="green"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--g-k) !important; font-family: var(--g-serif) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
-html[data-skin="green"] .tv-app .tv-stats .stats-list li .k { color: var(--g-k) !important; }
+html[data-skin="green"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]) { color: var(--g-k) !important; font-family: var(--g-serif) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+html[data-skin="green"] .tv-app .tv-stats .stats-list li .k:not([data-tv-edit-color]) { color: var(--g-k) !important; }
 /* 4. 數字：var(--disp) 700 #f4dfa4 */
-html[data-skin="green"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, #totalCount, .stats-list li > b) {
+html[data-skin="green"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, #totalCount, .stats-list li > b):not([data-tv-edit-color]) {
   font-family: var(--g-disp) !important; font-weight: 700 !important; color: #f4dfa4 !important; -webkit-text-fill-color: #f4dfa4;
 }
 /* 5. 標題、標籤：Noto Serif TC 600 */
-html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) {
+html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title):not([data-tv-edit-color]) {
   font-family: var(--g-serif) !important; font-weight: 600 !important;
 }
-html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: #d9b568 !important; }
-html[data-skin="green"] .tv-app .tv-limit-name { color: #e8e4d8 !important; }
+html[data-skin="green"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title):not([data-tv-edit-color]) { color: #d9b568 !important; }
+html[data-skin="green"] .tv-app .tv-limit-name:not([data-tv-edit-color]) { color: #e8e4d8 !important; }
 /* 6. 按鈕照 .tool-btn：8px 圓角；儲存與切換同尺寸 */
-html[data-skin="green"] .tv-save-btn, html[data-skin="green"] .tv-skin-btn{
+html[data-skin="green"] .tv-save-btn, html[data-skin="green"] .tv-skin-btn, html[data-skin="green"] .tv-edit-toggle {
   border-radius: 8px; font-family: var(--g-serif); font-weight: 600; font-size: 15px; letter-spacing: .08em;
   height: 30px; padding: 0 12px; color: #e8e4d8; background: linear-gradient(180deg,#161f21,#0d1315); border: 1px solid #2c3634; box-shadow: none; transition: .2s;
 }
-html[data-skin="green"] .tv-save-btn:hover, html[data-skin="green"] .tv-skin-btn:hover{ border-color: #c9a25a; color: #f4dfa4; box-shadow: 0 6px 14px rgba(0,0,0,.5), 0 0 10px rgba(212,176,106,.2); }
-
+html[data-skin="green"] .tv-save-btn:hover, html[data-skin="green"] .tv-skin-btn:hover, html[data-skin="green"] .tv-edit-toggle:hover { border-color: #c9a25a; color: #f4dfa4; box-shadow: 0 6px 14px rgba(0,0,0,.5), 0 0 10px rgba(212,176,106,.2); }
+html[data-skin="green"] .tv-edit-toggle[aria-pressed="true"] {
+  color: #120e04; border-color: #8a6a2f; background: linear-gradient(180deg,#f4dfa4,#c9a25a);
+  text-shadow: 0 1px 0 rgba(255,255,255,.4); box-shadow: 0 0 12px rgba(212,176,106,.35), inset 0 1px 0 rgba(255,255,255,.5);
+}
 html[data-skin="green"] .tv-skin-btn[aria-pressed="true"] { border-color: #2c3634; }
 html[data-skin="green"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
-
-
+/* 7. 編輯鈕：在儲存鈕正上方，右緣對齊，離開黑桃 */
+html[data-skin="green"] .tv-edit-toggle { top: 8px; right: 172px; }
 /* ===== 三種風格下拉選單（2026-11-04）：觸發鈕沿用 #tvSkinToggle，清單由 tv-skin.js 控制開關 ===== */
 .tv-skin-menu { position: absolute; z-index: 40; margin: 0; padding: 0; list-style: none; box-sizing: border-box; background: #590d0d; border: 1px solid #d4a64a; border-radius: 0; box-shadow: 0 6px 18px rgba(0,0,0,.55); }
 .tv-skin-menu[hidden] { display: none; }
@@ -1122,14 +1129,14 @@ html[data-skin="black"] .tv-app .tv-board-item { background: #0d1417; border-col
 html[data-skin="black"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, #totalCount, .stats-list li > b) {
   font-family: var(--k-disp) !important; font-weight: 700 !important; text-shadow: none !important;
 }
-html[data-skin="black"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
+html[data-skin="black"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount):not([data-tv-edit-color]) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
 /* 標題、標籤 */
 html[data-skin="black"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) { font-family: var(--k-serif) !important; text-shadow: none; }
-html[data-skin="black"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: var(--k-gold) !important; }
-html[data-skin="black"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: var(--k-txt) !important; }
+html[data-skin="black"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title):not([data-tv-edit-color]) { color: var(--k-gold) !important; }
+html[data-skin="black"] .tv-app :is(.tv-board-title-zh, .tv-limit-name):not([data-tv-edit-color]) { color: var(--k-txt) !important; }
 html[data-skin="black"] .tv-app .predict-title { letter-spacing: 4px; }
 /* 限紅：.limit-label 金、.limit-input #f4dfa4（tv 維持透明底、不加框，版面不動） */
-html[data-skin="black"] .tv-app .tv-limit .limit-input { color: var(--k-light) !important; }
+html[data-skin="black"] .tv-app .tv-limit .limit-input:not([data-tv-edit-color]) { color: var(--k-light) !important; }
 html[data-skin="black"] .tv-app .tv-limit .limit-input:hover { border-color: #d9b56855; }
 html[data-skin="black"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid var(--k-gold); background: #182021; border-color: transparent; }
 /* 路單格：底 #0d1417、格線 #293136、框 #374047、直角、浮水印 #d9b56830 */
@@ -1164,25 +1171,25 @@ html[data-skin="black"] .tv-app .tv-stats li.stat-lucky6 { --k-c: var(--k-light)
 /* tv 專屬（幸運7、超級幸運7）路單頁沒有：用主金 */
 html[data-skin="black"] .tv-app .tv-stats li:is(.tv-lucky7, .tv-super-lucky7) { --k-c: var(--k-gold); }
 html[data-skin="black"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1113 !important; }
-html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
-html[data-skin="black"] .tv-app .tv-stats .stats-list li .k { color: var(--k-c) !important; }
-html[data-skin="black"] .tv-app .tv-stats .stats-list li > b { color: var(--k-c) !important; }
-
-html[data-skin="black"] .tv-save-btn, html[data-skin="black"] .tv-skin-btn{
+html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li .k:not([data-tv-edit-color]) { color: var(--k-c) !important; }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: var(--k-c) !important; }
+/* 按鈕照 .btn：面板漸層、1px #6b4c1d、8px 圓角；儲存／風格／編輯同尺寸 */
+html[data-skin="black"] .tv-save-btn, html[data-skin="black"] .tv-skin-btn, html[data-skin="black"] .tv-edit-toggle {
   display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 30px; padding: 0 12px;
   font: 600 15px/1 var(--k-serif); letter-spacing: .08em;
   color: var(--k-txt); background: var(--k-panel); border: 1px solid var(--k-gold-4); border-radius: 8px; box-shadow: inset 0 1px 0 #ffffff0d;
 }
-html[data-skin="black"] .tv-save-btn:hover, html[data-skin="black"] .tv-skin-btn:hover{ border-color: var(--k-gold-3); color: var(--k-light); }
-
+html[data-skin="black"] .tv-save-btn:hover, html[data-skin="black"] .tv-skin-btn:hover, html[data-skin="black"] .tv-edit-toggle:hover { border-color: var(--k-gold-3); color: var(--k-light); }
+html[data-skin="black"] .tv-edit-toggle[aria-pressed="true"] { color: #17140c; border-color: var(--k-gold-3); background: linear-gradient(135deg,#f4dfa4,#d9b568,#a67c35); }
 html[data-skin="black"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
-
+html[data-skin="black"] .tv-edit-toggle { top: 8px; right: 172px; }
 /* 下拉清單：面板漸層、金框、直角；選項底 #10171a；已選亮金字＋左金線 */
 html[data-skin="black"] .tv-skin-menu { padding: 0; background: var(--k-panel); border: 1px solid var(--k-gold-3); border-image: var(--k-line) 1; box-shadow: 0 10px 30px #0008; }
 html[data-skin="black"] .tv-skin-menu > li { padding: 6px 14px 6px 9px; background: #10171a; color: var(--k-txt); font: 600 15px/1.3 var(--k-serif); letter-spacing: .08em; }
 html[data-skin="black"] .tv-skin-menu > li:hover, html[data-skin="black"] .tv-skin-menu > li:focus { background: #1b2427; }
 html[data-skin="black"] .tv-skin-menu > li[aria-selected="true"] { color: var(--k-light); border-left-color: var(--k-gold); }
-
+/* 編輯模式選取提示（#tvEditSelBox .tv-edit-selbox）與 LOGO 刻意不在此覆寫。 */
 /* 黑金：統計格文字色比照 index.html 黑金模式（themes.css black-gold 實測 computed color；標籤與數字同色） */
 html[data-skin="black"] .tv-app .tv-stats li.stat-banker { --k-tc: #e05c4f; }
 html[data-skin="black"] .tv-app .tv-stats li.stat-tie { --k-tc: #5cbf8a; }
@@ -1192,7 +1199,7 @@ html[data-skin="black"] .tv-app .tv-stats li.stat-player-pair { --k-tc: #a99de0;
 html[data-skin="black"] .tv-app .tv-stats li.stat-lucky6 { --k-tc: #d68cba; }
 html[data-skin="black"] .tv-app .tv-stats li.tv-lucky7 { --k-tc: #a99de0; }
 html[data-skin="black"] .tv-app .tv-stats li.tv-super-lucky7 { --k-tc: #9283d8; }
-html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult), html[data-skin="black"] .tv-app .tv-stats .stats-list li > b { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
+html[data-skin="black"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]), html[data-skin="black"] .tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
 /* 黑金：五路紅藍統一為 --k-banker #e05c4f／--k-player #4fa3d8（使用者自訂色 html.tv-color-* 時不覆寫） */
 html[data-skin="black"]:not(.tv-color-red) .tv-app .derived-dot.shape-solid:not(.blue),
 html[data-skin="black"]:not(.tv-color-red) .tv-app .derived-dot.shape-slash:not(.blue)::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-banker) 60%, white) 0%, var(--k-banker) 32%); }
@@ -1261,14 +1268,14 @@ html[data-skin="led"] .tv-app .tv-board-item { background: #0d1417; border-color
 html[data-skin="led"] .tv-app :is(.tv-board-val, .limit-input, .tv-stat-head b, .stats-list li > b) {
   font-family: var(--k-disp) !important; font-weight: 700 !important; text-shadow: none !important;
 }
-html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
+html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount):not([data-tv-edit-color]) { color: var(--k-light) !important; -webkit-text-fill-color: var(--k-light); }
 /* 標題、標籤 */
 html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-board-title-zh, .tv-limit-name, .tv-limit-key, .tv-stat-head, .predict-title, .dragon-title) { font-family: var(--k-serif) !important; text-shadow: none; }
-html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: var(--k-gold) !important; }
-html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: var(--k-txt) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title):not([data-tv-edit-color]) { color: var(--k-gold) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name):not([data-tv-edit-color]) { color: var(--k-txt) !important; }
 html[data-skin="led"] .tv-app .predict-title { letter-spacing: 4px; }
 /* 限紅：.limit-label 金、.limit-input #f4dfa4（tv 維持透明底、不加框，版面不動） */
-html[data-skin="led"] .tv-app .tv-limit .limit-input { color: var(--k-light) !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:not([data-tv-edit-color]) { color: var(--k-light) !important; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #d9b56855; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid var(--k-gold); background: #182021; border-color: transparent; }
 /* 路單格：底 #0d1417、格線 #293136、框 #374047、直角、浮水印 #d9b56830 */
@@ -1303,25 +1310,25 @@ html[data-skin="led"] .tv-app .tv-stats li.stat-lucky6 { --k-c: var(--k-light); 
 /* tv 專屬（幸運7、超級幸運7）路單頁沒有：用主金 */
 html[data-skin="led"] .tv-app .tv-stats li:is(.tv-lucky7, .tv-super-lucky7) { --k-c: var(--k-gold); }
 html[data-skin="led"] .tv-app .tv-stats li.tv-stat-empty { background: #0b1113 !important; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li .k { color: var(--k-c) !important; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: var(--k-c) !important; }
-
-html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn{
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]) { color: var(--k-c) !important; font-family: var(--k-serif) !important; text-shadow: none; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li .k:not([data-tv-edit-color]) { color: var(--k-c) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: var(--k-c) !important; }
+/* 按鈕照 .btn：面板漸層、1px #6b4c1d、8px 圓角；儲存／風格／編輯同尺寸 */
+html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn, html[data-skin="led"] .tv-edit-toggle {
   display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 30px; padding: 0 12px;
   font: 600 15px/1 var(--k-serif); letter-spacing: .08em;
   color: var(--k-txt); background: var(--k-panel); border: 1px solid var(--k-gold-4); border-radius: 8px; box-shadow: inset 0 1px 0 #ffffff0d;
 }
-html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover{ border-color: var(--k-gold-3); color: var(--k-light); }
-
+html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover, html[data-skin="led"] .tv-edit-toggle:hover { border-color: var(--k-gold-3); color: var(--k-light); }
+html[data-skin="led"] .tv-edit-toggle[aria-pressed="true"] { color: #17140c; border-color: var(--k-gold-3); background: linear-gradient(135deg,#f4dfa4,#d9b568,#a67c35); }
 html[data-skin="led"] .tv-save-stack > .tv-skin-btn { margin-top: 6px; }
-
+html[data-skin="led"] .tv-edit-toggle { top: 8px; right: 172px; }
 /* 下拉清單：面板漸層、金框、直角；選項底 #10171a；已選亮金字＋左金線 */
 html[data-skin="led"] .tv-skin-menu { padding: 0; background: var(--k-panel); border: 1px solid var(--k-gold-3); border-image: var(--k-line) 1; box-shadow: 0 10px 30px #0008; }
 html[data-skin="led"] .tv-skin-menu > li { padding: 6px 14px 6px 9px; background: #10171a; color: var(--k-txt); font: 600 15px/1.3 var(--k-serif); letter-spacing: .08em; }
 html[data-skin="led"] .tv-skin-menu > li:hover, html[data-skin="led"] .tv-skin-menu > li:focus { background: #1b2427; }
 html[data-skin="led"] .tv-skin-menu > li[aria-selected="true"] { color: var(--k-light); border-left-color: var(--k-gold); }
-
+/* 編輯模式選取提示（#tvEditSelBox .tv-edit-selbox）與 LOGO 刻意不在此覆寫。 */
 /* 黑金：統計格文字色比照 index.html 黑金模式（themes.css black-gold 實測 computed color；標籤與數字同色） */
 html[data-skin="led"] .tv-app .tv-stats li.stat-banker { --k-tc: #e05c4f; }
 html[data-skin="led"] .tv-app .tv-stats li.stat-tie { --k-tc: #5cbf8a; }
@@ -1331,7 +1338,7 @@ html[data-skin="led"] .tv-app .tv-stats li.stat-player-pair { --k-tc: #a99de0; }
 html[data-skin="led"] .tv-app .tv-stats li.stat-lucky6 { --k-tc: #d68cba; }
 html[data-skin="led"] .tv-app .tv-stats li.tv-lucky7 { --k-tc: #a99de0; }
 html[data-skin="led"] .tv-app .tv-stats li.tv-super-lucky7 { --k-tc: #9283d8; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult), html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]), html[data-skin="led"] .tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: var(--k-tc, var(--k-c)) !important; -webkit-text-fill-color: var(--k-tc, var(--k-c)); }
 /* 黑金：五路紅藍統一為 --k-banker #e05c4f／--k-player #4fa3d8（使用者自訂色 html.tv-color-* 時不覆寫） */
 html[data-skin="led"]:not(.tv-color-red) .tv-app .derived-dot.shape-solid:not(.blue),
 html[data-skin="led"]:not(.tv-color-red) .tv-app .derived-dot.shape-slash:not(.blue)::before { background: radial-gradient(circle at 70% 28%, color-mix(in srgb, var(--k-banker) 60%, white) 0%, var(--k-banker) 32%); }
@@ -1387,11 +1394,11 @@ html[data-skin="led"] .tv-app .tv-board-item { background: linear-gradient(180de
 html[data-skin="led"] .tv-app .tv-board-val {
   font-weight: 900 !important; background: var(--l-flap); box-shadow: inset 0 0 0 1px #000, 0 1px 0 #ffffff14; border-radius: 0; padding: 0 .12em;
 }
-html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount) { color: #f3efe2 !important; -webkit-text-fill-color: #f3efe2; }
+html[data-skin="led"] .tv-app :is(.tv-board-val, .tv-stat-head b, #totalCount):not([data-tv-edit-color]) { color: #f3efe2 !important; -webkit-text-fill-color: #f3efe2; }
 /* 標籤：橘金點陣色，小字不加點陣遮罩、光暈 ≤2px */
-html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title) { color: #ffb12a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
-html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name) { color: #f3efe2 !important; }
-html[data-skin="led"] .tv-app .tv-limit .limit-input { color: #ffd27a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-key, .tv-stat-head, .predict-title):not([data-tv-edit-color]) { color: #ffb12a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
+html[data-skin="led"] .tv-app :is(.tv-board-title-zh, .tv-limit-name):not([data-tv-edit-color]) { color: #f3efe2 !important; }
+html[data-skin="led"] .tv-app .tv-limit .limit-input:not([data-tv-edit-color]) { color: #ffd27a !important; text-shadow: 0 0 2px rgba(255,140,0,.8) !important; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #6a6d72; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { outline: 2px solid #ffb12a; background: #111; }
 /* 路單螢幕：純黑底＋#1d140c 點陣，格線 #3a3a3c 看得見 */
@@ -1410,14 +1417,14 @@ html[data-skin="led"] .tv-app .tv-stats li.stat-tie { --l-sc: #30e060; --k-tc: #
 html[data-skin="led"] .tv-app .tv-stats li:is(.stat-player, .stat-player-pair, .tv-lucky7) { --l-sc: #2f9bff; --k-tc: #8ac8ff; --k-c: #8ac8ff; --l-gl: #1a7dff; }
 html[data-skin="led"] .tv-app .tv-stats li.tv-super-lucky7 { --l-sc: #c050ff; --k-tc: #e0a8ff; --k-c: #e0a8ff; --l-gl: #a020ff; }
 html[data-skin="led"] .tv-app .tv-stats li.tv-stat-empty { background: #0b0b0c !important; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { text-shadow: 0 0 2px var(--l-gl, #ff8c00) !important; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li > b { color: #f3efe2 !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]) { text-shadow: 0 0 2px var(--l-gl, #ff8c00) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: #f3efe2 !important; }
 /* 按鈕：樣本 .pb 金屬鈕、8px 圓角、#ffe1a0 字 */
-html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn{
+html[data-skin="led"] .tv-save-btn, html[data-skin="led"] .tv-skin-btn, html[data-skin="led"] .tv-edit-toggle {
   color: #ffe1a0; background: linear-gradient(#45484d,#1d1f22); border: 1px solid #000; border-radius: 8px; box-shadow: 0 2px 0 #000, inset 0 1px 0 #777; text-shadow: 0 0 2px #ff9a00;
 }
-html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover{ border-color: #000; color: #fff0c8; background: linear-gradient(#55585d,#2a2c30); }
-
+html[data-skin="led"] .tv-save-btn:hover, html[data-skin="led"] .tv-skin-btn:hover, html[data-skin="led"] .tv-edit-toggle:hover { border-color: #000; color: #fff0c8; background: linear-gradient(#55585d,#2a2c30); }
+html[data-skin="led"] .tv-edit-toggle[aria-pressed="true"] { color: #2a1700; border-color: #6b4a10; background: linear-gradient(#ffe7a8,#ffbf3a); text-shadow: none; }
 html[data-skin="led"] .tv-skin-menu { background: var(--l-metal); border: 1px solid #4a4d52; border-image: none; }
 html[data-skin="led"] .tv-skin-menu > li { background: #111214; color: #f3efe2; }
 html[data-skin="led"] .tv-skin-menu > li:hover, html[data-skin="led"] .tv-skin-menu > li:focus { background: #23252a; }
@@ -1520,7 +1527,7 @@ html[data-skin="led"] .tv-app .tv-board-label {
   display: block; width: calc(2em + 4px); overflow: hidden; white-space: nowrap; text-align: left;
   font: 900 18px/1.15 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 2px;
 }
-html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-name, .tv-limit-key, .predict-title) {
+html[data-skin="led"] .tv-app :is(.tv-board-label, .tv-limit-name, .tv-limit-key, .predict-title):not([data-tv-edit-color]) {
   color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; text-shadow: 0 0 6px rgba(255,140,0,.9) !important;
 }
 
@@ -1574,15 +1581,15 @@ html[data-skin="led"] .tv-app .tv-limit .limit-input {
   font: 900 20px/1 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 1px;
   -webkit-mask: var(--l-dm); mask: var(--l-dm);
 }
-html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .limit-input[data-k$="Max"] { color: #ffcf4a !important; }
-html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .limit-input[data-k$="Min"] { color: #7dff9a !important; }
+html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .limit-input[data-k$="Max"]:not([data-tv-edit-color]) { color: #ffcf4a !important; }
+html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .limit-input[data-k$="Min"]:not([data-tv-edit-color]) { color: #7dff9a !important; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input[data-k$="Max"] { text-shadow: 0 0 6px rgba(255,140,0,.9) !important; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input[data-k$="Min"] { text-shadow: 0 0 6px #20d050 !important; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:hover { border-color: #6a6d72; }
 html[data-skin="led"] .tv-app .tv-limit .limit-input:focus { -webkit-mask: none; mask: none; outline: 2px solid #ffb12a; outline-offset: -2px; background: #111; text-shadow: none !important; }
-html[data-skin="led"]:not(.tv-color-text) .tv-app .tv-limit .tv-limit-name { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
-html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .tv-limit-key-high,
-html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .tv-limit-key-low { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
+html[data-skin="led"]:not(.tv-color-text) .tv-app .tv-limit .tv-limit-name:not([data-tv-edit-color]) { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
+html[data-skin="led"]:not(.tv-color-limitHigh) .tv-app .tv-limit .tv-limit-key-high:not([data-tv-edit-color]),
+html[data-skin="led"]:not(.tv-color-limitLow) .tv-app .tv-limit .tv-limit-key-low:not([data-tv-edit-color]) { color: #ffb12a !important; -webkit-text-fill-color: #ffb12a; }
 
 /* ---------- 右上：三顆 .pb 金屬鈕（燈帽：金／金／紅）＋ .emb 圓徽 ---------- */
 html[data-skin="led"] .tv-app .tv-identity { gap: 11px; margin-top: -6px; align-items: stretch; }
@@ -1590,21 +1597,26 @@ html[data-skin="led"] .tv-app .tv-save-stack {
   flex-direction: column; justify-content: flex-start; gap: 5px; width: 119px; padding-top: 36px; box-sizing: border-box;
 }
 html[data-skin="led"] .tv-save-stack > .tv-skin-btn { position: relative; top: auto; margin: 0; }
-html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn) {
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn, .tv-edit-toggle) {
   position: relative; justify-content: center; width: 119px; height: 28px; padding: 0 0 0 18px; border: 0;
   font: 900 15px/1 "Noto Serif TC", "Noto Serif CJK TC", serif; letter-spacing: 1px; color: #ffe1a0;
   background: linear-gradient(#45484d, #1d1f22); border-radius: 8px;
   box-shadow: 0 3px 0 #000, inset 0 1px 0 #777; text-shadow: 0 0 6px #ff9a00;
 }
-html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn)::before {
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn, .tv-edit-toggle)::before {
   content: ""; position: absolute; left: 10px; top: 50%; width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #fff6c8, #ffb000 60%, #a05a00); box-shadow: 0 0 10px #ffb000;
 }
 html[data-skin="led"] .tv-skin-btn::before { background: radial-gradient(circle at 40% 35%, #ffd0d0, #ff2a2a 60%, #900); box-shadow: 0 0 10px #ff2a2a; }
-html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn):hover { color: #fff0c8; background: linear-gradient(#55585d, #2a2c30); }
-
-
-
+html[data-skin="led"] :is(.tv-save-btn, .tv-skin-btn, .tv-edit-toggle):hover { color: #fff0c8; background: linear-gradient(#55585d, #2a2c30); }
+html[data-skin="led"] .tv-edit-toggle[aria-pressed="true"] { color: #2a1700; background: linear-gradient(#ffe7a8, #ffbf3a); text-shadow: none; }
+/* 編輯鈕在 .tv-app 外（視窗座標）：用 --app-scale 換算到儲存鈕上方那格，任何視窗大小都對齊 */
+html[data-skin="led"] .tv-edit-toggle {
+  position: fixed; right: auto;
+  top: calc(50vh - 540px * var(--app-scale, 1) + 33px * var(--app-scale, 1));
+  left: calc(50vw - 960px * var(--app-scale, 1) + 1651px * var(--app-scale, 1));
+  transform: scale(var(--app-scale, 1)); transform-origin: 0 0;
+}
 html[data-skin="led"] .tv-app .tv-logo-btn {
   width: 119px; margin: 0; border-radius: 8px;
   background: linear-gradient(180deg, #2a2c30, #16171a); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 4px #000;
@@ -1620,12 +1632,12 @@ html[data-skin="led"] .tv-app .tv-logo-btn:is(:hover, :active) .tv-logo {
 html[data-skin="led"] .tv-app .panel.tv-stats { background: #0a0a0a !important; }
 html[data-skin="led"] .tv-app .tv-stats .tv-stat-head { background: transparent; }
 /* 標題字點陣：只套在文字（background-clip:text），數字翻牌不受影響 */
-html[data-skin="led"]:not(.tv-color-statText):not(.tv-color-statHeader) .tv-app .tv-stats .tv-stat-head {
+html[data-skin="led"]:not(.tv-color-statText):not(.tv-color-statHeader) .tv-app .tv-stats .tv-stat-head:not([data-tv-edit-color]) {
   background: radial-gradient(circle, #ffb12a 58%, transparent 62%) 0 0 / 3.4px 3.4px; -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: #ffb12a !important; text-shadow: 0 0 6px rgba(255,140,0,.55) !important;
 }
 html[data-skin="led"] .tv-app .tv-stats .stats-list { background: #000; }
-html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult) { text-shadow: 0 0 6px var(--l-gl, #ff8c00) !important; }
+html[data-skin="led"] .tv-app .tv-stats .stats-list li :is(.k, .tv-stat-main, .tv-stat-prefix, .tv-stat-mult):not([data-tv-edit-color]) { text-shadow: 0 0 6px var(--l-gl, #ff8c00) !important; }
 /* 下局指示標題：樣本 .nt 20px（→ 23px） */
 html[data-skin="led"] .tv-app .predict-title { font: 900 23px/1.2 "Noto Serif TC", "Noto Serif CJK TC", serif !important; letter-spacing: 3px; }
 /* 設定視窗等不在 .tv-app 內的介面字型改襯線 */

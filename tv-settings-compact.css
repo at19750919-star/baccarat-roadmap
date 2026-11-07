@@ -1,0 +1,94 @@
+/* Settings layout; all dimensions are design pixels under the existing TV scale. */
+#tvSettings.tv-settings {
+  box-sizing: border-box; min-width: 700px !important; min-height: 480px !important;
+  max-width: none !important; max-height: none !important; padding: 20px !important;
+  transform: scale(var(--app-scale, 1)); transform-origin: top left;
+}
+#tvSettings #tvSettingsForm { display: flex; flex-direction: column; gap: 18px; width: 100%; height: 100%; min-height: 0; min-width: 0; }
+#tvSettings [hidden] { display: none !important; }
+#tvSettings .tv-settings-header { display: flex; align-items: center; gap: 12px; margin: 0; width: 100%; }
+#tvSettings .tv-settings-header h2 { flex: none; }
+#tvSettings .tv-drag-hint { flex: 1; white-space: nowrap; }
+#tvSettings #tvSettingsClose, #tvSettings #tvSettingsSizeToggle { position: static; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 0; flex: none; }
+#tvSettings .tv-settings-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; border: 1px solid #d9b56880; border-radius: 8px; padding: 6px; background: #540b0b80; }
+#tvSettings .tv-settings-tabs button { width: auto; min-width: 0; padding: 11px 3px; min-height: 48px; white-space: nowrap; border-radius: 4px; font-weight: 600; }
+#tvSettings .tv-settings-content { flex: 1 1 0; min-height: 0; min-width: 0; padding: 0 8px 0 0; overflow: auto; scrollbar-gutter: stable; }
+#tvSettings .tv-settings-content > section { width: 100%; max-width: 100%; min-height: 0; }
+#tvSettings .tv-settings-actions { display: flex; gap: 10px; align-items: center; margin: 0; padding: 0; border: 0; background: none; flex-shrink: 0; }
+#tvSettings .tv-settings-spacer { flex: 1; }
+#tvSettings .tv-settings-skin { margin: 0 0 14px; gap: 14px; }
+#tvSettings .tv-settings-group, #tvSettings .tv-keys-subgroup { padding: 0; margin: 0; border: 0; background: none; }
+#tvSettings .tv-settings-subhead, #tvSettings .tv-keys-subhead { margin: 0 0 10px; }
+#tvSettings .tv-size-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 16px; width: 100%; }
+#tvSettings .tv-size-fields label { display: flex; align-items: center; justify-content: space-between; gap: 8px; white-space: nowrap; padding: 0; }
+#tvSettings .tv-size-fields label > span { display: flex; align-items: center; gap: 6px; }
+#tvSettings #tvProposalLimitSettings { margin-top: 28px; }
+#tvSettings .tv-limit-tables { display: flex; align-items: start; gap: 16px; }
+#tvSettings .tv-limit-table { border-collapse: collapse; width: auto; margin: 0; }
+#tvSettings .tv-limit-table :is(td, th) { border: 0; padding: 5px 3px; white-space: nowrap; text-align: center; }
+#tvSettings .tv-limit-table :is(td, th):first-child { text-align: left; min-width: 67px; padding-left: 0; }
+#tvSettings .tv-keys-settings { display: grid; grid-template-columns: repeat(2, max-content); gap: 16px 24px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(-n+2), #tvSettings .tv-keys-settings > .tv-settings-help { grid-column: 1 / -1; }
+#tvSettings .tv-keys-grid { display: grid; grid-template-columns: repeat(3, max-content); gap: 10px 20px; }
+#tvSettings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-keys-grid { grid-template-columns: repeat(2, max-content); }
+#tvSettings .tv-key-bind-row, #tvSettings .tv-check-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 0; white-space: nowrap; }
+#tvSettings .tv-keys-grid .tv-key-bind-row { min-width: 146px; }
+#tvSettings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-key-bind-row { min-width: 280px; }
+#tvSettings .tv-keys-subgroup > :is(.tv-key-bind-row,.tv-check-row) { margin-top: 10px; }
+#tvSettings .tv-vol-wrap { display: flex; align-items: center; gap: 8px; }
+#tvSettings .tv-vol-wrap input { width: 130px; }
+#tvSettings .tv-audition-row { margin: 12px 0 0; padding: 0; border: 0; }
+#tvSettings .tv-audition-title { margin-bottom: 8px; }
+#tvSettings .tv-audition-btns { display: flex; flex-wrap: wrap; gap: 6px; max-width: 300px; }
+#tvSettings .tv-settings-help { margin-top: 12px; max-width: 100%; }
+#tvSettings .tv-target-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+#tvSettings .tv-target-picker { flex: 1; min-width: 0; }
+#tvSettings #tvColorTarget { width: 100%; }
+#tvSettings .tv-color-workspace { margin-top: 12px; width: max-content; }
+#tvSettings .tv-color-editor { display: grid; grid-template-columns: 300px 230px; width: max-content; max-width: none; gap: 12px 16px; }
+#tvSettings .tv-color-spectrum { grid-column: 1; grid-row: 1 / span 3; width: 300px; height: 220px; aspect-ratio: auto; }
+#tvSettings .tv-color-presets { display: grid; grid-template-columns: repeat(6, 32px); gap: 7px; width: max-content; }
+#tvSettings .tv-color-presets button { width: 32px; height: 30px; min-height: 30px; padding: 0; }
+#tvSettings .tv-color-hex-label { justify-content: space-between; gap: 10px; }
+#tvSettings .tv-stats-font-preview-wrap { width: 100%; max-width: 100%; }
+#tvSettings .tv-stats-font-controls { margin-top: 14px; }
+#tvSettings .tv-stats-font-control, #tvSettings .tv-symbol-control, #tvSettings .tv-caption-control { display: grid; grid-template-columns: 130px 180px 76px 34px; gap: 14px; align-items: center; width: max-content; padding: 6px 0; }
+#tvSettings .tv-stats-font-control input[type=range], #tvSettings .tv-symbol-control input[type=range], #tvSettings .tv-caption-control input[type=range] { width: 180px; }
+#tvSettings #tvSymbolsPanel { width: 100%; }
+#tvSettings .tv-symbol-result-stage { width: 100%; }
+#tvSettings .tv-symbol-target, #tvSettings .tv-symbol-sample { display: flex; align-items: center; justify-content: start; gap: 12px; width: max-content; margin: 12px 0; }
+#tvSettings .tv-caption-controls { width: 100%; }
+#tvSettings .tv-caption-field { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+#tvSettings .tv-select-picker { display: inline-block; position: relative; min-width: 160px; }
+#tvSettings .tv-select-menu { position: absolute; top: calc(100% + 5px); left: 0; min-width: 100%; max-height: 240px; overflow: auto; z-index: 40; padding: 4px; }
+#tvSettings .tv-select-menu button { display: block; width: 100%; text-align: left; white-space: nowrap; }
+
+/* Keyboard controls use the same two-column content area as every other tab. */
+#tvSettings .tv-keys-settings { gap: 24px 24px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(-n+2) { grid-column: auto; }
+#tvSettings .tv-keys-subgroup:first-child .tv-keys-grid { grid-template-columns: repeat(2, max-content); }
+#tvSettings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-keys-grid { grid-template-columns: max-content; }
+#tvSettings .tv-keys-settings > .tv-settings-help { margin-top: 0; }
+#tvSettings .tv-audition-btns { max-width: 280px; }
+
+#tvSettings .tv-size-fields label { min-height: 44px; }
+#tvSettings .tv-settings-header, #tvSettings .tv-settings-tabs { flex-shrink: 0; }
+#tvSettings .tv-limit-table { flex: 1; }
+#tvSettings .tv-settings-subhead, #tvSettings .tv-keys-subhead { margin-bottom: 16px; letter-spacing: .06em; }
+#tvSettings .tv-key-bind-row > span { white-space: normal; }
+
+
+/* Color pages use the available canvas instead of a small picker beside blank space. */
+#tvSettings .tv-color-workspace, #tvSettings .tv-color-editor { width: 100%; }
+#tvSettings .tv-color-editor { grid-template-columns: minmax(0, 1fr) 230px; gap: 16px; }
+#tvSettings .tv-color-spectrum { grid-column: 1 / -1; grid-row: 1; width: 100%; height: 280px; }
+#tvSettings .tv-hue-label { grid-column: 1 / -1; grid-row: 2; }
+#tvSettings .tv-color-presets { grid-column: 1; grid-row: 3; grid-template-columns: repeat(6, 36px); gap: 8px; }
+#tvSettings .tv-color-presets button { width: 36px; height: 32px; min-height: 32px; }
+#tvSettings .tv-color-hex-label { grid-column: 2; grid-row: 3; align-self: center; }
+
+#tvSettings .tv-settings-skin { display: block; }
+#tvSettings .tv-settings-skin > span { display: block; margin-bottom: 10px; }
+#tvSettings .tv-style-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+#tvSettings .tv-style-options button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 8px; white-space: nowrap; }
+#tvSettings .tv-style-swatch { width: 12px; height: 12px; flex: none; border-radius: 50%; background: var(--style-swatch); border: 1px solid #f4dfa488; }

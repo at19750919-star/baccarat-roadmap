@@ -1,4 +1,4 @@
-/* 紅金／綠金／黑金三選一：在 <head> 同步執行，首次繪製前就套用，避免閃爍。只改外觀，不碰路單資料。 */
+/* 紅金／綠金／黑金／電子看板：在 <head> 同步執行，首次繪製前就套用，避免閃爍。只改外觀，不碰路單資料。 */
 (() => {
   const key = 'tv_skin_v1';
   const root = document.documentElement;
@@ -10,6 +10,11 @@
     if (skin === 'red') root.removeAttribute('data-skin'); else root.setAttribute('data-skin', skin);
     // 電視頁固定用經典版面；只改畫面屬性，不寫回路單頁的 baccarat_road_theme_v1。
     root.setAttribute('data-theme', 'classic');
+    document.querySelectorAll('.tv-style-options [data-skin-value]').forEach(button => {
+      const checked = button.dataset.skinValue === skin;
+      button.setAttribute('aria-checked', String(checked));
+      button.tabIndex = checked ? 0 : -1;
+    });
     const btn = document.getElementById('tvSkinToggle');
     if (btn) btn.textContent = SKINS[skin];
     const menu = document.getElementById('tvSkinMenu');
@@ -18,6 +23,30 @@
   paint();
   document.addEventListener('DOMContentLoaded', () => {
     paint();
+    const group = document.querySelector('.tv-style-options');
+    if (group) {
+      const options = [...group.querySelectorAll('[data-skin-value]')];
+      const choose = button => {
+        skin = norm(button.dataset.skinValue);
+        try { localStorage.setItem(key, skin); } catch (_) {}
+        paint();
+      };
+      group.addEventListener('click', event => {
+        const button = event.target.closest('[data-skin-value]');
+        if (button && group.contains(button)) choose(button);
+      });
+      group.addEventListener('keydown', event => {
+        if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Enter',' '].includes(event.key)) return;
+        event.preventDefault(); event.stopPropagation();
+        const index = options.indexOf(document.activeElement);
+        if (index < 0) return;
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1
+          : ['ArrowLeft','ArrowUp'].includes(event.key) ? (index + options.length - 1) % options.length
+          : ['ArrowRight','ArrowDown'].includes(event.key) ? (index + 1) % options.length : index;
+        choose(options[next]); options[next].focus();
+      });
+      return;
+    }
     const btn = document.getElementById('tvSkinToggle');
     const menu = document.getElementById('tvSkinMenu');
     if (!btn || !menu) return;
@@ -45,6 +74,7 @@
       close(false);
       btn.blur();
     };
+    document.getElementById('tvSettings')?.addEventListener('close', () => close(false));
     btn.addEventListener('click', () => { if (isOpen()) close(false); else open(); });
     btn.addEventListener('keydown', e => {
       // 不讓路單快捷鍵（app.js / tv.js 掛在 document）收到選單按鍵

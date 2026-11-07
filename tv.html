@@ -10,8 +10,10 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&amp;family=Cinzel:wght@500;700;900&amp;family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&amp;family=Noto+Serif+TC:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
 <link href="style.css?v=9" rel="stylesheet"/>
-<script src="tv-skin.js?v=3"></script>
-<link href="tv.css?v=65" rel="stylesheet"/>
+<script src="tv-skin.js?v=5"></script>
+<link href="tv.css?v=66" rel="stylesheet"/>
+<link href="tv-layout-proposal.css?v=27" rel="stylesheet"/>
+<link href="tv-settings-compact.css?v=15" rel="stylesheet"/>
 
 
 
@@ -22,6 +24,9 @@
 <style>
 /* Equal cells; natural glyph proportions with one fitter in tv.js. */
 .tv-app .tv-stats .stats-list { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.tv-app .tv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tv-app .tv-stats .tv-stat-head { justify-content: center; gap: 14px; }
+.tv-app .tv-stats .tv-stat-head b, .tv-app .tv-stats #totalCount { font-size: 32px; }
 .tv-app .tv-stats .stats-list li {
   grid-template-columns: minmax(0, 1fr) 25%;
   gap: 3%; padding: 3% 6% 3% 3%; min-width: 0; overflow: hidden;
@@ -32,7 +37,8 @@
   font-size: var(--stat-fit-size, 1px); line-height: 1.08;
   letter-spacing: 0; text-align: left;
 }
-.tv-app .tv-stats .stats-list .k { color: #fff !important; }
+.tv-app .tv-stats .stats-list .k:not([data-tv-edit-color]) { color: #fff !important; }
+.tv-app .tv-stats .stats-list .k.tv-stat-short { align-items: flex-start; text-align: left; }
 .tv-app .tv-stats .stats-list .tv-stat-main { display: block; flex: none; width: max-content; white-space: nowrap; }
 .tv-app .tv-stats .tv-stat-prefix { display: block; flex: none; width: max-content; font-size: .7em; line-height: 1.12; }
 .tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top {
@@ -52,38 +58,21 @@
   padding: 0; border: 0; border-radius: 0;
   background: none; box-shadow: none;
   font: 800 var(--stat-count-fit-size, 1px)/1 "Abril Fatface", "Cinzel", "Cormorant Garamond", "Georgia", serif;
-  letter-spacing: 1.5px; font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: 0; font-feature-settings: "tnum" 1, "lnum" 1;
   font-variant-numeric: tabular-nums lining-nums; text-shadow: 0 1px 1px #261800;
 }
-.tv-app .tv-stats .stats-list li > b { color: #fdf8c9 !important; }
-.tv-app .tv-stats .tv-stat-head b { color: #E8C877 !important; }
+.tv-app .tv-stats .stats-list li > b:not([data-tv-edit-color]) { color: #fdf8c9 !important; }
+.tv-app .tv-stats .tv-stat-head b:not([data-tv-edit-color]) { color: #E8C877 !important; }
 </style>
+<link href="tv-panel-style.css?v=14" rel="stylesheet"/>
 </head>
 <body>
 
 <div class="app tv-app">
 <header class="title-bar"><div class="tv-shortcuts">
-<div class="tv-table-board">
-  <div class="tv-board-brand">
-    <span class="tv-board-brand-icon">♠</span>
-    <span class="tv-board-title-en">VIP BACCARAT</span>
-    <span class="tv-board-divider">|</span>
-    <span class="tv-board-title-zh">尊榮百家樂</span>
-  </div>
-  <div class="tv-board-stats">
-    <div class="tv-board-item">
-      <span class="tv-board-label">桌號 TABLE</span>
-      <b class="tv-board-val">001</b>
-    </div>
-    <div class="tv-board-item">
-      <span class="tv-board-label">靴號 SHOE</span>
-      <b class="tv-board-val">01</b>
-    </div>
-    <div class="tv-board-item tv-board-round">
-      <span class="tv-board-label">局數 ROUND</span>
-      <b class="tv-board-val" id="tvTopRoundCount">0</b>
-    </div>
-  </div>
+<div class="tv-table-board tv-brand-slot" data-logo-status="ready">
+  <img class="tv-brand-logo" src="tv-jiujiu-logo-gold-v5.png" alt="玖玖"/>
+  <b class="tv-visually-hidden" id="tvTopRoundCount">0</b>
 </div>
 <div class="key-legend" hidden>
 <div class="key-row">
@@ -100,8 +89,8 @@
 <span>超級幸運7<b id="legendKeyS7">2222~</b></span>
 <span>確定<b id="legendKeyConfirm">⏎</b></span>
 <span>退局<b id="legendKeyUndo">⌫</b></span>
-<span>金額<b id="legendKeyLimit">77</b></span>
-<span>隱藏<b id="legendKeyBoss">88</b></span>
+<span>設定<b id="legendKeyLimit">77</b></span>
+<span>儲存<b id="legendKeyBoss">8</b></span>
 <span>清<b id="legendKeyClear">99</b></span>
 <span>全螢幕<b id="legendKeyFullscreen">F</b></span>
 </div>
@@ -120,7 +109,7 @@
 <button class="btn action-btn btn-undo" id="undoBtn">退</button>
 <button class="btn action-btn btn-clear" id="clearBtn">清</button>
 </div>
-</div></div><div class="panel limit-panel tv-limit">
+</div></div><div class="panel limit-panel tv-limit tv-limit-summary" id="tvLimitSummary">
 <div class="tv-limit-col tv-limit-keys"><span class="tv-limit-name"></span><span class="tv-limit-key tv-limit-key-high">最高</span><span class="tv-limit-key tv-limit-key-low">最低</span></div>
 <div class="tv-limit-col"><span class="tv-limit-name">莊&amp;閒</span><input aria-label="莊&閒最高" class="limit-input" data-k="bpMax" inputmode="numeric" type="text" value="1,500,000"/><input aria-label="莊&閒最低" class="limit-input" data-k="bpMin" inputmode="numeric" type="text" value="30,000"/></div>
 <div class="tv-limit-col"><span class="tv-limit-name">和</span><input aria-label="和最高" class="limit-input" data-k="tMax" inputmode="numeric" type="text" value="187,500"/><input aria-label="和最低" class="limit-input" data-k="tMin" inputmode="numeric" type="text" value="3,000"/></div>
@@ -309,7 +298,7 @@
 <circle cx="114" cy="60" fill="currentColor" r="1.6"></circle>
 </svg>
 </button>
-</div></div><div class="tv-save-stack"><button type="button" class="tv-save-btn" id="saveBtn" title="下載 JSON、PNG 並備份至 OneDrive">儲存路單</button><button type="button" class="tv-skin-btn" id="tvSkinToggle" aria-haspopup="listbox" aria-expanded="false" aria-controls="tvSkinMenu" title="選擇畫面風格">紅金風格</button><ul class="tv-skin-menu" id="tvSkinMenu" role="listbox" aria-label="畫面風格" hidden><li role="option" tabindex="-1" data-skin-value="red" aria-selected="true">紅金風格</li><li role="option" tabindex="-1" data-skin-value="green" aria-selected="false">綠金風格</li><li role="option" tabindex="-1" data-skin-value="black" aria-selected="false">黑金風格</li><li role="option" tabindex="-1" data-skin-value="led" aria-selected="false">電子看板</li></ul></div><button type="button" class="tv-logo-btn" id="tvSettingsButton" aria-label="路單設定" aria-haspopup="dialog" aria-controls="tvSettings" title="路單設定"><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo-transparent.png" width="130"/></button></div></header>
+</div></div><button type="button" class="tv-logo-btn" id="tvSettingsButton" aria-label="路單設定" aria-haspopup="dialog" aria-controls="tvSettings" title="路單設定"><img alt="AT 黑桃" class="tv-logo" height="130" src="tv-at-logo-transparent.png" width="130"/></button></div></header>
 <!-- 大路 (full width on top) -->
 <section class="panel big-panel">
 <div class="grid-board big-road" data-label="大路" id="bigRoad"></div>
@@ -331,8 +320,8 @@
 <!-- 底部:統計 | 珠盤路 | 下局指示 | 貨幣限額 -->
 <section class="bottom-row">
 <div class="panel stats-panel tv-stats">
-<div class="tv-stat-head tv-stat-table">桌號：<b>001</b></div>
-<div class="tv-stat-head">局數：<b id="totalCount">0</b></div>
+<div class="tv-stat-head tv-stat-table"><span class="tv-stat-head-label">桌號</span><b>001</b></div>
+<div class="tv-stat-head"><span class="tv-stat-head-label">局數</span><b id="totalCount">0</b></div>
 <ul class="stats-list">
 <li class="stat-banker"><span class="k tv-stat-short"><span class="tv-stat-main">莊贏</span></span><b id="cntB">0</b></li>
 <li class="stat-tie"><span class="k tv-stat-short"><span class="tv-stat-main">和局</span></span><b id="cntT">0</b></li>
@@ -377,7 +366,8 @@
 </div>
 </div>
 </section>
-<dialog id="tvSettings" class="tv-settings" aria-labelledby="tvSettingsTitle">
+<button type="button" id="saveBtn" hidden>儲存路單</button>
+<dialog id="tvSettings" class="tv-settings tv-settings-proposal tv-settings-compact" aria-labelledby="tvSettingsTitle">
 <form method="dialog" id="tvSettingsForm" novalidate>
 <header class="tv-settings-header"><h2 id="tvSettingsTitle">路單設定</h2><span class="tv-drag-hint">拖曳移動 ｜ 邊緣縮放</span><button type="button" id="tvSettingsSizeToggle" class="tv-settings-size-btn" title="切換大視窗/標準視窗" aria-label="切換視窗尺寸">⛶</button><button type="button" id="tvSettingsClose" aria-label="關閉設定">×</button></header>
 <div class="tv-settings-tabs" role="tablist" aria-label="設定分類">
@@ -389,9 +379,14 @@
 <button type="button" id="tvTabStats" role="tab" data-settings-tab="2" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">統計顏色</button>
 <button type="button" id="tvTabSymbols" role="tab" data-settings-tab="symbols" aria-controls="tvSymbolsPanel" aria-selected="false" tabindex="-1">符號調整</button>
 </div>
-<p class="tv-live-hint">調整即時預覽，按「儲存」保留。</p>
 <div class="tv-settings-content">
 <section id="tvBasicPanel" role="tabpanel" aria-labelledby="tvTabBasic">
+<div class="tv-settings-skin"><span id="tvStyleLabel">畫面風格</span><div class="tv-style-options" role="radiogroup" aria-labelledby="tvStyleLabel">
+<button type="button" role="radio" aria-checked="true" data-skin-value="red"><i class="tv-style-swatch" style="--style-swatch:#b32424" aria-hidden="true"></i>紅金風格</button>
+<button type="button" role="radio" aria-checked="false" data-skin-value="green" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#297052" aria-hidden="true"></i>綠金風格</button>
+<button type="button" role="radio" aria-checked="false" data-skin-value="black" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#252525" aria-hidden="true"></i>黑金風格</button>
+<button type="button" role="radio" aria-checked="false" data-skin-value="led" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#d9b568" aria-hidden="true"></i>電子看板</button>
+</div></div>
 <div class="tv-size-settings">
 <label for="tvBigColumns">大路欄數 <span><input id="tvBigColumns" name="columns" type="number" min="38" max="48" step="1" required/> 欄</span></label>
 <label for="tvDragonThreshold">長龍起算 <span><input id="tvDragonThreshold" name="dragonThreshold" type="number" min="2" max="100" step="1" required/> 局</span></label>
@@ -400,7 +395,6 @@
 <label for="tvCockroachStroke">蟑螂路筆畫 <span><input id="tvCockroachStroke" name="cockroachStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
 <label for="tvStarStroke">三星路筆畫 <span><input id="tvStarStroke" name="starStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
 </div>
-<div class="tv-settings-help"><p>欄數 38～48 欄，筆畫 1～10 px。</p><p>長龍達到設定局數時亮起，再多一局播放全螢幕特效；和局不中斷連勝。</p></div>
 </section>
 <section id="tvStatsFontPanel" role="tabpanel" aria-labelledby="tvTabStatsFont" hidden>
 <div class="tv-stats-font-preview-wrap"><p>即時預覽・與畫面上的統計資料同步</p><div id="tvStatsFontPreview" class="tv-stats-font-preview tv-app" role="img" aria-label="統計區即時預覽"></div></div>
@@ -414,7 +408,7 @@
 <section id="tvKeysPanel" role="tabpanel" aria-labelledby="tvTabKeys" hidden>
 <div class="tv-keys-settings">
   <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">⌨️ 按鍵綁定（標籤在前，數字在後）</h3>
+    <h3 class="tv-keys-subhead">開獎按鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>莊贏</span><input id="tvKeyB" name="keyB" maxlength="1" value="1" required/></label>
       <label class="tv-key-bind-row"><span>閒贏</span><input id="tvKeyP" name="keyP" maxlength="1" value="2" required/></label>
@@ -428,25 +422,25 @@
   </div>
 
   <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">🛠️ 系統與輔助功能鍵（標籤在前，數字／鍵在後）</h3>
+    <h3 class="tv-keys-subhead">系統與輔助按鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>確定送出</span><input id="tvKeyConfirm" name="keyConfirm" maxlength="10" value="Enter" required/></label>
       <label class="tv-key-bind-row"><span>退回上局</span><input id="tvKeyUndo" name="keyUndo" maxlength="10" value="Backspace" required/></label>
-      <label class="tv-key-bind-row"><span>設定金額</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="7" required/></label>
-      <label class="tv-key-bind-row"><span>隱藏頁面</span><input id="tvKeyBoss" name="keyBoss" maxlength="5" value="8" required/></label>
+      <label class="tv-key-bind-row"><span>開啟設定</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="7" readonly title="連按 77 開啟設定；單按 7 撤銷上一局" required/></label>
+      <label class="tv-key-bind-row"><span>儲存路單</span><input id="tvKeyBoss" name="keyBoss" maxlength="5" value="8" readonly title="單按 8 儲存路單" required/></label>
       <label class="tv-key-bind-row"><span>清空路單</span><input id="tvKeyClear" name="keyClear" maxlength="5" value="9" required/></label>
       <label class="tv-key-bind-row"><span>全螢幕</span><input id="tvKeyFullscreen" name="keyFullscreen" maxlength="5" value="F" required/></label>
     </div>
   </div>
 
   <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">⏱️ 操作模式設定</h3>
+    <h3 class="tv-keys-subhead">操作模式</h3>
     <label class="tv-check-row"><span>免按 ENTER 自動開獎</span><input id="tvAutoCommit" name="autoCommit" type="checkbox" checked/></label>
     <label class="tv-key-bind-row"><span>連按停頓等待時間</span><span><input id="tvAutoCommitDelay" name="autoCommitDelay" type="number" min="0.2" max="0.8" step="0.01" value="0.38"/> 秒</span></label>
   </div>
 
   <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">🔊 語音播報設定</h3>
+    <h3 class="tv-keys-subhead">語音播報</h3>
     <label class="tv-check-row"><span>語音播報開關</span><input id="tvSoundEnabled" name="soundEnabled" type="checkbox" checked/></label>
     <label class="tv-key-bind-row"><span>語音音量大小</span><span class="tv-vol-wrap"><input id="tvSoundVolume" name="soundVolume" type="range" min="10" max="100" step="5" value="100"/><b id="tvSoundVolumeText">100%</b></span></label>
     <div class="tv-audition-row">
@@ -465,7 +459,8 @@
 
   <div class="tv-settings-help">
     <p>小老虎：連按 2 次幸運6鍵 ｜ 大老虎：連按 3 次幸運6鍵</p>
-    <p>幸運七：連按 2～6 次閒贏鍵 ｜ 退局：Backspace ⌫</p>
+    <p>幸運七：連按 2～6 次閒贏鍵 ｜ 退局：7 或 Backspace ⌫</p>
+    <p>單按 7：稍候撤銷上一局 ｜ 連按 77：開啟設定 ｜ 單按 8：儲存路單</p>
   </div>
 </div>
 </section>
@@ -534,9 +529,12 @@
 <script src="app.js?v=17"></script>
 <script src="tv-caption-settings.js?v=3"></script>
 <script src="tv-symbol-settings.js?v=6"></script>
-<script src="tv.js?v=22"></script>
-<script src="tv-dragon-video.js?v=3"></script>
+<script src="tv.js?v=31"></script>
+<script src="tv-dragon-video.js?v=6"></script>
 <script src="result-announcement.js?v=6"></script>
+<script src="tv-layout-proposal.js?v=14"></script>
+<script src="tv-settings-compact.js?v=7"></script>
+
 
 
 

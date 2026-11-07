@@ -65,14 +65,14 @@
       return val;
     };
     setTxt('legendKeyConfirm', fmtKey(kb.keyConfirm || 'Enter'));
-    setTxt('legendKeyUndo', fmtKey(kb.keyUndo || 'Backspace'));
-    setTxt('legendKeyLimit', fmtDoubleKey(kb.keyLimit, '7'));
-    setTxt('legendKeyBoss', fmtDoubleKey(kb.keyBoss, '8'));
+    setTxt('legendKeyUndo', '7 / ' + fmtKey(kb.keyUndo || 'Backspace'));
+    setTxt('legendKeyLimit', '77');
+    setTxt('legendKeyBoss', '8');
     setTxt('legendKeyClear', fmtDoubleKey(kb.keyClear, '9'));
     setTxt('legendKeyFullscreen', String(kb.keyFullscreen || 'F'));
   }
   const statsFontKeys = ["statsNameSize", "statsNumberSize", "statsHeaderSize"];
-  const defaults = { columns: 46, bigStroke: 4, eyeStroke: 2, cockroachStroke: 3, starStroke: 3, dragonThreshold: 6, statsNameSize: 48, statsNumberSize: 32, statsHeaderSize: 22 };
+  const defaults = { columns: 46, bigStroke: 4, eyeStroke: 2, cockroachStroke: 3, starStroke: 3, dragonThreshold: 6, statsNameSize: 32, statsNumberSize: 36, statsHeaderSize: 22 };
   const limits = { columns: [38, 48, 1], bigStroke: [1, 10, 0.5], eyeStroke: [1, 10, 0.5], cockroachStroke: [1, 10, 0.5], starStroke: [1, 10, 0.5], dragonThreshold: [2, 100, 1], statsNameSize: [16, 48, 1], statsNumberSize: [18, 40, 1], statsHeaderSize: [16, 36, 1] };
   const colorGroups = [
     ["畫面與文字", [
@@ -134,6 +134,25 @@
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) settings = normalize(JSON.parse(saved));
   } catch (_) { /* Unavailable or damaged storage keeps the defaults. */ }
+
+  // Apply the smaller label cap once to existing preferences; later manual choices remain valid.
+  try {
+    const revisionKey = 'baccarat_tv_stats_labels_v2';
+    if (!localStorage.getItem(revisionKey)) {
+      settings.statsNameSize = Math.min(settings.statsNameSize, defaults.statsNameSize);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      localStorage.setItem(revisionKey, '1');
+    }
+  } catch (_) { /* The default cap still applies when storage is unavailable. */ }
+
+  try {
+    const revisionKey = 'baccarat_tv_stats_counts_v2';
+    if (!localStorage.getItem(revisionKey)) {
+      settings.statsNumberSize = Math.max(settings.statsNumberSize, defaults.statsNumberSize);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      localStorage.setItem(revisionKey, '1');
+    }
+  } catch (_) { /* Display remains usable without preference storage. */ }
 
   // Set the saved threshold before app.js performs its first DOM-ready render.
   document.querySelector('.tv-app').dataset.dragonThreshold = settings.dragonThreshold;
@@ -290,9 +309,20 @@
           if (width <= label.clientWidth * .96 && height <= label.clientHeight * .92) low = size;
           else high = size;
         }
-        const cap = Number(settings.statsNameSize);
+        const cap = Number(settings.statsNameSize) * (label.classList.contains('tv-stat-short') ? 1.125 : 1);
         const size = Math.min(low * .94, Number.isFinite(cap) ? cap : low * .94);
         label.style.setProperty('--stat-fit-size', size.toFixed(2) + 'px');
+      }
+      // Center short names against the visible 幸運6 text, not the wider label column.
+      const referenceLabel = targetList.querySelector('.stat-lucky6 .k');
+      const referenceText = referenceLabel?.querySelector('.tv-stat-main');
+      if (referenceText && referenceLabel.clientWidth) {
+        const scale = referenceLabel.getBoundingClientRect().width / referenceLabel.clientWidth;
+        const referenceWidth = referenceText.getBoundingClientRect().width / scale;
+        targetList.querySelectorAll('.tv-stat-short .tv-stat-main').forEach(text => {
+          const width = text.getBoundingClientRect().width / scale;
+          text.style.marginLeft = ((referenceWidth - width) / 2).toFixed(2) + 'px';
+        });
       }
       // Every count shares the same size and reserved right column, even as digits grow.
       // 數字大小 is a px target: use it when the tightest cell can hold it, otherwise shrink to the cell.
@@ -644,19 +674,11 @@
     const panelScale = () => Math.min(innerWidth / 1920, innerHeight / 1080);
     const SETTINGS_SIZE_KEY = 'baccarat_tv_settings_size_v1';
     function applyDialogSize(w, h) {
-      if (w) dialog.style.width = Math.round(w) + 'px';
-      if (h) dialog.style.height = Math.round(h) + 'px';
+      if (w) dialog.style.setProperty('width', Math.round(w) + 'px', 'important');
+      if (h) dialog.style.setProperty('height', Math.round(h) + 'px', 'important');
       clampPanel();
     }
-    try {
-      const savedSz = localStorage.getItem(SETTINGS_SIZE_KEY);
-      if (savedSz) {
-        const { width, height } = JSON.parse(savedSz);
-        const w = width && width >= 360 ? width : 520;
-        const h = height && height >= 640 ? height : 820;
-        applyDialogSize(w, h);
-      }
-    } catch (_) {}
+    applyDialogSize(720, 800);
 
     function clampPanel() {
       if (!dialog.open) return;
@@ -694,9 +716,9 @@
     });
 
     function toggleSettingsSize() {
-      const isExpanded = parseInt(dialog.style.width, 10) > 550;
-      const targetW = isExpanded ? 420 : 680;
-      const targetH = isExpanded ? 660 : 820;
+      const isExpanded = parseInt(dialog.style.width, 10) > 720;
+      const targetW = isExpanded ? 720 : 840;
+      const targetH = isExpanded ? 800 : 960;
       applyDialogSize(targetW, targetH);
       const btn = document.getElementById('tvSettingsSizeToggle');
       if (btn) btn.textContent = isExpanded ? '⛶' : '🗗';
@@ -815,9 +837,46 @@
       const c = codeToKeyChar(e.code);
       return (c && c.toUpperCase() === t) || (e.key && e.key.toUpperCase() === t);
     }
+    // Fixed TV shortcuts: defer a single 7 so 77 never undoes a round.
+    const SEVEN_DOUBLE_MS = 250;
+    let sevenTimer = null;
+    function cancelSeven() {
+      clearTimeout(sevenTimer);
+      sevenTimer = null;
+    }
+    function finishSeven() {
+      if (sevenTimer === null) return;
+      cancelSeven();
+      undo();
+    }
+    window.addEventListener('blur', cancelSeven);
+    button.addEventListener('click', cancelSeven);
     document.addEventListener('keydown', event => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName) || event.target?.isContentEditable || dialog.open || event.ctrlKey || event.altKey || event.metaKey) return;
       const code = event.code;
+      const shortcut = codeToKeyChar(code);
+      if (shortcut === '7' || shortcut === '8' || shortcut === 'X' || code === 'Backspace') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (event.repeat) return;
+        resetInput();
+        cancelOrdinary();
+        if (shortcut === '7') {
+          if (sevenTimer !== null) {
+            cancelSeven();
+            button.click();
+          } else {
+            sevenTimer = setTimeout(finishSeven, SEVEN_DOUBLE_MS);
+          }
+        } else {
+          finishSeven();
+          if (shortcut === '8') document.getElementById('saveBtn').click();
+          else if (shortcut === 'X') document.getElementById('tvEditToggle').click();
+          else undo();
+        }
+        return;
+      }
+      if (!event.repeat) finishSeven();
       const isCustomKeyUsed = [
         currentKeyBindings.keyConfirm, currentKeyBindings.keyUndo,
         currentKeyBindings.keyLimit, currentKeyBindings.keyBoss, currentKeyBindings.keyClear,
@@ -899,7 +958,7 @@
       ];
       for (const k of allFields) {
         const el = form.elements.namedItem(k);
-        if (el) el.value = b[k] || defaultKeyBindings[k];
+        if (el) el.value = k === 'keyLimit' ? '7' : k === 'keyBoss' ? '8' : b[k] || defaultKeyBindings[k];
       }
       const ac = form.elements.namedItem('autoCommit');
       if (ac) ac.checked = b.autoCommit !== false;
@@ -990,6 +1049,10 @@
     // Prevent game shortcuts while the dialog is open, including Enter on buttons.
     document.addEventListener('keydown', event => {
       if (dialog.open) {
+        // Let the relocated style menu handle its own navigation before the dialog.
+        if (event.target.closest('.tv-style-options') && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Enter',' '].includes(event.key)) return;
+        if (event.target.closest('.tv-settings-skin-picker, .tv-select-picker') &&
+            ['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter', ' ', 'Escape'].includes(event.key)) return;
         if (handleTargetKey(event)) { event.stopImmediatePropagation(); return; }
         if (event.key === 'Escape') { event.preventDefault(); cancelSettings(); }
         if (event.target === spectrum && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -1059,6 +1122,7 @@
       const input = document.getElementById(id);
       if (input) {
         input.addEventListener('keydown', e => {
+          if (input.readOnly) return;
           if (['Tab', 'Escape'].includes(e.key)) return;
           e.preventDefault();
           e.stopPropagation();

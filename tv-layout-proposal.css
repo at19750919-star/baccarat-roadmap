@@ -1,0 +1,284 @@
+/* 百家樂電視路單・整頁布局提案（隔離副本，不覆寫正式檔）
+   只改布局與樣式。主色維持現況紅金。logo 先留固定佔位，不做去背或上色。 */
+
+.tv-app {
+  --tv-logo-slot-w: 220px;
+  --tv-logo-slot-h: 156px;
+  --tv-card-radius: 0px;
+  --tv-gold-line: linear-gradient(135deg,#6b4c1d,#e8c97a 25%,#8a6a2f 50%,#f4dfa4 75%,#6b4c1d);
+  --tv-gold-ornament: #f4dfa4;
+}
+
+.tv-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tv-app .title-bar:has(.tv-brand-slot) {
+  grid-template-columns: minmax(var(--tv-logo-slot-w), 1fr) 1368px auto;
+}
+
+/* Live VIP board (no logo slot): keep the official first-column width so
+   「♠ VIP BACCARAT | 尊榮百家樂」and 桌號/靴號/局數 sit fully inside the box. */
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board {
+  height: calc(100% + 12px);
+  margin: -6px 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-board-brand {
+  min-width: 0;
+  overflow: hidden;
+  justify-content: center;
+}
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-board-item {
+  min-width: 0;
+  overflow: hidden;
+}
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-board-label {
+  max-width: 100%;
+  overflow: hidden;
+  letter-spacing: 0.3px;
+}
+
+.tv-app .tv-table-board.tv-brand-slot {
+  width: 100%;
+  height: var(--tv-logo-slot-h);
+  margin: -6px 0;
+  padding: 6px;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-sizing: border-box;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.tv-brand-placeholder {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed rgba(212, 166, 74, .8);
+  background: rgba(0, 0, 0, .22);
+  color: #ffe28a;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.tv-brand-placeholder-label {
+  font-family: "Noto Serif TC", "Cinzel", serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: #ffe296;
+}
+
+.tv-brand-placeholder-size {
+  font-family: "Cinzel", "Noto Serif TC", serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #fff8e0;
+}
+
+/* 限紅數字加大；略收字距以免長數字互撞。限紅欄改吃剩餘寬度。 */
+.tv-app .tv-limit {
+  padding: 4px 10px;
+  min-width: 0;
+}
+
+.tv-app .tv-limit-name { font-size: 29px; }
+.tv-app .tv-limit-key { font-size: 26px; }
+.tv-app .tv-limit .limit-input {
+  height: 44px;
+  font-size: 32px;
+  line-height: 42px;
+  letter-spacing: 0.4px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1, "zero" 0;
+}
+
+.tv-app .tv-stats { grid-template-columns: 1fr 1fr 1fr; }
+
+.tv-app #starRoad {
+  --cell-star: var(--cell-star-fit, var(--cell-big));
+  grid-template-columns: repeat(var(--cols-star, 23), var(--cell-star));
+  grid-template-rows: repeat(3, var(--cell-star));
+  width: calc(var(--cols-star, 23) * var(--cell-star) + 2px);
+  height: calc(3 * var(--cell-star) + 2px);
+  background-size: 100% var(--cell-star), var(--cell-star) 100%, auto;
+}
+
+/* Bottom row uses real design pixels; do not scale stats, beads and next-hand together. */
+.tv-app .bottom-row {
+  width: var(--tv-bottom-width, 1900px);
+  height: 100%;
+  max-height: 100%;
+  transform: none !important;
+  grid-template-columns: var(--tv-stats-width, 622px) minmax(0, 1fr) var(--tv-predict-width, 162px);
+  gap: var(--tv-bottom-gap, 6px);
+}
+
+/* Green-gold .gframe treatment: gold-line border-image, square corners, 14px L ornaments.
+   Fills/text/cells unchanged (no metal panel fill, no green felt).
+   Road/stats/predict keep the existing 2px border slot so leftovers and cell sizes stay put.
+   Sample .gframe line is 1px; the extra 1px on those cards stays in the old #ffd700 border.
+   Top-row brand + limits were 1px and become 2px; that 1px comes from inside those boxes. */
+.tv-app .big-panel,
+.tv-app .bead-panel,
+.tv-app .tv-road-row .panel,
+.tv-app .stats-panel,
+.tv-app .tv-stats,
+.tv-app .predict-panel,
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board,
+.tv-app .tv-limit {
+  position: relative;
+  border: 2px solid transparent !important;
+  border-image: var(--tv-gold-line) 1 !important;
+  border-radius: 0 !important;
+  overflow: visible;
+  box-shadow: none; /* no inset; no outer drop — outset tinted translucent fills by 1 RGB */
+}
+.tv-app .big-panel::before,
+.tv-app .bead-panel::before,
+.tv-app .tv-road-row .panel::before,
+.tv-app .stats-panel::before,
+.tv-app .tv-stats::before,
+.tv-app .predict-panel::before,
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board::before,
+.tv-app .tv-limit::before,
+.tv-app .big-panel::after,
+.tv-app .bead-panel::after,
+.tv-app .tv-road-row .panel::after,
+.tv-app .stats-panel::after,
+.tv-app .tv-stats::after,
+.tv-app .predict-panel::after,
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board::after,
+.tv-app .tv-limit::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 3;
+  box-sizing: border-box;
+  border-color: var(--tv-gold-ornament);
+  border-style: solid;
+}
+.tv-app .big-panel::before,
+.tv-app .bead-panel::before,
+.tv-app .tv-road-row .panel::before,
+.tv-app .stats-panel::before,
+.tv-app .tv-stats::before,
+.tv-app .predict-panel::before,
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board::before,
+.tv-app .tv-limit::before {
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+.tv-app .big-panel::after,
+.tv-app .bead-panel::after,
+.tv-app .tv-road-row .panel::after,
+.tv-app .stats-panel::after,
+.tv-app .tv-stats::after,
+.tv-app .predict-panel::after,
+.tv-app .title-bar:not(:has(.tv-brand-slot)) .tv-table-board::after,
+.tv-app .tv-limit::after {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 2px 2px 0;
+}
+.tv-app .big-panel .grid-board,
+.tv-app .bead-panel .grid-board,
+.tv-app .tv-road-row .grid-board,
+.tv-app .big-road,
+.tv-app .derived-road,
+.tv-app .bead-board,
+.tv-app #bigRoad,
+.tv-app #bigEye,
+.tv-app #smallRoad,
+.tv-app #cockroachRoad,
+.tv-app #starRoad,
+.tv-app #beadBoard {
+  border-radius: 0 !important;
+}
+
+/* Logo slot fills the title-bar track (cancel the 6px vertical padding). */
+.tv-app .title-bar .tv-shortcuts {
+  align-self: stretch;
+  min-height: 0;
+}
+.tv-app .tv-table-board.tv-brand-slot {
+  width: 100%;
+  height: calc(100% + 12px);
+  margin: -6px 0;
+}
+
+/* 限紅：畫面上的數字只顯示，不可點選編輯（改由黑桃設定）。 */
+.tv-app .tv-limit .limit-input {
+  pointer-events: none;
+  caret-color: transparent;
+}
+.tv-app .tv-limit .limit-input:hover,
+.tv-app .tv-limit .limit-input:focus {
+  border-color: transparent;
+  background: transparent;
+  color: inherit;
+  outline: none;
+}
+/* Header controls now live in settings or on the keyboard. */
+#saveBtn[hidden], #tvEditToggle[hidden] { display: none !important; }
+#tvSettings .tv-settings-skin { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-family: "Noto Serif TC", "Cinzel", serif; }
+#tvSettings .tv-settings-skin-picker { position: relative; width: max-content; }
+#tvSettings .tv-settings-skin-picker #tvSkinToggle { position: static; width: auto; min-width: 150px; margin: 0; }
+#tvSettings .tv-settings-skin-picker #tvSkinMenu { position: absolute; z-index: 30; margin: 0; padding: 4px; list-style: none; }
+#tvSettings .tv-settings-skin-picker #tvSkinMenu[hidden] { display: none !important; }
+
+.tv-app .tv-brand-logo {
+  display: block;
+  width: 308px;
+  height: 135px;
+  flex-shrink: 0;
+  transform: scale(1.1);
+  transform-origin: center;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.2)) drop-shadow(0 0 10px rgba(255, 140, 0, 0.25)) brightness(1.3);
+}
+
+/* Preserve the original eight-column limit layout; adjust typography and colors only. */
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .tv-limit-name {
+  color: #fff6eb; font-size: 26px;
+}
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .tv-limit-key { font-size: 22px; }
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .limit-input { font-size: 30px; letter-spacing: 0; }
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .tv-limit-key-high,
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .limit-input[data-k$="Max"] { color: #f3c75b; }
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .tv-limit-key-low,
+html .tv-app .title-bar .panel.tv-limit.tv-limit-summary .limit-input[data-k$="Min"] { color: #fff2b2; }
+
+/* Anchor the text independently; do not move the video or native dragon artwork. */
+#dragonOverlay .dragon-banner {
+  position: absolute;
+  top: var(--tv-dragon-text-top, 200px);
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Match the bead road's opaque base color; no red tint through the prediction panel. */
+.tv-app .predict-panel { background: var(--tv-color-grid, #fff); }

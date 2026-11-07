@@ -57,6 +57,12 @@
       clearStartup();
       overlay.classList.add('dragon-video-mode');
     }
+    function setSpeed() {
+      if (!current()) return;
+      // Complete the original dragon motion in 5.5 seconds without trimming.
+      video.playbackRate = Number.isFinite(video.duration) && video.duration > 0
+        ? video.duration / 5.5 : 1;
+    }
     function ended() {
       if (current() && video.ended) onEnded();
     }
@@ -66,13 +72,15 @@
       startupTimer = setTimeout(fallback, 6000);
     }
     const mediaError = () => { if (video.error) fallback(); };
-    const handlers = { playing, ended, error: mediaError, waiting, stalled: waiting };
+    const handlers = { loadedmetadata: setSpeed, playing, ended, error: mediaError, waiting, stalled: waiting };
     for (const [type, listener] of Object.entries(handlers)) video.addEventListener(type, listener);
     unbind = () => {
       for (const [type, listener] of Object.entries(handlers)) video.removeEventListener(type, listener);
     };
     video.muted = true;
     video.playsInline = true;
+    video.loop = false;
+    video.playbackRate = 1;
     video.src = src;
     startupTimer = setTimeout(fallback, 6000);
     try {
