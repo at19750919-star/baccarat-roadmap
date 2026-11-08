@@ -296,10 +296,10 @@ function layoutDerivedMarks(marks, rows) {
   rows = rows || 6;
   const grid = [];
   for (let r = 0; r < rows; r++) grid.push({});
-  let curCol = -1, curRow = -1, curMark = null, maxCol = -1;
+  let curCol = -1, curRow = -1, curStartCol = -1, curMark = null, maxCol = -1;
   for (const m of marks) {
     if (curCol < 0) {
-      curCol = 0; curRow = 0; curMark = m;
+      curCol = 0; curRow = 0; curStartCol = 0; curMark = m;
     } else if (m === curMark) {
       let nr = curRow + 1;
       if (nr < rows && !grid[nr][curCol]) {
@@ -310,9 +310,11 @@ function layoutDerivedMarks(marks, rows) {
         curCol = nc;
       }
     } else {
-      let nc = curCol + 1;
+      // A color break starts after the streak's original column, not its tail.
+      let nc = curStartCol + 1;
       while (grid[0][nc]) nc++;
       curCol = nc;
+      curStartCol = nc;
       curRow = 0;
       curMark = m;
     }
