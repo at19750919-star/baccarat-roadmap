@@ -31,7 +31,7 @@
     const bigSize=number('--cell-big'),derivedSize=number('--cell-derived'),beadSize=number('--cell-bead');
     const bottomScale=number('--tv-bottom-scale'),big=buildBigRoad(rounds);
     const bigCols=Math.max(number('--cols-big'),big.cols),derived=[];
-    for(const [id,title,offset,shape]of [['bigEye','大眼仔',1,'hollow'],['smallRoad','小路',2,'solid'],['cockroachRoad','蟑螂路',3,'slash']]){
+    for(const [id,title,offset,shape]of [['bigEye','大眼仔',1,'hollow'],['smallRoad','小路',2,'solid'],['cockroachRoad','甲由路',3,'slash']]){
       const marks=buildDerivedRoad(big.grid,offset,big.cols,big.rows);
       derived.push({id,title,shape,marks,cols:Math.max(number('--cols-derived'),layoutDerivedMarks(marks,6).cols)});
     }
