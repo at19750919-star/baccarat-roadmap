@@ -253,39 +253,34 @@ function hasAt(grid, col, row) {
 }
 
 // ---------- 衍生路演算法 ----------
-// 傳入大路 grid(6 列 × N 欄)與 offset(大眼仔=1, 小路=2, 甲由路=3)
-// 從 col = offset 的第二格開始；若該欄僅一格，從下一欄第一格開始。
-// 對每一個到達起點且存在的非和局主格子,
-// 我們要判斷它是「紅」還是「藍」:
-//   - 當該格位於「新一欄」的開頭(row === 0,或前一列同欄是空):比較 col-offset 欄與 col-offset-1 欄的高度
-//     相等 → 紅;不等 → 藍
-//   - 否則(延續同欄往下拖):看「前 offset 欄同 row 的左鄰(col-offset, row)」與(col-offset, row-1)
-//     兩格是否都存在:兩格都有或都沒有 → 紅(齊整);只有一格 → 藍(不齊整)
-//
-// 這是通用「大眼仔」式判斷,大眼仔 offset=1、小路 offset=2、甲由路 offset=3。
-
+// 依原始局序還原連勝欄與實際長度；大路拖尾的畫面欄位不是新的連勝欄。
+// offset：大眼仔=1、小路=2、甲由路=3。和局沒有獨立主格，不產生下三路珠。
 function buildDerivedRoad(bigGrid, offset, bigCols, bigRows) {
-  // 收集「判斷點」順序:跳過起點欄之前及起點欄第一格
-  // 遍歷順序:逐欄(左到右),每欄逐列(上到下),這樣衍生路的排列順序與大路對應
-  const marks = []; // 'R' | 'B'(這裡的 R/B 指紅/藍,不是莊/閒)
+  const cells = [];
   for (let col = 0; col < bigCols; col++) {
     for (let row = 0; row < bigRows; row++) {
-      if (!hasAt(bigGrid, col, row)) break; // 該欄到底
-      if (col < offset || (col === offset && row === 0)) continue; // 還沒到判斷起點
-      let mark;
-      // 判斷「此格是否為該欄的第一格」:row === 0 → 新欄開頭
-      if (row === 0) {
-        // 比較前一欄與其左方 offset 欄的高度
-        const hL1 = columnHeight(bigGrid, col - 1, bigRows);
-        const hL2 = columnHeight(bigGrid, col - offset - 1, bigRows);
-        mark = (hL1 === hL2) ? 'R' : 'B';
-      } else {
-        // 延續:檢查「左 offset 欄、同 row」與「左 offset 欄、row-1」是否兩格都有/都沒有
-        const a = hasAt(bigGrid, col - offset, row);
-        const b = hasAt(bigGrid, col - offset, row - 1);
-        mark = (a === b) ? 'R' : 'B';
-      }
-      marks.push(mark);
+      const cell = bigGrid[row] && bigGrid[row][col];
+      if (cell) cells.push(cell); // 頂端有空格的欄位，底部仍可能存在長龍尾端。
+    }
+  }
+  cells.sort((a, b) => a.idx - b.idx);
+
+  const marks = [], lengths = [];
+  let previousColor = null;
+  for (const cell of cells) {
+    const newStreak = cell.r !== previousColor;
+    if (newStreak) lengths.push(1);
+    else lengths[lengths.length - 1]++;
+    previousColor = cell.r;
+    const column = lengths.length - 1;
+    const depth = lengths[column];
+    if (newStreak) {
+      if (column <= offset) continue;
+      marks.push(lengths[column - 1] === lengths[column - offset - 1] ? 'R' : 'B');
+    } else {
+      if (column < offset) continue;
+      // 對照欄恰好在上一格結束時為藍；同深度都有格或都無格時為紅。
+      marks.push(depth === lengths[column - offset] + 1 ? 'B' : 'R');
     }
   }
   return marks;
