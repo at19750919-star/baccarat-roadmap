@@ -43,8 +43,8 @@
 .tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-mult {
   flex: none; width: max-content; font-size: 1em; line-height: 1.08; white-space: nowrap;
 }
-.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-mult { margin-left: auto; }
-.tv-app .tv-stats .stats-list .k.tv-stat-seven .tv-stat-mult small { font-size: .7em; margin-left: 0; }
+.tv-app .tv-stats .stats-list .k.tv-stat-seven > .tv-stat-seven-top > .tv-stat-mult { margin-left: auto; font-size: 1.45em; line-height: .8; }
+.tv-app .tv-stats .stats-list .k.tv-stat-seven .tv-stat-mult small { font-size: .6em; margin-left: 0; }
 .tv-app .tv-stats .stats-list .k small { font-size: 1em; margin-left: 0; }
 .tv-app .tv-stats .stats-list li > b {
   display: flex; align-items: center; justify-content: center;
@@ -159,6 +159,15 @@ html:not([data-skin]) .tv-app .predict-panel .predict-title {
   margin: 0 -6px 8px !important; height: 56px; border: 2px solid #d9a94e !important;
   box-shadow: inset 0 0 0 2px #4a0303, inset 0 0 0 3px rgba(246, 217, 138, .5);
   background: linear-gradient(180deg, #8c1414, #4e0505) !important; color: #fff4de !important; font-size: 30px !important;
+}
+/* 右上黑桃垂直置中 */
+html:not([data-skin]) .tv-app .tv-logo { transform: translateY(3px) scale(1.10); }
+html:not([data-skin]) .tv-app .tv-logo-btn:hover .tv-logo { transform: translateY(3px) scale(1.14); }
+html:not([data-skin]) .tv-app .tv-logo-btn:active .tv-logo { transform: translateY(3px) scale(1.04); }
+/* 桌號、局數文字比照「下局指示」 */
+html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-label, b):not([data-tv-edit-color]) {
+  color: #fff4de !important; font-family: "Noto Serif TC", serif !important; font-size: 30px !important;
+  font-weight: 900 !important; letter-spacing: 4px !important; text-shadow: none !important;
 }
 </style>
 </head>
