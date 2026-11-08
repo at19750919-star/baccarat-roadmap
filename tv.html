@@ -90,8 +90,11 @@ html:not([data-skin]) body { background: url("data:image/svg+xml,%3Csvg xmlns='h
 <style id="tv-ref-frame">
 /* 參考圖風格（僅紅色預設風格）：紅緞頂列、金框四角飾、白底格子、限紅區無分隔線 */
 html:not([data-skin]) body { background: radial-gradient(ellipse at 50% 30%, #5e0505 0%, #3c0101 70%, #2a0000 100%) !important; }
-html:not([data-skin]) .tv-app { padding: 8px !important; gap: 8px !important; grid-template-rows: 156px 282fr 126fr 121fr 347fr !important; }
-html:not([data-skin]) .tv-app .mid-row, html:not([data-skin]) .tv-app .bottom-row { gap: 8px !important; }
+/* 大路剛好裝滿 6 列，剩下的高度給頂列 */
+html:not([data-skin]):not(#_) .tv-app { padding: 8px !important; gap: 6px !important; grid-template-rows: minmax(0, 1fr) calc(var(--cell-big) * 6 + 10px) calc(var(--cell-big) * 3 + 10px) calc(var(--cell-big) * 3 + 10px) 347px !important; }
+/* 下三路格線鋪滿卡片寬度 */
+html:not([data-skin]):not(#_) .tv-app .derived-panel > .grid-board { width: 100% !important;  }
+html:not([data-skin]) .tv-app .mid-row, html:not([data-skin]) .tv-app .bottom-row { gap: 6px !important; }
 html:not([data-skin]):not(#_) body .tv-app .title-bar,
 html:not([data-skin]):not(#_) body .tv-app .big-panel,
 html:not([data-skin]):not(#_) body .tv-app .bead-panel,
@@ -103,7 +106,7 @@ html:not([data-skin]):not(#_) body .tv-app .predict-panel {
   box-shadow: 0 0 0 1px #1e0000, inset 0 0 0 1px rgba(90, 40, 5, .7) !important; overflow: visible !important;
 }
 html:not([data-skin]):not(#_) body .tv-app .title-bar {
-  height: 156px !important;
+  height: auto !important; min-height: 0 !important;
   background:
     radial-gradient(ellipse 40% 70% at 22% 35%, rgba(255, 90, 70, .28), transparent 70%),
     radial-gradient(ellipse 50% 60% at 70% 80%, rgba(255, 70, 60, .18), transparent 70%),
@@ -636,7 +639,7 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <script src="tv.js?v=31"></script>
 <script src="tv-dragon-video.js?v=6"></script>
 <script src="result-announcement.js?v=6"></script>
-<script src="tv-layout-proposal.js?v=14"></script>
+<script src="tv-layout-proposal.js?v=15"></script>
 <script src="tv-settings-compact.js?v=7"></script>
 
 </body>

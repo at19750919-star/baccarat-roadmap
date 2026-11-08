@@ -124,8 +124,9 @@
       const eyePanel = eye.parentElement;
       const eyeBox = box(eyePanel);
       const derivedAvailW = eyeBox.contentW - BOARD_BORDER;
-      const derivedCols = DERIVED_COLS;
-      const derivedCell = derivedAvailW / derivedCols;
+      // 下三路小格連動大路：大路 1 格 = 4 小格
+      const derivedCell = bigCell / 2;
+      const derivedCols = Math.max(1, Math.floor((derivedAvailW + 0.01) / derivedCell));
       const derivedHeight = derivedCell * 6 + eyeBox.borderY + eyeBox.padY + BOARD_BORDER;
 
       // Real design px: no nested scale on the whole bottom row.
@@ -160,7 +161,9 @@
         const starPanel = star.parentElement;
         const starBox = box(starPanel);
         const starAvailW = starBox.contentW - BOARD_BORDER;
-        starCell = starAvailW / starCols;
+        // 三星路格子跟大路同大
+        starCell = bigCell;
+        starCols = Math.max(1, Math.floor((starAvailW + 0.01) / starCell));
         set('--cols-star', String(starCols));
         set('--cell-star-fit', `${starCell}px`);
       }
