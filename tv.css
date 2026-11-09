@@ -1814,3 +1814,7 @@ html[data-skin="led"] .tv-app .derived-panel > #starRoad > .tv-star-mark {
 }
 html[data-skin="led"]:not(.tv-color-red) .tv-app #starRoad .tv-star-mark.B { background: radial-gradient(circle, transparent 50%, rgba(255,60,40,.15)) #050505; box-shadow: 0 0 9.16px #ff2010, 0 0 20.62px rgba(255,40,20,.6), inset 0 0 9.16px #ff2010; }
 html[data-skin="led"]:not(.tv-color-blue) .tv-app #starRoad .tv-star-mark.P { background: radial-gradient(circle, transparent 50%, rgba(40,140,255,.15)) #050505; box-shadow: 0 0 9.16px #1a7dff, 0 0 20.62px rgba(30,130,255,.6), inset 0 0 9.16px #1a7dff; }
+
+/* 珠子路清晰度修正：幸運6/7、老虎等特效動畫會讓 Chrome 把後面的珠子拆到另一個圖層、以較低品質繪製（右側幾欄變霧）。
+   讓整個珠盤成為單一合成圖層，所有珠子用同樣品質繪製。 */
+.tv-app #beadBoard { will-change: transform; }
