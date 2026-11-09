@@ -389,7 +389,7 @@
 /* Reference-matched independent raster artwork. Small card counts stay live white text. */
 .tv-app .bead.tv-art-bead {
   isolation: isolate;
-  background: transparent;
+  background: #00000075;
   border: 0;
   box-shadow: none;
   animation: none;
@@ -880,6 +880,19 @@ html.tv-color-statText .tv-app .tv-stat-head:not([data-tv-edit-color]) { color: 
   pointer-events: none;
 }
 .dragon-overlay.dragon-video-mode .dragon-video { display: block; }
+/* 莊長龍影片：沿龍身外形的金色光暈（輕微閃動），結尾往右滑出淡出 */
+.dragon-overlay.dragon-video-mode.banker-dragon-overlay .dragon-video {
+  animation: tv-dragon-video-glow 1.4s ease-in-out infinite alternate;
+  transition: transform 0.8s cubic-bezier(0.55, 0, 1, 0.45), opacity 0.8s ease-in;
+}
+.dragon-overlay.dragon-video-mode.dragon-video-exit .dragon-video {
+  transform: translateX(70%);
+  opacity: 0;
+}
+@keyframes tv-dragon-video-glow {
+  from { filter: drop-shadow(0 0 6px rgba(255, 214, 110, 0.75)) drop-shadow(0 0 18px rgba(255, 160, 40, 0.4)); }
+  to   { filter: drop-shadow(0 0 12px rgba(255, 224, 130, 0.95)) drop-shadow(0 0 34px rgba(255, 170, 40, 0.65)); }
+}
 .dragon-overlay.dragon-video-mode .dragon-fx-canvas,
 .dragon-overlay.dragon-video-mode .dragon-aura-ring,
 .dragon-overlay.dragon-video-mode .dragon-magic-circle,
@@ -1814,6 +1827,17 @@ html[data-skin="led"] .tv-app .derived-panel > #starRoad > .tv-star-mark {
 }
 html[data-skin="led"]:not(.tv-color-red) .tv-app #starRoad .tv-star-mark.B { background: radial-gradient(circle, transparent 50%, rgba(255,60,40,.15)) #050505; box-shadow: 0 0 9.16px #ff2010, 0 0 20.62px rgba(255,40,20,.6), inset 0 0 9.16px #ff2010; }
 html[data-skin="led"]:not(.tv-color-blue) .tv-app #starRoad .tv-star-mark.P { background: radial-gradient(circle, transparent 50%, rgba(40,140,255,.15)) #050505; box-shadow: 0 0 9.16px #1a7dff, 0 0 20.62px rgba(30,130,255,.6), inset 0 0 9.16px #1a7dff; }
+
+/* 下局指示（預設皮膚）：縮小圓點、四排平均分開 */
+html:not([data-skin="led"]) .tv-app .predict-legend { grid-template-rows: repeat(4, minmax(0, 1fr)); align-content: stretch; }
+html:not([data-skin="led"]) .tv-app .predict-legend .leg-row { align-items: center; justify-content: space-evenly; }
+html:not([data-skin="led"]) .tv-app .predict-legend :is(.leg-mark, .leg-tag) { width: 54px; height: 54px; }
+html:not([data-skin="led"]) .tv-app .predict-legend .leg-tag { font-size: 32px; }
+html:not([data-skin="led"]) .tv-app .predict-legend :is(#pBE_B, #pBE_P) { border-width: calc(var(--tv-eye-stroke, 2px) * 1.3); }
+html:not([data-skin="led"]) .tv-app .predict-legend :is(#pCR_B, #pCR_P)::before { --pl-sl: calc(var(--tv-cockroach-stroke, 3px) * 1.2); height: var(--pl-sl); top: calc(50% - var(--pl-sl) / 2); }
+/* 下局指示實心圓：比照珠子路的亮面光澤 */
+html:not([data-skin="led"]) .tv-app .predict-legend .leg-mark.solid:not(.blue) { background: radial-gradient(circle at 35% 30%, #ff9c8c 0%, var(--tv-color-red, #d62121) 45%, #7a0b0b 100%) !important; box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.3); }
+html:not([data-skin="led"]) .tv-app .predict-legend .leg-mark.solid.blue { background: radial-gradient(circle at 35% 30%, #9cc4ff 0%, var(--tv-color-blue, #1e5ec9) 45%, #0b2a6e 100%) !important; box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.3); }
 
 /* 珠子路清晰度修正：幸運6/7、老虎等特效動畫會讓 Chrome 把後面的珠子拆到另一個圖層、以較低品質繪製（右側幾欄變霧）。
    讓整個珠盤成為單一合成圖層，所有珠子用同樣品質繪製。 */

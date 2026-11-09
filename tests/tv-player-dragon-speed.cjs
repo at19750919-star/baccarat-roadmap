@@ -30,11 +30,16 @@ const {chromium} = require(path.join(process.env.USERPROFILE, '.cache/codex-runt
     }, side);
     await page.waitForFunction(() => document.getElementById('dragonVideo').currentTime > .1);
     const media = await page.locator('#dragonVideo').evaluate(v => ({duration: v.duration, rate: v.playbackRate, src: decodeURI(v.currentSrc)}));
-    assert.ok(Math.abs(media.duration / media.rate - 5.5) < .02, JSON.stringify(media));
-    assert.ok(media.src.endsWith(side === 'P' ? '/特效/dragon-long-v2.webm' : '/assets/dragons/dragon-gold-transparent-v2.webm'), 'Keep the complete original video');
+    const targetSeconds = side === 'P' ? 5.5 : media.duration;
+    assert.ok(Math.abs(media.duration / media.rate - targetSeconds) < .02, JSON.stringify(media));
+    assert.ok(media.src.endsWith(side === 'P' ? '/特效/dragon-long-v2.webm' : '/assets/dragons/dragon-gold-front-loop-6s.webm'), 'Use the selected complete clip');
+    if (side === 'B') {
+      assert.ok(Math.abs(media.duration - 6) < .1, 'Banker clip is approximately six seconds');
+      await page.waitForFunction(() => document.getElementById('dragonOverlay').classList.contains('dragon-video-exit'), null, {timeout: 8000});
+    }
     await page.waitForFunction(() => speedEvidence.ended, null, {timeout: 10000});
     const evidence = await page.evaluate(() => speedEvidence);
-    assert.ok(Math.abs(evidence.elapsed - 5500) < 350, JSON.stringify(evidence));
+    assert.ok(Math.abs(evidence.elapsed - targetSeconds * 1000) < 350, JSON.stringify(evidence));
     assert.ok(Math.abs(evidence.lastTime - evidence.duration) < .02, 'Reach the last frame without cutting');
     await page.waitForFunction(() => {
       const overlay = document.getElementById('dragonOverlay');
@@ -51,6 +56,6 @@ const {chromium} = require(path.join(process.env.USERPROFILE, '.cache/codex-runt
     results.push({side, ...evidence});
     }
     assert.deepEqual(errors, []);
-    console.log('PASS: banker and player complete videos in 5.5 seconds, natural ended events and fades; both badge replays reach the end.', JSON.stringify(results));
+    console.log('PASS: banker completes the six-second clip and exit; player completes at 5.5 seconds; both badge replays reach the end.', JSON.stringify(results));
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

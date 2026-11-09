@@ -20,6 +20,7 @@
     clearStartup();
     if (unbind) { unbind(); unbind = null; }
     video.pause();
+    overlay.classList.remove('dragon-video-exit');
     if (!keepFrame) {
       playbackColor = null;
       overlay.classList.remove('dragon-video-mode');
@@ -59,9 +60,14 @@
     }
     function setSpeed() {
       if (!current()) return;
-      // Complete the original dragon motion in 5.5 seconds without trimming.
-      video.playbackRate = Number.isFinite(video.duration) && video.duration > 0
+      // Banker video is already cut to 6 seconds; player keeps the 5.5-second rule.
+      video.playbackRate = color === 'P' && Number.isFinite(video.duration) && video.duration > 0
         ? video.duration / 5.5 : 1;
+    }
+    function timeupdate() {
+      // The banker clip ends with the dragon still at the right edge: slide it out on the page.
+      if (!current() || color !== 'B' || !Number.isFinite(video.duration)) return;
+      if (video.duration - video.currentTime <= 0.8) overlay.classList.add('dragon-video-exit');
     }
     function ended() {
       if (current() && video.ended) onEnded();
@@ -72,7 +78,7 @@
       startupTimer = setTimeout(fallback, 6000);
     }
     const mediaError = () => { if (video.error) fallback(); };
-    const handlers = { loadedmetadata: setSpeed, playing, ended, error: mediaError, waiting, stalled: waiting };
+    const handlers = { loadedmetadata: setSpeed, timeupdate, playing, ended, error: mediaError, waiting, stalled: waiting };
     for (const [type, listener] of Object.entries(handlers)) video.addEventListener(type, listener);
     unbind = () => {
       for (const [type, listener] of Object.entries(handlers)) video.removeEventListener(type, listener);
