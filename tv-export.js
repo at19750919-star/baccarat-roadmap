@@ -10,19 +10,94 @@
       const [r,g,b,a]=context.getImageData(0,0,1,1).data;
       const rgba=`rgba(${r},${g},${b},${a/255})`;cache.set(color,rgba);return rgba;
     });
-    for(const [index,node]of [...view.querySelectorAll('.big-circle,.derived-dot')].entries()){
+    const properties=['color','background-color','background-image','border-top-color','border-right-color','border-bottom-color','border-left-color','box-shadow','text-shadow','text-decoration-color','outline-color','-webkit-text-fill-color','-webkit-text-stroke-color'];
+    for(const [index,node]of [view,...view.querySelectorAll('*')].entries()){
       for(const pseudo of [null,'::before','::after']){
-        const image=getComputedStyle(node,pseudo).backgroundImage;
-        if(!/(?:color|oklab|oklch|lab|lch)\(/.test(image))continue;
-        const compatible=convert(image);
-        if(!pseudo)node.style.setProperty('background-image',compatible,'important');
-        else{
-          node.dataset.exportPaint=index;
-          // Match the customized slash selector's specificity, after its stylesheet.
-          rules.push(`html .tv-app.road-export-frame .derived-dot.shape-slash[data-export-paint="${index}"]${pseudo}{background-image:${compatible}!important}`);
+        const css=getComputedStyle(node,pseudo);
+        if(pseudo&&css.content==='none')continue;
+        for(const property of properties){
+          const value=css.getPropertyValue(property);
+          if(!/(?:color|oklab|oklch|lab|lch)\(/.test(value))continue;
+          const compatible=convert(value);
+          if(!pseudo)node.style.setProperty(property,compatible,'important');
+          else{
+            node.dataset.exportPaint=index;
+            const selector=node===view?`.tv-app.road-export-frame[data-export-paint="${index}"]`:`.tv-app.road-export-frame [data-export-paint="${index}"]`;
+            rules.push(`html:not(#_):not(#_) ${selector}${pseudo}{${property}:${compatible}!important}`);
+          }
         }
       }
     }
+    if(rules.length){const style=document.createElement('style');style.textContent=rules.join('\n');view.append(style);}
+  }
+  function compatibleBackgroundPositions(view){
+    // html2canvas 1.4 cannot parse four-part edge offsets such as right 4px top 4px.
+    // Resolve only those fixed-size decorative layers to pixels in the export clone.
+    const rules=[],split=value=>{
+      let depth=0,start=0;const parts=[];
+      for(let i=0;i<value.length;i++){
+        if(value[i]==='(')depth++;else if(value[i]===')')depth--;
+        else if(value[i]===','&&!depth){parts.push(value.slice(start,i).trim());start=i+1;}
+      }
+      parts.push(value.slice(start).trim());return parts;
+    };
+    const absolute=(token,space)=>{
+      const calc=token.match(/^calc\((-?[\d.]+)%\s*([+-])\s*([\d.]+)px\)$/);
+      if(calc)return space*Number(calc[1])/100+(calc[2]==='-'?-1:1)*Number(calc[3]);
+      if(/^-?[\d.]+px$/.test(token))return parseFloat(token);
+      if(/^-?[\d.]+%$/.test(token))return space*parseFloat(token)/100;
+      return null;
+    };
+    [view,...view.querySelectorAll('*')].forEach((node,index)=>{
+      for(const pseudo of [null,'::before','::after']){
+        const css=getComputedStyle(node,pseudo),positions=split(css.backgroundPosition);
+        let sizes=split(css.backgroundSize);
+        let changed=false;
+        const width=pseudo?parseFloat(css.width):node.clientWidth,height=pseudo?parseFloat(css.height):node.clientHeight;
+        const resolvedSizes=sizes.map(size=>{
+          const tokens=size.match(/calc\([^)]*\)|[^\s]+/g);
+          return tokens.map((token,axis)=>{
+            const value=token.includes('calc(')?absolute(token,axis?height:width):null;
+            return value!==null&&Number.isFinite(value)?Math.max(0,value)+'px':token;
+          }).join(' ');
+        });
+        const sizeChanged=resolvedSizes.join(',')!==sizes.join(',');
+        sizes=resolvedSizes;
+        const images=split(css.backgroundImage),safeImages=images.map((image,i)=>{
+          const size=sizes[i%sizes.length];
+          return /(?:^| )0px(?: |$)/.test(size)?'none':image;
+        });
+        const imageChanged=safeImages.join(',')!==images.join(',');
+        const resolved=positions.map((position,i)=>{
+          const match=position.match(/^(left|right) ([\d.]+)px (top|bottom) ([\d.]+)px$/);
+          const size=sizes[i%sizes.length].match(/^([\d.]+)px ([\d.]+)px$/);
+          if(!size||!Number.isFinite(width)||!Number.isFinite(height))return position;
+          let x,y;
+          if(match){
+            x=match[1]==='right'?width-Number(size[1])-Number(match[2]):Number(match[2]);
+            y=match[3]==='bottom'?height-Number(size[2])-Number(match[4]):Number(match[4]);
+          }else if(position.includes('calc(')){
+            const tokens=position.match(/calc\([^)]*\)|[^\s]+/g);
+            if(tokens.length!==2)return position;
+            x=absolute(tokens[0],width-Number(size[1]));y=absolute(tokens[1],height-Number(size[2]));
+            if(x===null||y===null)return position;
+          }else return position;
+          changed=true;
+          return `${x}px ${y}px`;
+        });
+        if(!changed&&!sizeChanged&&!imageChanged)continue;
+        if(!pseudo){
+          if(changed)node.style.setProperty('background-position',resolved.join(','),'important');
+          if(sizeChanged)node.style.setProperty('background-size',sizes.join(','),'important');
+          if(imageChanged)node.style.setProperty('background-image',safeImages.join(','),'important');
+        }
+        else{
+          node.dataset.exportPosition=index;
+          const selector=node===view?`.tv-app.road-export-frame[data-export-position="${index}"]`:`.tv-app.road-export-frame [data-export-position="${index}"]`;
+          rules.push(`html:not(#_):not(#_) ${selector}${pseudo}{${changed?'background-position:'+resolved.join(',')+'!important;':''}${sizeChanged?'background-size:'+sizes.join(',')+'!important;':''}${imageChanged?'background-image:'+safeImages.join(',')+'!important;':''}}`);
+        }
+      }
+    });
     if(rules.length){const style=document.createElement('style');style.textContent=rules.join('\n');view.append(style);}
   }
   async function png(entry){
@@ -81,6 +156,7 @@
       await Promise.all([...view.querySelectorAll('img')].map(img=>img.decode().catch(()=>{})));
       root.BaccaratTVView.fitStats?.(view.querySelector('.tv-stats .stats-list'));
       compatibleGradients(view);
+      compatibleBackgroundPositions(view);
       const w=view.offsetWidth,h=view.offsetHeight,scale=Math.min(1.5,11998/w,11998/h,Math.sqrt(23900000/(w*h)));
       if(scale<.3)throw Error('路單過長，圖片超出安全尺寸；JSON已保留，請分段儲存。');
       const canvas=await html2canvas(view,{backgroundColor:getComputedStyle(view).backgroundColor,scale,useCORS:true,logging:false,width:w,height:h,windowWidth:Math.max(w,1920),windowHeight:1080,
