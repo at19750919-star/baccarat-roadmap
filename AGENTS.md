@@ -1,6 +1,8 @@
 # 百家樂路單
 
 ## 已定案
+- [2026-11-19｜Claude] 說到「路單」一律指電視版 tv.html，舊的一般版 index.html 已不再使用（使用者指定）
+- [2026-11-19｜Claude] 限紅可存多個版本，預設三組，可新增、命名、刪除、儲存，畫面顯示目前選用的版本（使用者指定）
 <!-- 使用者拍板過的決定。AI 不得自行推翻；要改先問使用者。每條附日期與誰記下的。一條一句重點，不寫細節與過程 -->
 - [2026-11-19｜Claude] 儲存路單本機與雲端都只存 JSON，不再產生 PNG（使用者指定）
 - [2026-11-19｜Claude] 路單檢視器的分類與備註同步存在「路單收件/備註/路單備註.json」單一檔案，不每個路單一個檔或資料夾（使用者指定）
@@ -12,7 +14,8 @@
 - [2026-10-24｜Claude] OneDrive 授權維持 Files.ReadWrite 加離線存取，程式只操作指定收件資料夾，授權設定不放入 Git／前端／公開紀錄（業主明確同意擴大授權）
 
 ## 專案說明
-- 電視版路單：`tv.html`（`tv.js`、`tv.css`、`tv-export.js` 等），一般版：`index.html`（`app.js`、`style.css`）。
+- 路單＝電視版 `tv.html`（`tv.js`、`tv.css`、`tv-export.js` 等，共用 `app.js`）；舊一般版 `index.html` 已停用。
+- 限紅設定與版本：`tv-layout-proposal.js`（存在瀏覽器 `baccarat_tv_limit_presets_v1`），樣式在 `tv-settings-compact.css`。
 - 路單檢視器：`road-viewer.html`，讀取雲端收件資料夾的路單。
 - 雲端收件：`road_backup.js` 前端上傳；後端 `backend/`（Google Apps Script，`road_entry.gs`、`road_onedrive.gs` 為來源快照），細節見 `CLOUD_BACKUP.md`。
 - 亂路子工具：`亂路/`（`luanlu.html`）。測試在 `tests/`。
