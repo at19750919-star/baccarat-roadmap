@@ -1,19 +1,19 @@
-/* 路單設定：賭金風格（酒紅主色）。主材質＝雕刻金線、主形狀＝方形；
-   輔助材質＝金色漸層實心（選中、唯一送出）、氈布（輸入凹底）；輔助形狀＝膠囊（開關、滑桿軌道）。
+/* 路單設定：賭金風格（主色取自 tv.html 主畫面的紅 #9c1414→#5e0909）。主材質＝雕刻金線、主形狀＝方形；
+   輔助材質＝金色漸層實心（選中、唯一送出）；輔助形狀＝膠囊（開關、滑桿軌道）。
+   按鈕、輸入框、畫面風格選項全部同一款雕刻金線（深底＋內縮一圈金線）。
    只改顏色、字型、邊框、外形，不動尺寸與版面。最後載入，集中覆蓋舊樣式。 */
 
-/* ---- 變數：規範 2.1 與酒紅 9 變數 ---- */
+/* ---- 變數：規範 2.1 與主色 9 變數（tv 紅） ---- */
 #tvSettings.tv-settings {
   --serif: "Noto Serif TC", "Cinzel", serif;
   --disp: "Cinzel", "Noto Serif TC", serif;
-  --ink: #07090b; --pit: #150d13;
-  --felt-1: #6b1631; --felt-2: #350b1a; --glow: rgba(123,29,66,.38);
-  --state-1: #8b2d4b; --state-2: #4d182d;
-  --panel: #291a21; --panel-2: #150d13;
-  --control-1: #281a22; --control-2: #1a0d15;
+  --ink: #07090b; --pit: #1f0505;
+  --felt-1: #9c1414; --felt-2: #5e0909; --glow: rgba(200,40,30,.35);
+  --state-1: #b42222; --state-2: #6e0d0d;
+  --panel: #5a0f0f; --panel-2: #300606;
+  --control-1: #2e0808; --control-2: #1c0404;
   --gold-1: #f4dfa4; --gold-2: #d9b568; --gold-3: #a67c35; --gold-4: #6b4c1d;
-  --txt: #e8e4d8; --txt-dim: #9a9584; --danger: #ff6b5e; --ok: #67c98f;
-  --felt-well: radial-gradient(ellipse at 50% 38%, color-mix(in srgb, var(--felt-1) 86%, white), var(--felt-1) 52%, var(--felt-2));
+  --txt: #e8e4d8; --txt-dim: #b3a993; --danger: #ff6b5e; --ok: #67c98f;
   --gold-solid: linear-gradient(180deg, #f7e6ba, #d6ad5d 55%, #a77a32);
   --engrave: linear-gradient(160deg, var(--control-1), var(--control-2));
   color: var(--txt); color-scheme: dark;
@@ -23,7 +23,7 @@
 html #tvSettings.tv-settings {
   background: linear-gradient(160deg, var(--panel), var(--panel-2)) !important;
   border: 1px solid var(--gold-3) !important; border-image: none !important; border-radius: 0 !important;
-  box-shadow: inset 0 0 0 5px var(--panel), inset 0 0 0 6px #a67c3588, 0 18px 50px #000a !important;
+  box-shadow: inset 0 0 0 5px transparent, inset 0 0 0 6px #a67c3588, 0 18px 50px #000a !important;
 }
 html #tvSettings.tv-settings::before, html #tvSettings.tv-settings::after { width: 17px; height: 17px; border-color: var(--gold-1); border-radius: 0; }
 
@@ -86,16 +86,16 @@ html #tvSettings.tv-settings .tv-settings-tabs button[aria-selected=true] {
   background: none !important; border: 0; border-bottom: 2px solid var(--gold-2); color: var(--gold-1) !important; font-weight: 700; outline: 0;
 }
 
-/* ---- 畫面風格：按鈕式單選（選中為金色實心） ---- */
-html #tvSettings.tv-settings .tv-style-options button { background: var(--control-2); border-color: var(--gold-4); color: var(--txt-dim); outline: 0; }
-html #tvSettings.tv-settings .tv-style-options button:hover { background: var(--control-2); border-color: var(--gold-2); color: var(--gold-1); }
+/* ---- 畫面風格：按鈕式單選（未選＝同一般按鈕的雕刻金線，選中＝金色實心） ---- */
+html #tvSettings.tv-settings .tv-style-options button { background: var(--engrave); border-color: var(--gold-3); color: var(--gold-1); outline: 1px solid #a67c3588; outline-offset: -4px; }
+html #tvSettings.tv-settings .tv-style-options button:hover { background: var(--engrave); border-color: var(--gold-1); outline-color: var(--gold-2); color: var(--gold-1); }
 html #tvSettings.tv-settings .tv-style-options button[aria-checked=true] { background: var(--gold-solid); border-color: var(--gold-1); color: #21190d; font-weight: 700; outline: 0; }
 html #tvSettings.tv-settings .tv-style-swatch { border-radius: 50%; border: 1px solid var(--gold-1); }
 
-/* ---- 輸入框：基本輸入框與數字框（氈布凹底、方形） ---- */
+/* ---- 輸入框：基本輸入框與數字框（雕刻金線、方形，與按鈕同款） ---- */
 html #tvSettings.tv-settings input:not([type=checkbox]):not([type=range]):not([type=color]), html #tvSettings.tv-settings textarea {
-  border: 1px solid var(--gold-3); border-radius: 0; background: var(--felt-well); color: var(--gold-1);
-  box-shadow: inset 0 2px 8px #000b; font-weight: 600;
+  border: 1px solid var(--gold-3); border-radius: 0; background: var(--engrave); color: var(--gold-1);
+  outline: 1px solid #a67c3566; outline-offset: -4px; box-shadow: inset 0 2px 6px #000a; font-weight: 600;
 }
 html #tvSettings.tv-settings input::placeholder, html #tvSettings.tv-settings textarea::placeholder { color: rgba(244,223,164,.38); }
 html #tvSettings.tv-settings input:not([type=checkbox]):not([type=range]):focus { border-color: var(--gold-1); box-shadow: inset 0 2px 8px #000b, 0 0 0 1px var(--gold-1); }
