@@ -25,6 +25,24 @@
     });
   }
 
+  // 大視窗切換鈕：用內嵌 SVG 取代文字符號；tv.js 切換時會改回文字，這裡監看後換回 SVG。
+  const SIZE_ICONS = {
+    expand: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg>',
+    restore: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg>'
+  };
+  function renderSizeIcon() {
+    const btn = document.getElementById('tvSettingsSizeToggle');
+    if (!btn || btn.querySelector('svg')) return;
+    btn.innerHTML = btn.textContent.trim() === '⛶' || !btn.textContent.trim() ? SIZE_ICONS.expand : SIZE_ICONS.restore;
+  }
+  function watchSizeIcon() {
+    const btn = document.getElementById('tvSettingsSizeToggle');
+    if (!btn || btn.dataset.iconWatch) return;
+    btn.dataset.iconWatch = '1';
+    renderSizeIcon();
+    new MutationObserver(renderSizeIcon).observe(btn, { childList: true, characterData: true, subtree: true });
+  }
+
   function regroupBasic() {
     const panel = document.getElementById('tvBasicPanel');
     if (!panel) return;
@@ -211,6 +229,7 @@
         });
       });
     }
+    watchSizeIcon();
     const dialog = dialogEl();
     if (dialog && !dialog.dataset.compactBound) {
       dialog.dataset.compactBound = '1';
