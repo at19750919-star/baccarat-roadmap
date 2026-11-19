@@ -109,3 +109,15 @@
 #tvSettings .tv-size-fields label > span { display: grid; grid-template-columns: 64px 26px; column-gap: 6px; align-items: center; justify-items: start; }
 #tvSettings .tv-size-fields label > span > input { grid-column: 1; }
 #tvSettings .tv-size-fields label > span > input[type="checkbox"] { justify-self: center; }
+
+/* 按鍵設定下半部：操作模式、語音播報各佔整列，內部沿用上方兩欄，右格與第二欄左緣對齊 */
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; row-gap: 0; align-items: center; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-keys-subhead { grid-column: 1 / -1; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > :is(.tv-check-row, .tv-key-bind-row) { grid-column: auto; min-width: 0; margin-top: 0; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-audition-row { grid-column: 1 / -1; margin-top: 16px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-audition-btns { display: flex; flex-wrap: nowrap; gap: 6px; max-width: none; width: 100%; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) button.tv-mini-audio-btn { flex: 1 1 auto; min-width: 0; padding: 6px 4px !important; white-space: nowrap; font-size: 16px !important; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-keys-subhead { margin-bottom: 10px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-audition-row { margin-top: 10px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-audition-title { display: block; margin-bottom: 6px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-vol-wrap input { width: 120px; }
