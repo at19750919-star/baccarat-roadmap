@@ -12,14 +12,14 @@
 #tvSettings #tvSettingsClose, #tvSettings #tvSettingsSizeToggle { position: static; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 0; flex: none; }
 #tvSettings .tv-settings-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; border: 1px solid #d9b56880; border-radius: 8px; padding: 6px; background: #540b0b80; }
 #tvSettings .tv-settings-tabs button { width: auto; min-width: 0; padding: 11px 3px; min-height: 48px; white-space: nowrap; border-radius: 4px; font-weight: 600; }
-#tvSettings .tv-settings-content { flex: 1 1 0; min-height: 0; min-width: 0; padding: 0 8px 0 0; overflow: auto; scrollbar-gutter: stable; }
+#tvSettings .tv-settings-content { flex: 1 1 0; min-height: 0; min-width: 0; padding: 4px 8px 0 0; overflow: auto; scrollbar-gutter: stable; }
 #tvSettings .tv-settings-content > section { width: 100%; max-width: 100%; min-height: 0; }
 #tvSettings .tv-settings-actions { display: flex; gap: 10px; align-items: center; margin: 0; padding: 0; border: 0; background: none; flex-shrink: 0; }
 #tvSettings .tv-settings-spacer { flex: 1; }
 #tvSettings .tv-settings-skin { margin: 0 0 14px; gap: 14px; }
 #tvSettings .tv-settings-group, #tvSettings .tv-keys-subgroup { padding: 0; margin: 0; border: 0; background: none; }
 #tvSettings .tv-settings-subhead, #tvSettings .tv-keys-subhead { margin: 0 0 10px; }
-#tvSettings .tv-size-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 16px; width: 100%; }
+#tvSettings .tv-size-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; width: 100%; }
 #tvSettings .tv-size-fields label { display: flex; align-items: center; justify-content: space-between; gap: 8px; white-space: nowrap; padding: 0; }
 #tvSettings .tv-size-fields label > span { display: flex; align-items: center; gap: 6px; }
 #tvSettings #tvProposalLimitSettings { margin-top: 28px; }
@@ -64,17 +64,17 @@
 #tvSettings .tv-select-menu button { display: block; width: 100%; text-align: left; white-space: nowrap; }
 
 /* Keyboard controls use the same two-column content area as every other tab. */
-#tvSettings .tv-keys-settings { gap: 24px 24px; }
+#tvSettings .tv-keys-settings { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 24px; }
 #tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(-n+2) { grid-column: auto; }
-#tvSettings .tv-keys-subgroup:first-child .tv-keys-grid { grid-template-columns: repeat(2, max-content); }
-#tvSettings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-keys-grid { grid-template-columns: max-content; }
+#tvSettings .tv-keys-subgroup:first-child .tv-keys-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#tvSettings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-keys-grid { grid-template-columns: minmax(0, 1fr); }
 #tvSettings .tv-keys-settings > .tv-settings-help { margin-top: 0; }
 #tvSettings .tv-audition-btns { max-width: 280px; }
 
-#tvSettings .tv-size-fields label { min-height: 44px; }
+#tvSettings .tv-size-fields label { min-height: 46px; }
 #tvSettings .tv-settings-header, #tvSettings .tv-settings-tabs { flex-shrink: 0; }
 #tvSettings .tv-limit-table { flex: 1; }
-#tvSettings .tv-settings-subhead, #tvSettings .tv-keys-subhead { margin-bottom: 16px; letter-spacing: .06em; }
+#tvSettings .tv-settings-subhead, #tvSettings .tv-keys-subhead { margin-bottom: 14px; letter-spacing: .06em; }
 #tvSettings .tv-key-bind-row > span { white-space: normal; }
 
 
@@ -121,3 +121,9 @@
 #tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-audition-row { margin-top: 10px; }
 #tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-audition-title { display: block; margin-bottom: 6px; }
 #tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-vol-wrap input { width: 120px; }
+
+/* Give the shorter save form its own, calmer spacing within the fixed panel. */
+#tvSettings #tvSavePanel { padding-top: 28px; }
+#tvSettings .tv-save-settings { max-width: 690px; margin-inline: auto; }
+#tvSettings .tv-save-grid { gap: 22px; }
+#tvSettings .tv-save-row { min-height: 48px; gap: 20px; }
