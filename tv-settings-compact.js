@@ -12,10 +12,10 @@
       const scale = Math.min(innerWidth / 1920, innerHeight / 1080) || 1;
       if (!dialog.dataset.fixedSizeReady) {
         dialog.style.setProperty('width', '720px', 'important');
-        dialog.style.setProperty('height', '800px', 'important');
+        dialog.style.setProperty('height', '887px', 'important');
         dialog.dataset.fixedSizeReady = '1';
         dialog.style.left = Math.max(12, (innerWidth - 720 * scale) / 2) + 'px';
-        dialog.style.top = Math.max(12, (innerHeight - 800 * scale) / 2) + 'px';
+        dialog.style.top = Math.max(12, (innerHeight - 887 * scale) / 2) + 'px';
       }
       const rect = dialog.getBoundingClientRect();
       dialog.style.left = Math.max(8, Math.min(rect.left, innerWidth - rect.width - 8)) + 'px';

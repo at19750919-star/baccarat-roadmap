@@ -718,7 +718,7 @@
     function toggleSettingsSize() {
       const isExpanded = parseInt(dialog.style.width, 10) > 720;
       const targetW = isExpanded ? 720 : 840;
-      const targetH = isExpanded ? 800 : 960;
+      const targetH = isExpanded ? 887 : 960;
       applyDialogSize(targetW, targetH);
       const btn = document.getElementById('tvSettingsSizeToggle');
       if (btn) btn.textContent = isExpanded ? '⛶' : '🗗';
