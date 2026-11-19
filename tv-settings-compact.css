@@ -102,3 +102,6 @@
 #tvSettings .tv-limit-presets #tvLimitPresetName { flex: 1 1 auto; min-width: 0; width: 100%; height: 44px; box-sizing: border-box; padding: 6px 12px !important; text-align: left !important; font: 600 18px/1.3 "Noto Serif TC", serif !important; }
 #tvSettings .tv-limit-presets button { flex: none; padding: 7px 12px; white-space: nowrap; }
 #tvSettings .tv-limit-presets #tvLimitPresetDelete.is-confirm { background: #7a1f1b !important; border-color: #f3c75b !important; color: #fff4de !important; }
+
+/* 本機只顯示三個分頁（基本、按鍵、儲存）；其餘分頁暫時隱藏 */
+#tvSettings:not(.tv-settings-limited) .tv-settings-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }

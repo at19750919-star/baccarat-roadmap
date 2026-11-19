@@ -529,7 +529,7 @@
     // Local editing stays complete; the hosted version exposes only approved tabs.
     const localSettings = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
     const allTabs = [...dialog.querySelectorAll('[data-settings-tab]')];
-    const tabs = allTabs.filter(button => localSettings || ['basic', 'keys'].includes(button.dataset.settingsTab));
+    const tabs = allTabs.filter(button => (localSettings ? ['basic', 'keys', 'save'] : ['basic', 'keys']).includes(button.dataset.settingsTab)); // 本機其餘分頁暫時隱藏（功能保留）
     for (const tab of allTabs) tab.hidden = !tabs.includes(tab);
     dialog.classList.toggle('tv-settings-limited', !localSettings);
     const editor = document.createElement('section');
