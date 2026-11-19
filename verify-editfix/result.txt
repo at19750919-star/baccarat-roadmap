@@ -1,0 +1,34 @@
+==== 2560x1440
+開編輯 toggle= 完成編輯
+選左上卡片 panel visible= true
+× hit: OK
+連選多區塊後字型按鈕數= 1
+字型面板可見= true  關閉鈕數= 1
+「上傳字型檔」 hit: OK
+字型關閉鈕 hit: OK
+完成編輯 toggle hit: OK
+水平溢出(編輯中): 2560<=2560 OK
+關閉字型面板後可見= false
+× hit(關字型後): OK
+× 後 panel可見= false  toggle= 編輯
+Esc 後 panel可見= false  字型面板可見= false  toggle= 編輯
+完成編輯後 panel可見= false  toggle= 編輯  editing= false
+水平溢出(結束): 2560<=2560 OK
+console/pageerror 數= 0 
+==== 390x844
+開編輯 toggle= 完成編輯
+選左上卡片 panel visible= true
+× hit: OK
+連選多區塊後字型按鈕數= 1
+字型面板可見= true  關閉鈕數= 1
+「上傳字型檔」 hit: OK
+字型關閉鈕 hit: OK
+完成編輯 toggle hit: OK
+水平溢出(編輯中): 390<=390 OK
+關閉字型面板後可見= false
+× hit(關字型後): OK
+× 後 panel可見= false  toggle= 編輯
+Esc 後 panel可見= false  字型面板可見= false  toggle= 編輯
+完成編輯後 panel可見= false  toggle= 編輯  editing= false
+水平溢出(結束): 390<=390 OK
+console/pageerror 數= 0 

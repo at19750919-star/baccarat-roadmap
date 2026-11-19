@@ -167,6 +167,7 @@
     if (state.rounds.length === 0) dismiss(true);
     return result;
   };
+  document.addEventListener('baccarat:clear', () => dismiss(true));
   document.addEventListener('visibilitychange', () => { if (document.hidden) dismiss(); });
   const boss = document.getElementById('bossScreen');
   if (boss) new MutationObserver(() => {

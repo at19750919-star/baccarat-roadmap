@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>閃電龍特效示範</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: "Microsoft JhengHei", sans-serif; }
+  canvas { display: block; background: #000; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; }
+  #hud { position: fixed; left: 16px; bottom: 14px; display: flex; gap: 10px; align-items: center; color: #9cc8ff; font-size: 14px; transition: opacity .4s; }
+  #hud button { background: #0b1d3a; color: #cfe6ff; border: 1px solid #2f6fd8; border-radius: 6px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
+  #hud button:hover { background: #12305e; }
+  #hud.idle { opacity: 0; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="hud">
+  <button id="replay">重播</button>
+  <label><input type="checkbox" id="loop" checked> 自動循環</label>
+  <span id="info"></span>
+</div>
+<script>
+(() => {
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const W = 1920, H = 1080, CX = W / 2, CY = H / 2, F = 1000;
+
+  // 時間軸（秒）
+  const T_ENTER = 2.4, T_LOOP = 3.8, T_CHARGE = 2.2, T_ROAR = 1.7, T_FADE = 0.9, T_GAP = 0.8;
+  const T1 = T_ENTER, T2 = T1 + T_LOOP, T3 = T2 + T_CHARGE, T4 = T3 + T_ROAR, T_END = T4 + T_FADE;
+
+  // 龍頭圖（已左右翻成面向右）：頸點、口、臉中心、頭軸角度
+  const HEAD = { k: 0.3, neck: [255, 720], mouth: [840, 795], face: [690, 660], axis: -0.176 };
+  const R = 320, OMEGA = Math.PI * 2 / T_LOOP;
+  const FINAL_HEADING = -0.12;
+  const N = 110, SPACING = 14;
+
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const smooth = (a, b, v) => { const u = clamp((v - a) / (b - a), 0, 1); return u * u * (3 - 2 * u); };
+  const hermite = (p0, v0, p1, v1, T, u) => {
+    const u2 = u * u, u3 = u2 * u;
+    const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+    return p0.map((_, i) => h00 * p0[i] + h10 * T * v0[i] + h01 * p1[i] + h11 * T * v1[i]);
+  };
+
+  // 結尾龍頭位置：讓臉剛好落在畫面中央（與縮放倍數無關）
+  const rotF = FINAL_HEADING - HEAD.axis;
+  const fx = (HEAD.face[0] - HEAD.neck[0]) * HEAD.k, fy = (HEAD.face[1] - HEAD.neck[1]) * HEAD.k;
+  const FACE_OFF = [fx * Math.cos(rotF) - fy * Math.sin(rotF), fx * Math.sin(rotF) + fy * Math.cos(rotF)];
+  const P_START = [-350, 430, F], V_START = [650, 110, 0];
+  const P_TOP = [CX, CY - R, F], V_TOP = [R * OMEGA, 0, 0];
+  const P_END = [CX - FACE_OFF[0], CY - FACE_OFF[1], 150], V_END = [0, 0, -260];
+
+  // 龍頭飛行路徑（世界座標 x, y, 深度 z）
+  function path(t) {
+    if (t < 0) return [P_START[0] + V_START[0] * t, P_START[1] + V_START[1] * t, F];
+    if (t < T1) {
+      const u = t / T1;
+      const p = hermite(P_START, V_START, P_TOP, V_TOP, T1, u);
+      p[1] += Math.sin(2 * Math.PI * u) * Math.sin(Math.PI * u) * 80;
+      return p;
+    }
+    if (t < T2) {
+      const ph = OMEGA * (t - T1);
+      return [CX + R * Math.sin(ph), CY - R * Math.cos(ph), F];
+    }
+    if (t < T3) {
+      const u = (t - T2) / T_CHARGE;
+      return hermite(P_TOP, V_TOP, P_END, V_END, T_CHARGE, u);
+    }
+    const u = clamp((t - T3) / (T_END - T3), 0, 1);
+    return [P_END[0], P_END[1], lerp(P_END[2], 128, 1 - Math.pow(1 - u, 2))];
+  }
+  const project = (p) => { const s = F / p[2]; return [CX + (p[0] - CX) * s, CY + (p[1] - CY) * s, s]; };
+
+  // 沿路徑往回取等距身體節點，身體永遠是一整條
+  function spine(t) {
+    const pts = [];
+    let prev = path(t), acc = 0, next = 0;
+    pts.push(prev);
+    const dt = 1 / 200;
+    for (let k = 1; k < 4000 && pts.length < N; k++) {
+      const cur = path(t - k * dt);
+      const d = Math.hypot(cur[0] - prev[0], cur[1] - prev[1], cur[2] - prev[2]);
+      while (d > 0 && acc + d >= (next + 1) * SPACING && pts.length < N) {
+        next++;
+        const f = ((next) * SPACING - acc) / d;
+        pts.push([lerp(prev[0], cur[0], f), lerp(prev[1], cur[1], f), lerp(prev[2], cur[2], f)]);
+      }
+      acc += d; prev = cur;
+    }
+    while (pts.length < N) pts.push(pts[pts.length - 1].slice());
+    return pts;
+  }
+
+  function widthAt(u) {
+    return 58 * (0.72 + 0.28 * smooth(0, 0.15, u)) * (1 - smooth(0.32, 1, u) * 0.9);
+  }
+
+  // 光點貼圖
+  const glow = document.createElement('canvas');
+  glow.width = glow.height = 64;
+  {
+    const g = glow.getContext('2d');
+    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(235,248,255,1)');
+    gr.addColorStop(0.18, 'rgba(140,210,255,0.85)');
+    gr.addColorStop(0.45, 'rgba(40,130,255,0.25)');
+    gr.addColorStop(1, 'rgba(0,40,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  }
+
+  let headImg = null;
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const g = c.getContext('2d');
+    g.translate(img.width, 0); g.scale(-1, 1); g.drawImage(img, 0, 0);
+    headImg = c;
+  };
+  img.src = 'dragon_head.png';
+
+  // 鋸齒閃電
+  function bolt(x1, y1, x2, y2, disp, out) {
+    if (disp < 2.5) { out.push([x2, y2]); return; }
+    const mx = (x1 + x2) / 2 + (Math.random() - 0.5) * disp;
+    const my = (y1 + y2) / 2 + (Math.random() - 0.5) * disp;
+    bolt(x1, y1, mx, my, disp / 2, out);
+    bolt(mx, my, x2, y2, disp / 2, out);
+  }
+  function drawPolyGlow(pts, w, alpha) {
+    if (pts.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = `rgba(40,120,255,${0.18 * alpha})`; ctx.lineWidth = w * 5; ctx.stroke();
+    ctx.strokeStyle = `rgba(110,190,255,${0.45 * alpha})`; ctx.lineWidth = w * 2.2; ctx.stroke();
+    ctx.strokeStyle = `rgba(235,248,255,${0.95 * alpha})`; ctx.lineWidth = w; ctx.stroke();
+  }
+  function lightning(x1, y1, x2, y2, w, alpha) {
+    const pts = [[x1, y1]];
+    bolt(x1, y1, x2, y2, Math.hypot(x2 - x1, y2 - y1) * 0.35, pts);
+    drawPolyGlow(pts, w, alpha);
+    if (Math.random() < 0.5 && pts.length > 6) {
+      const a = pts[(pts.length * Math.random()) | 0];
+      const ang = Math.atan2(y2 - y1, x2 - x1) + (Math.random() - 0.5) * 1.6;
+      const len = Math.hypot(x2 - x1, y2 - y1) * (0.2 + Math.random() * 0.3);
+      const br = [[a[0], a[1]]];
+      bolt(a[0], a[1], a[0] + Math.cos(ang) * len, a[1] + Math.sin(ang) * len, len * 0.4, br);
+      drawPolyGlow(br, w * 0.6, alpha * 0.8);
+    }
+  }
+
+  // 粒子與軌跡
+  let sparks = [];
+  let trail = [];
+  function emit(x, y, s, n, spread, vx = 0, vy = 0) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, v = Math.random() * spread;
+      sparks.push({ x, y, vx: vx + Math.cos(a) * v * s, vy: vy + Math.sin(a) * v * s, life: 1, decay: 0.6 + Math.random() * 1.1, size: (4 + Math.random() * 10) * s });
+    }
+  }
+
+  // 本幀身體的螢幕座標
+  function bodyScreen(t) {
+    const pts = spine(t).map(project);
+    const out = [];
+    let lastN = [0, -1];
+    for (let i = 0; i < N; i++) {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(N - 1, i + 1)];
+      let tx = a[0] - b[0], ty = a[1] - b[1];
+      const L = Math.hypot(tx, ty);
+      let n;
+      if (L < 0.5) n = lastN; else { tx /= L; ty /= L; n = [ty, -tx]; }
+      lastN = n;
+      const u = i / (N - 1), s = pts[i][2];
+      const wave = Math.sin(u * 14 - t * 6) * 16 * s * smooth(0, 0.18, u);
+      out.push({ x: pts[i][0] + n[0] * wave, y: pts[i][1] + n[1] * wave, n, tg: L < 0.5 ? [-n[1], n[0]] : [tx, ty], w: widthAt(u) * s, s, u });
+    }
+    return out;
+  }
+
+  function edge(b, k) { return [b.x + b.n[0] * b.w * k, b.y + b.n[1] * b.w * k]; }
+  function band(B, k1, k2, fill) {
+    ctx.beginPath();
+    for (let i = 0; i < B.length; i++) { const p = edge(B[i], k1); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    for (let i = B.length - 1; i >= 0; i--) { const p = edge(B[i], k2); ctx.lineTo(p[0], p[1]); }
+    ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+  }
+
+  function drawLeg(B, idx, t, phase) {
+    const b = B[idx]; if (!b) return;
+    const s = b.s, swing = Math.sin(t * 5 + phase) * 0.35;
+    const back = [-b.tg[0], -b.tg[1]], down = [-b.n[0], -b.n[1]];
+    const p0 = edge(b, -0.3);
+    const k1 = [p0[0] + (down[0] * 0.9 + back[0] * (0.2 + swing)) * 46 * s, p0[1] + (down[1] * 0.9 + back[1] * (0.2 + swing)) * 46 * s];
+    const k2 = [k1[0] + (down[0] * 0.5 - back[0] * (0.6 - swing)) * 40 * s, k1[1] + (down[1] * 0.5 - back[1] * (0.6 - swing)) * 40 * s];
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#123a86'; ctx.lineWidth = 20 * s;
+    ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(k1[0], k1[1]); ctx.lineTo(k2[0], k2[1]); ctx.stroke();
+    ctx.strokeStyle = '#3f86e8'; ctx.lineWidth = 9 * s; ctx.stroke();
+    ctx.strokeStyle = '#e8f4ff'; ctx.lineWidth = 3 * s;
+    const da = Math.atan2(k2[1] - k1[1], k2[0] - k1[0]);
+    for (let c = -1; c <= 1; c++) {
+      const a = da + c * 0.55;
+      ctx.beginPath(); ctx.moveTo(k2[0], k2[1]);
+      ctx.quadraticCurveTo(k2[0] + Math.cos(a) * 12 * s, k2[1] + Math.sin(a) * 12 * s, k2[0] + Math.cos(a + 0.6) * 18 * s, k2[1] + Math.sin(a + 0.6) * 18 * s);
+      ctx.stroke();
+    }
+  }
+
+  function drawBody(B, t) {
+    // 外光暈
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = N - 2; i >= 0; i--) {
+      const a = B[i], b = B[i + 1];
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(30,100,255,0.11)'; ctx.lineWidth = a.w * 3.2;
+      ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(a.x, a.y); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    // 背刺與腹刺（先畫，被身體壓住根部）
+    for (let i = 2; i < N - 4; i += 2) {
+      const b = B[i];
+      const big = 1 - b.u * 0.6;
+      const base1 = edge(b, 0.42), tip = [b.x + b.n[0] * b.w * (0.95 + 0.25 * big) - b.tg[0] * b.w * 0.9, b.y + b.n[1] * b.w * (0.95 + 0.25 * big) - b.tg[1] * b.w * 0.9];
+      ctx.beginPath();
+      ctx.moveTo(base1[0] + b.tg[0] * b.w * 0.35, base1[1] + b.tg[1] * b.w * 0.35);
+      ctx.quadraticCurveTo(base1[0] + b.n[0] * b.w * 0.4, base1[1] + b.n[1] * b.w * 0.4, tip[0], tip[1]);
+      ctx.lineTo(base1[0] - b.tg[0] * b.w * 0.45, base1[1] - b.tg[1] * b.w * 0.45);
+      ctx.closePath();
+      ctx.fillStyle = i % 4 ? 'rgba(90,175,255,0.92)' : 'rgba(150,215,255,0.95)';
+      ctx.fill();
+      if (i % 3 === 0) {
+        const vb = edge(b, -0.42), vt = [b.x - b.n[0] * b.w * 0.85 - b.tg[0] * b.w * 0.7, b.y - b.n[1] * b.w * 0.85 - b.tg[1] * b.w * 0.7];
+        ctx.beginPath();
+        ctx.moveTo(vb[0] + b.tg[0] * b.w * 0.25, vb[1] + b.tg[1] * b.w * 0.25);
+        ctx.lineTo(vt[0], vt[1]);
+        ctx.lineTo(vb[0] - b.tg[0] * b.w * 0.3, vb[1] - b.tg[1] * b.w * 0.3);
+        ctx.closePath(); ctx.fillStyle = 'rgba(80,160,255,0.8)'; ctx.fill();
+      }
+    }
+    // 尾鰭
+    const tail = B[N - 1], tb = B[N - 6];
+    for (let f = -3; f <= 3; f++) {
+      const a = Math.atan2(-tail.tg[1], -tail.tg[0]) + f * 0.28 + Math.sin(t * 7 + f) * 0.08;
+      const len = (70 - Math.abs(f) * 9) * tail.s;
+      ctx.beginPath();
+      ctx.moveTo(tb.x, tb.y);
+      ctx.quadraticCurveTo(tail.x + Math.cos(a - 0.3) * len * 0.5, tail.y + Math.sin(a - 0.3) * len * 0.5, tail.x + Math.cos(a) * len, tail.y + Math.sin(a) * len);
+      ctx.quadraticCurveTo(tail.x + Math.cos(a + 0.2) * len * 0.3, tail.y + Math.sin(a + 0.2) * len * 0.3, tb.x, tb.y);
+      ctx.fillStyle = f % 2 ? 'rgba(120,200,255,0.85)' : 'rgba(70,150,255,0.85)';
+      ctx.fill();
+    }
+
+    drawLeg(B, 46, t, 2.2);
+    drawLeg(B, 18, t, 0);
+
+    // 身體本體（深藍底、藍色背、銀白腹）
+    band(B, 0.5, -0.5, '#0a2459');
+    band(B, 0.5, 0.02, '#1b56c0');
+    band(B, 0.36, 0.12, '#3b84ea');
+    band(B, -0.16, -0.48, '#9fbde8');
+    band(B, -0.22, -0.36, 'rgba(225,240,255,0.55)');
+
+    // 腹甲橫紋
+    ctx.strokeStyle = 'rgba(70,105,170,0.75)';
+    for (let i = 1; i < N - 3; i++) {
+      const b = B[i], p1 = edge(b, -0.17), p2 = edge(b, -0.47);
+      ctx.lineWidth = Math.max(0.8, 1.6 * b.s);
+      ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+    }
+    // 鱗片
+    for (let i = 1; i < N - 2; i++) {
+      const b = B[i], nb = B[i + 1];
+      const mx = (b.x + nb.x) / 2, my = (b.y + nb.y) / 2;
+      const back = Math.atan2(-b.tg[1], -b.tg[0]);
+      const r = b.w * 0.14;
+      if (r < 1.2) continue;
+      for (const [kk, half] of [[0.38, 0], [0.24, 1], [0.1, 0], [-0.04, 1]]) {
+        const cx = half ? mx : b.x, cy = half ? my : b.y;
+        const px = cx + b.n[0] * b.w * kk, py = cy + b.n[1] * b.w * kk;
+        ctx.beginPath();
+        ctx.arc(px, py, r, back - 1.25, back + 1.25);
+        ctx.strokeStyle = kk > 0.2 ? 'rgba(190,230,255,0.85)' : 'rgba(140,195,255,0.8)';
+        ctx.lineWidth = Math.max(1, 1.8 * b.s);
+        ctx.stroke();
+      }
+    }
+    // 背脊高光
+    ctx.lineCap = 'round';
+    for (let i = 0; i < N - 2; i++) {
+      const a = B[i], b = B[i + 1], p = edge(a, 0.3), q = edge(b, 0.3);
+      ctx.strokeStyle = 'rgba(200,235,255,0.55)'; ctx.lineWidth = a.w * 0.06;
+      ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+    }
+
+    // 身上流竄的電光
+    ctx.globalCompositeOperation = 'lighter';
+    const crawl = 3;
+    for (let c = 0; c < crawl; c++) {
+      const start = ((t * 30 + c * 37) | 0) % (N - 12);
+      const side = c % 2 ? 0.55 : -0.55;
+      const a = edge(B[start], side), b = edge(B[start + 8], side * 0.8);
+      if (Math.random() < 0.75) lightning(a[0], a[1], b[0], b[1], 1.6 * B[start].s, 0.8);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawHead(B, t, heading, extra) {
+    if (!headImg) return;
+    const b = B[0];
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(heading - HEAD.axis);
+    const sc = HEAD.k * b.s * extra;
+    ctx.scale(sc, sc);
+    // 頭部背光
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(glow, HEAD.face[0] - HEAD.neck[0] - 520, HEAD.face[1] - HEAD.neck[1] - 520, 1040, 1040);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(headImg, -HEAD.neck[0], -HEAD.neck[1]);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.25 + 0.15 * Math.sin(t * 9);
+    ctx.drawImage(headImg, -HEAD.neck[0], -HEAD.neck[1]);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  function headPoint(B, heading, extra, pt) {
+    const b = B[0], sc = HEAD.k * b.s * extra, r = heading - HEAD.axis;
+    const x = (pt[0] - HEAD.neck[0]) * sc, y = (pt[1] - HEAD.neck[1]) * sc;
+    return [b.x + x * Math.cos(r) - y * Math.sin(r), b.y + x * Math.sin(r) + y * Math.cos(r)];
+  }
+
+  function angleLerp(a, b, u) {
+    let d = b - a;
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    return a + d * u;
+  }
+
+  let t0 = performance.now(), lastT = 0, lastHeading = 0, flash = 0;
+  function restart() { t0 = performance.now(); lastT = 0; sparks = []; trail = []; flash = 0; }
+  document.getElementById('replay').onclick = restart;
+  const loopBox = document.getElementById('loop');
+
+  function frame(now) {
+    let t = window.FREEZE_T != null ? window.FREEZE_T : (now - t0) / 1000;
+    if (t > T_END + T_GAP) {
+      if (loopBox.checked) { restart(); t = 0; } else t = T_END + T_GAP;
+    }
+    const dt = clamp(t - lastT, 0, 0.05); lastT = t;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    if (t > T_END) { requestAnimationFrame(frame); return; }
+
+    // 吼叫時輕微震動
+    const roarK = t > T3 ? Math.sin(clamp((t - T3) / T_ROAR, 0, 1) * Math.PI) : 0;
+    if (roarK > 0) ctx.translate((Math.random() - 0.5) * 14 * roarK, (Math.random() - 0.5) * 14 * roarK);
+
+    const B = bodyScreen(t);
+
+    // 頭的朝向
+    const a = project(path(t)), b2 = project(path(t - 0.03));
+    let heading = Math.hypot(a[0] - b2[0], a[1] - b2[1]) > 0.5 ? Math.atan2(a[1] - b2[1], a[0] - b2[0]) : lastHeading;
+    if (t > T2) heading = angleLerp(heading, FINAL_HEADING, smooth(T2, T2 + T_CHARGE * 0.6, t));
+    if (t > T3) heading = FINAL_HEADING;
+    heading = angleLerp(lastHeading, heading, t < 0.05 ? 1 : 0.35);
+    lastHeading = heading;
+    const roarPulse = 1 + 0.04 * roarK * Math.sin(t * 30);
+
+    // 軌跡：頭經過的位置留下閃電火花
+    if (t < T2 + 0.4) {
+      const hp = headPoint(B, heading, 1, HEAD.face);
+      trail.push({ x: hp[0], y: hp[1], age: 0 });
+      emit(B[0].x, B[0].y, B[0].s, 3, 60, 0, 0);
+      for (let k = 0; k < 4; k++) {
+        const bb = B[(Math.random() * (N - 10)) | 0];
+        if (bb.x > -50 && bb.x < W + 50) emit(bb.x + bb.n[0] * bb.w * 0.5, bb.y + bb.n[1] * bb.w * 0.5, bb.s, 1, 40);
+      }
+    }
+    const TRAIL_LIFE = 2.4;
+    trail.forEach(p => p.age += dt);
+    trail = trail.filter(p => p.age < TRAIL_LIFE);
+    // 軌跡上持續冒出火花
+    for (let k = 0; k < 5 && trail.length > 4; k++) {
+      const p = trail[(Math.random() * trail.length) | 0];
+      if (Math.random() < 1 - p.age / TRAIL_LIFE) emit(p.x + (Math.random() - 0.5) * 40, p.y + (Math.random() - 0.5) * 40, 0.8, 1, 25);
+    }
+
+    ctx.globalCompositeOperation = 'lighter';
+    // 軌跡光帶
+    ctx.lineCap = 'round';
+    for (let i = 1; i < trail.length; i++) {
+      const p = trail[i - 1], q = trail[i];
+      const al = 1 - q.age / TRAIL_LIFE;
+      ctx.strokeStyle = `rgba(30,100,255,${0.16 * al})`; ctx.lineWidth = 90 * al;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+      ctx.strokeStyle = `rgba(120,200,255,${0.22 * al})`; ctx.lineWidth = 18 * al;
+      ctx.stroke();
+    }
+    // 軌跡閃電
+    const older = trail.filter(p => p.age > 0.12);
+    for (let k = 0; k < 6 && older.length > 14; k++) {
+      const i = (Math.random() * (older.length - 12)) | 0;
+      const p = older[i], q = older[Math.min(older.length - 1, i + 6 + ((Math.random() * 8) | 0))];
+      const off = 30 * (1 - p.age / TRAIL_LIFE);
+      lightning(p.x + (Math.random() - 0.5) * off, p.y + (Math.random() - 0.5) * off, q.x + (Math.random() - 0.5) * off, q.y + (Math.random() - 0.5) * off, 2, 1 - p.age / TRAIL_LIFE);
+    }
+    // 火花
+    for (const s of sparks) {
+      s.x += s.vx * dt; s.y += s.vy * dt; s.vx *= 0.97; s.vy *= 0.97;
+      s.life -= s.decay * dt;
+      if (s.life <= 0) continue;
+      const sz = s.size * (0.5 + s.life);
+      ctx.globalAlpha = clamp(s.life, 0, 1) * (Math.random() < 0.15 ? 0.4 : 1);
+      ctx.drawImage(glow, s.x - sz / 2, s.y - sz / 2, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+    sparks = sparks.filter(s => s.life > 0);
+    ctx.globalCompositeOperation = 'source-over';
+
+    drawBody(B, t);
+    drawHead(B, t, heading, roarPulse);
+
+    // 吼叫：口中噴出閃電、強光
+    if (t > T3 - 0.25) {
+      if (flash === 0) flash = 1;
+      const m = headPoint(B, heading, roarPulse, HEAD.mouth);
+      ctx.globalCompositeOperation = 'lighter';
+      const nb = 4 + ((roarK * 6) | 0);
+      for (let k = 0; k < nb; k++) {
+        const ang = Math.random() * Math.PI * 2;
+        const len = (300 + Math.random() * 900) * (0.4 + roarK);
+        lightning(m[0], m[1], m[0] + Math.cos(ang) * len, m[1] + Math.sin(ang) * len, 3 + roarK * 4, 0.9);
+      }
+      ctx.globalAlpha = 0.5 * roarK;
+      ctx.drawImage(glow, m[0] - 700, m[1] - 700, 1400, 1400);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    if (flash > 0) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = `rgba(190,225,255,${flash * 0.75})`;
+      ctx.fillRect(0, 0, W, H);
+      flash = Math.max(0.0001, flash - dt * 2.8);
+      if (flash <= 0.0001) flash = -1;
+    }
+    // 收尾淡出
+    if (t > T4) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = `rgba(0,0,0,${smooth(T4, T_END, t)})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // 滑鼠不動 2 秒後隱藏控制列
+  const hud = document.getElementById('hud');
+  let idleTimer;
+  const wake = () => { hud.classList.remove('idle'); clearTimeout(idleTimer); idleTimer = setTimeout(() => hud.classList.add('idle'), 2000); };
+  addEventListener('mousemove', wake); wake();
+  if (new URLSearchParams(location.search).has('nohud')) hud.style.display = 'none';
+})();
+</script>
+</body>
+</html>

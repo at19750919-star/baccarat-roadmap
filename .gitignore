@@ -30,3 +30,7 @@
 !assets/beads/banker-stats.png
 !assets/beads/player-stats.png
 !assets/beads/tie-stats.png
+
+# 更新檔簽章私鑰（絕不可進版控或打包）
+update-signing-key/
+windows-app/dist-updates/

@@ -1,0 +1,103 @@
+{
+ "共用元件/bet-panel/demo.html": {
+  "ok": 31,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/cell-splitter/demo.html": {
+  "ok": 0,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/color-picker/demo.html": {
+  "ok": 9,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/contrast-check/demo.html": {
+  "ok": 3,
+  "fail": 3,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/css-controls/demo.html": {
+  "ok": 17,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/eyedropper/demo.html": {
+  "ok": 15,
+  "fail": 0,
+  "attrs": [
+   "data-check-result=OK"
+  ],
+  "errs": 0
+ },
+ "共用元件/font-picker/demo.html": {
+  "ok": 28,
+  "fail": 0,
+  "attrs": [
+   "data-fp-result=OK"
+  ],
+  "errs": 0
+ },
+ "共用元件/grid-editor/demo.html": {
+  "ok": 28,
+  "fail": 0,
+  "attrs": [
+   "data-ge-result=OK"
+  ],
+  "errs": 0
+ },
+ "共用元件/ruler/demo.html": {
+  "ok": 19,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/settings-io/demo.html": {
+  "ok": 7,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/theme-presets/demo.html": {
+  "ok": 13,
+  "fail": 0,
+  "attrs": [
+   "data-check-result=OK"
+  ],
+  "errs": 0
+ },
+ "共用元件/version-snapshot/demo.html": {
+  "ok": 9,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/viewport-preview/demo.html": {
+  "ok": 7,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ },
+ "共用元件/index.html": {
+  "ok": 26,
+  "fail": 0,
+  "attrs": [
+   "data-index-result=OK",
+   "data-index-result=OK"
+  ],
+  "errs": 0
+ },
+ "百家樂路單/tv.html": {
+  "ok": 9,
+  "fail": 0,
+  "attrs": [],
+  "errs": 0
+ }
+}

@@ -1,0 +1,36 @@
+==== 2560
+本寬度使用區塊 .tv-board-title-en,.stat-banker,.stat-tie
+Ctrl 加選 3 個: {"n":3,"label":"選取：3 個區塊（Ctrl+點選加選或取消）","textDisabled":true,"mixed":"--edit-background-color,--edit-color,--edit-border-color,--edit-font-size,--edit-letter-spacing","fontBtns":1,"fontBtnText":"選擇字型"} 通過
+Ctrl 再點莊取消: 2 選取：2 個區塊（Ctrl+點選加選或取消） 通過
+再加回: 3
+字級同時套用: 31px / 31px / 31px 通過
+字色 原 rgb(255, 215, 0) / rgb(255, 255, 255) / rgb(255, 255, 255) | 拖曳中 rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54) | 套用後 rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54) 通過
+字型按鈕: 1 選擇字型 通過
+字型面板字色列可見= false 通過(已隱藏)
+左側編輯面板字色欄可見= true
+拖曳 前 2140,56,420,1384 後 1840,56,420,1384 通過
+拉角縮放後 1840,56,360,1304 通過
+拖出畫面測試 2200,136,360,1304 通過(仍在畫面內)
+本寬度使用區塊 .tv-board-title-en,.stat-banker,.stat-tie
+重新載入後位置大小 2200,136,360,1304 保留 通過
+重新載入後字級/字色 31px / 31px / 31px rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54)
+清除後字級 16px / 14px / 14px
+console/pageerror 0 
+==== 390
+本寬度使用區塊 .tv-board-title-en,.tv-stat-head,.tv-board-val
+Ctrl 加選 3 個: {"n":3,"label":"選取：3 個區塊（Ctrl+點選加選或取消）","textDisabled":true,"mixed":"--edit-color,--edit-border-color,--edit-border-width,--edit-font-size,--edit-letter-spacing","fontBtns":1,"fontBtnText":"選擇字型"} 通過
+Ctrl 再點莊取消: 2 選取：2 個區塊（Ctrl+點選加選或取消） 通過
+再加回: 3
+字級同時套用: 31px / 31px / 31px 通過
+字色 原 rgb(255, 215, 0) / rgb(255, 255, 255) / rgb(255, 255, 255) | 拖曳中 rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54) | 套用後 rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54) 通過
+字型按鈕: 1 選擇字型 通過
+字型面板字色列可見= false 通過(已隱藏)
+左側編輯面板字色欄可見= true
+拖曳 前 0,56,390,788 後 0,56,390,788 失敗
+拉角縮放後 0,56,330,708 通過
+拖出畫面測試 60,136,330,708 通過(仍在畫面內)
+本寬度使用區塊 .tv-board-title-en,.tv-stat-head,.tv-board-val
+重新載入後位置大小 60,136,330,708 保留 通過
+重新載入後字級/字色 31px / 31px / 31px rgb(179, 54, 54) / rgb(179, 54, 54) / rgb(179, 54, 54)
+清除後字級 16px / 22px / 32px
+console/pageerror 0 

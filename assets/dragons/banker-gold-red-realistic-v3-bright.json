@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-29",
+  "generator": "built-in image_gen",
+  "input": "banker-gold-red-realistic-v2.png",
+  "output": "banker-gold-red-realistic-v3-bright.png",
+  "purpose": "顏色提亮候選圖；尚未接入或部署",
+  "transparent_background": true,
+  "prompt": "Edit the supplied golden-red Chinese dragon image. Change only the creature's lighting and color treatment: noticeably brighter luminous rich yellow GOLD scales, more brilliant clean golden highlights, warmer vivid gold midtones instead of dull antique bronze, brighter golden belly plates, horns, face and limbs; gently lift deep shadows so the whole dragon remains legible as a TV overlay. Make the crimson-red mane and dorsal accents a little brighter and richer while keeping GOLD dominant. Preserve fine individual scale texture, dark separation between scales and physically realistic metallic reflections; do not wash out the texture or clip highlights. Keep the exact same dragon identity, realistic mature face, fierce expression, four legs, horns, whiskers, long S-shaped body, pose, silhouette, framing and tail. Maintain cinematic photorealistic creature quality. Preserve the existing transparent alpha background and clean cutout. Any apparent brown/black surrounding the cutout is not a background to retain: leave all non-dragon space genuinely transparent, with no added backdrop or rectangular glow. No text, symbols, jewels or new objects. This is a brighter color revision, not a redesign."
+}

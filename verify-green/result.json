@@ -1,0 +1,121 @@
+{
+ "red": {
+  "skin": null,
+  "save": {
+   "x": 1446,
+   "y": 28,
+   "w": 86,
+   "h": 40,
+   "r": 1531,
+   "b": 68
+  },
+  "toggle": {
+   "x": 1446,
+   "y": 72,
+   "w": 86,
+   "h": 23,
+   "r": 1531,
+   "b": 94
+  },
+  "titleBottom": 114,
+  "toggleText": "綠金風格",
+  "toggleFont": "\"Noto Serif TC\", Cinzel, serif",
+  "toggleRad": "5px",
+  "toggleColor": "rgb(255, 226, 138)",
+  "toggleBg": "none",
+  "overflow": [
+   false,
+   false
+  ],
+  "sysFonts": [
+   "Arial, sans-serif"
+  ],
+  "ls": null
+ },
+ "red_errs": [],
+ "green": {
+  "skin": "green",
+  "save": {
+   "x": 1446,
+   "y": 28,
+   "w": 86,
+   "h": 40,
+   "r": 1531,
+   "b": 68
+  },
+  "toggle": {
+   "x": 1446,
+   "y": 72,
+   "w": 86,
+   "h": 23,
+   "r": 1531,
+   "b": 94
+  },
+  "titleBottom": 114,
+  "toggleText": "紅金風格",
+  "toggleFont": "\"Noto Serif TC\", Cinzel, serif",
+  "toggleRad": "2px",
+  "toggleColor": "rgb(244, 223, 164)",
+  "toggleBg": "linear-gradient(155deg, rgb(20, 29, 28), rgb(10, 18, 16))",
+  "overflow": [
+   false,
+   false
+  ],
+  "sysFonts": [
+   "Arial, sans-serif"
+  ],
+  "ls": "green"
+ },
+ "green_reload": {
+  "skin": "green",
+  "save": {
+   "x": 1446,
+   "y": 28,
+   "w": 86,
+   "h": 40,
+   "r": 1531,
+   "b": 68
+  },
+  "toggle": {
+   "x": 1446,
+   "y": 72,
+   "w": 86,
+   "h": 23,
+   "r": 1531,
+   "b": 94
+  },
+  "titleBottom": 114,
+  "toggleText": "紅金風格",
+  "toggleFont": "\"Noto Serif TC\", Cinzel, serif",
+  "toggleRad": "2px",
+  "toggleColor": "rgb(244, 223, 164)",
+  "toggleBg": "linear-gradient(155deg, rgb(20, 29, 28), rgb(10, 18, 16))",
+  "overflow": [
+   false,
+   false
+  ],
+  "sysFonts": [
+   "Arial, sans-serif"
+  ],
+  "ls": "green"
+ },
+ "green_errs": [],
+ "selbox": {
+  "display": "block",
+  "border": "2px solid rgba(244, 223, 164, 0.9)",
+  "radius": "2px",
+  "bg": "rgba(0, 0, 0, 0)",
+  "box": [
+   116,
+   14,
+   133,
+   27
+  ]
+ },
+ "edit_errs": [],
+ "selbox_red": {
+  "border": "2px rgba(244, 223, 164, 0.9)",
+  "radius": "2px"
+ },
+ "final_errs": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "jiujiu-baccarat-roadmap",
+  "version": "1.0.11",
+  "description": "百家樂電視路單離線版",
+  "main": "main.cjs",
+  "scripts": {
+    "prepare": "node prepare.cjs",
+    "make-update": "node make-update.cjs",
+    "start": "electron .",
+    "test": "node test-offline.cjs",
+    "dist": "node prepare.cjs && node make-update.cjs --baseline --no-prepare && electron-builder --win nsis --x64 --publish never"
+  },
+  "keywords": [],
+  "author": "玖玖",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "productName": "玖玖百家樂路單",
+  "build": {
+    "appId": "com.jiujiu.baccarat.roadmap",
+    "productName": "玖玖百家樂路單",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "prompt-preload.cjs",
+      "update-core.cjs",
+      "prompt.html",
+      "site-public/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "玖玖路單安裝程式-${version}-${arch}.${ext}",
+      "runAfterFinish": false,
+      "installerLanguages": [
+        "zh_TW"
+      ],
+      "displayLanguageSelector": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
+  }
+}

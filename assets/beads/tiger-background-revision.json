@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "input": "tiger-v2.png",
+  "output": "tiger-v3.png",
+  "prompt": "Edit this tiger medallion with ONE precise change: replace ONLY the visible amber/gold circular background behind the tiger's face with a rich DARK EMERALD / deep forest-green jewel-enamel gradient (upper-left subtly lighter emerald, lower-right very dark green). The new green backing must strongly contrast with the golden tiger face so its silhouette reads instantly when shrunk to a 32–61 pixel UI bead. Preserve the existing tiger face itself, all facial features and dark-bronze stripes, exact head size, exact eye positions, the satin-gold material, upper-left highlights, sculpted relief, and the thin polished gold circular rim. Keep exactly the same centered composition and framing. Change no gold on the face or rim into green; green belongs ONLY on the disc behind the face. Preserve genuine transparency outside the circular rim. No text, numbers, icons, extra ornaments, new glow or new border. Production UI asset; a restrained deep green gemstone setting with the same gold tiger sculpture."
+}

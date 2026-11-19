@@ -1,0 +1,7 @@
+{
+  "name": "at-local",
+  "owner": { "name": "AT" },
+  "plugins": [
+    { "name": "window-color", "source": "./plugins/window-color", "description": "依專案替 Claude Code 視窗上不同底色與色帶" }
+  ]
+}

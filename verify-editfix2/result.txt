@@ -1,0 +1,46 @@
+==== 2560
+color 原值 rgb(255, 215, 0) | 拖曳中(未確定) rgb(204, 180, 41) | 放開 rgb(179, 154, 18) 即時預覽 通過
+  Esc 取消後 rgb(255, 215, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgb(255, 215, 0) 還原 通過
+  確定套用後 rgb(179, 154, 18) 通過
+backgroundColor 原值 rgba(0, 0, 0, 0) | 拖曳中(未確定) rgba(204, 41, 41, 0.83) | 放開 rgba(179, 18, 18, 0.83) 即時預覽 通過
+  Esc 取消後 rgba(0, 0, 0, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgba(0, 0, 0, 0) 還原 通過
+  確定套用後 rgba(179, 18, 18, 0.83) 通過
+borderTopColor 原值 rgb(255, 215, 0) | 拖曳中(未確定) rgb(204, 180, 41) | 放開 rgb(179, 154, 18) 即時預覽 通過
+  Esc 取消後 rgb(255, 215, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgb(255, 215, 0) 還原 通過
+  確定套用後 rgb(179, 154, 18) 通過
+重新載入後 color rgb(179, 154, 18) 保留 通過
+重新載入後 backgroundColor rgba(179, 18, 18, 0.83) 保留 通過
+重新載入後 borderTopColor rgb(179, 154, 18) 保留 通過
+清除後 color rgb(255, 215, 0) 已還原
+清除後 backgroundColor rgba(0, 0, 0, 0) 已還原
+清除後 borderTopColor rgb(255, 215, 0) 已還原
+選取 card 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+選取 red 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+選取 green 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+console/pageerror 0 
+==== 390
+color 原值 rgb(255, 215, 0) | 拖曳中(未確定) rgb(204, 180, 41) | 放開 rgb(179, 154, 18) 即時預覽 通過
+  Esc 取消後 rgb(255, 215, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgb(255, 215, 0) 還原 通過
+  確定套用後 rgb(179, 154, 18) 通過
+backgroundColor 原值 rgba(0, 0, 0, 0) | 拖曳中(未確定) rgba(204, 41, 41, 0.83) | 放開 rgba(179, 18, 18, 0.83) 即時預覽 通過
+  Esc 取消後 rgba(0, 0, 0, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgba(0, 0, 0, 0) 還原 通過
+  確定套用後 rgba(179, 18, 18, 0.83) 通過
+borderTopColor 原值 rgb(255, 215, 0) | 拖曳中(未確定) rgb(204, 180, 41) | 放開 rgb(179, 154, 18) 即時預覽 通過
+  Esc 取消後 rgb(255, 215, 0) 還原 通過 | 仍在編輯= true
+  點外部關閉後 rgb(255, 215, 0) 還原 通過
+  確定套用後 rgb(179, 154, 18) 通過
+重新載入後 color rgb(179, 154, 18) 保留 通過
+重新載入後 backgroundColor rgba(179, 18, 18, 0.83) 保留 通過
+重新載入後 borderTopColor rgb(179, 154, 18) 保留 通過
+清除後 color rgb(255, 215, 0) 已還原
+清除後 backgroundColor rgba(0, 0, 0, 0) 已還原
+清除後 borderTopColor rgb(255, 215, 0) 已還原
+選取 card 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+選取 red 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+選取 green 4px rgb(10, 10, 10) 0px 0px 0px 8px inset
+console/pageerror 0 

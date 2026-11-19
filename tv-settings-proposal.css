@@ -1,0 +1,418 @@
+/* Isolated TV settings proposal. Not loaded by live tv.html. */
+.tv-settings.tv-settings-proposal {
+  --gold-1: #f4dfa4;
+  --gold-2: #d9b568;
+  --gold-3: #a67c35;
+  --gold-4: #6b4c1d;
+  --txt: #fff6e4;
+  --txt-dim: #ecd9b0;
+  --disp: "Cinzel", "Noto Serif TC", serif;
+  --serif: "Noto Serif TC", "Cinzel", serif;
+  --gold-line: linear-gradient(135deg, #6b4c1d, #e8c97a, #8a6a2f, #f4dfa4, #6b4c1d);
+  --control-1: #3a1612;
+  --control-2: #210c0b;
+  --pit: #180808;
+  --red-1: rgba(138, 16, 16, 0.86);
+  --red-2: rgba(101, 12, 12, 0.85);
+  box-sizing: border-box;
+  width: 1240px !important;
+  height: 820px !important;
+  min-width: 1240px !important;
+  min-height: 820px !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 22px 28px 16px !important;
+  border: 2px solid transparent !important;
+  border-image: var(--gold-line) 1 !important;
+  border-radius: 0 !important;
+  background: linear-gradient(165deg, var(--red-1), var(--red-2)) !important;
+  backdrop-filter: blur(10px) saturate(1.12);
+  -webkit-backdrop-filter: blur(10px) saturate(1.12);
+  color: var(--txt);
+  font: 500 18px/1.45 var(--serif);
+  font-feature-settings: "tnum" 1, "lnum" 1, "zero" 0;
+  box-shadow: none !important;
+}
+
+html.tv-color-settings .tv-settings.tv-settings-proposal,
+html .tv-settings.tv-settings-proposal {
+  background: linear-gradient(165deg, rgba(138, 16, 16, 0.86), rgba(101, 12, 12, 0.85)) !important;
+}
+
+.tv-settings.tv-settings-proposal::before,
+.tv-settings.tv-settings-proposal::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  border-color: var(--gold-1);
+  border-style: solid;
+  z-index: 4;
+}
+.tv-settings.tv-settings-proposal::before {
+  top: -2px;
+  left: -2px;
+  border-width: 3px 0 0 3px;
+}
+.tv-settings.tv-settings-proposal::after {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 3px 3px 0;
+}
+
+.tv-settings.tv-settings-proposal #tvSettingsForm {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.tv-settings.tv-settings-proposal,
+.tv-settings.tv-settings-proposal button,
+.tv-settings.tv-settings-proposal input,
+.tv-settings.tv-settings-proposal select,
+.tv-settings.tv-settings-proposal textarea,
+.tv-settings.tv-settings-proposal label,
+.tv-settings.tv-settings-proposal p,
+.tv-settings.tv-settings-proposal span,
+.tv-settings.tv-settings-proposal b,
+.tv-settings.tv-settings-proposal th,
+.tv-settings.tv-settings-proposal td,
+.tv-settings.tv-settings-proposal h2,
+.tv-settings.tv-settings-proposal h3 {
+  font-family: var(--serif);
+}
+
+.tv-settings.tv-settings-proposal h2 {
+  font: 700 28px/1.2 var(--serif);
+  letter-spacing: 0.12em;
+  color: var(--gold-1);
+}
+
+.tv-settings.tv-settings-proposal p,
+.tv-settings.tv-settings-proposal .tv-drag-hint,
+.tv-settings.tv-settings-proposal .tv-live-hint,
+.tv-settings.tv-settings-proposal .tv-settings-help,
+.tv-settings.tv-settings-proposal .tv-settings-help p {
+  color: var(--txt-dim);
+  font: 500 18px/1.5 var(--serif) !important;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-subhead,
+.tv-settings.tv-settings-proposal .tv-keys-subhead,
+.tv-settings.tv-settings-proposal .tv-keys-subgroup h3 {
+  margin: 8px 0 10px;
+  font: 700 16px/1.3 var(--serif);
+  letter-spacing: 0.3em;
+  color: var(--gold-3);
+}
+
+.tv-settings.tv-settings-proposal button {
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 1px solid #6b4c1d;
+  border-radius: 8px;
+  color: var(--gold-2);
+  background: linear-gradient(155deg, var(--control-1), var(--control-2));
+  font: 700 20px var(--serif) !important;
+  letter-spacing: 0.04em;
+}
+
+.tv-settings.tv-settings-proposal button:hover {
+  filter: none;
+  border-color: #c9a25a;
+  color: var(--gold-1);
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-actions button[type="submit"] {
+  color: #21190d;
+  border-color: var(--gold-1);
+  background: linear-gradient(180deg, #f7e6ba, #d6ad5d 55%, #a77a32);
+  font: 700 22px var(--serif) !important;
+  min-width: 132px;
+  min-height: 52px;
+}
+
+.tv-settings.tv-settings-proposal #tvSettingsClose {
+  background: transparent;
+  border: 0;
+  color: var(--gold-1);
+  font: 700 32px/1 var(--disp);
+  min-height: 0;
+  padding: 2px 10px;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-size-btn {
+  background: linear-gradient(155deg, var(--control-1), var(--control-2)) !important;
+  border: 1px solid #6b4c1d !important;
+  color: var(--gold-2) !important;
+  border-radius: 8px;
+  font-size: 18px !important;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid #6b4c1d80;
+  padding-bottom: 12px;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-tabs button {
+  flex: 1 1 120px;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid #6b4c1d;
+  border-radius: 8px;
+  background: linear-gradient(155deg, var(--control-1), var(--control-2));
+  color: var(--gold-2);
+  font: 700 18px var(--serif);
+  letter-spacing: 0.04em;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-tabs button[aria-selected="true"] {
+  color: #21190d;
+  border-color: var(--gold-1);
+  background: linear-gradient(180deg, #f7e6ba, #d6ad5d 55%, #a77a32);
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 10px 28px 4px;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-content > section {
+  min-height: 0;
+  padding-bottom: 8px;
+}
+
+.tv-settings.tv-settings-proposal .tv-settings-actions {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  gap: 12px;
+  margin-top: 0;
+  padding: 14px 4px 4px;
+  border-top: 1px solid #6b4c1d80;
+  background: linear-gradient(180deg, rgba(138, 16, 16, 0.55), rgba(101, 12, 12, 0.92));
+}
+
+.tv-settings.tv-settings-proposal input,
+.tv-settings.tv-settings-proposal select,
+.tv-settings.tv-settings-proposal textarea {
+  min-height: 44px;
+  width: 120px;
+  padding: 8px 12px;
+  border: 1px solid #6b4c1d;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--control-2), var(--pit));
+  box-shadow: inset 0 2px 8px #0007;
+  color: var(--gold-1);
+  text-align: center;
+  font: 700 22px/1.2 var(--disp) !important;
+  font-feature-settings: "tnum" 1, "lnum" 1, "zero" 0;
+}
+
+.tv-settings.tv-settings-proposal input:focus,
+.tv-settings.tv-settings-proposal select:focus {
+  outline: 0;
+  border-color: #c9a25a;
+  box-shadow: 0 0 10px #d4b06a40, inset 0 2px 8px #0007;
+  background: linear-gradient(180deg, var(--control-2), var(--pit));
+  color: var(--gold-1);
+}
+
+.tv-settings.tv-settings-proposal .tv-size-fields,
+.tv-settings.tv-settings-proposal #tvBasicPanel > .tv-size-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 28px;
+}
+
+.tv-settings.tv-settings-proposal .tv-size-fields label,
+.tv-settings.tv-settings-proposal .tv-size-settings label,
+.tv-settings.tv-settings-proposal .tv-key-bind-row,
+.tv-settings.tv-settings-proposal .tv-check-row,
+.tv-settings.tv-settings-proposal .tv-stats-font-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 0;
+  border-bottom: none;
+  font: 700 20px var(--serif) !important;
+  color: var(--gold-2);
+}
+
+.tv-settings.tv-settings-proposal .tv-size-fields label > span,
+.tv-settings.tv-settings-proposal .tv-size-settings label > span {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 6px;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #721212;
+}
+.tv-settings.tv-settings-proposal .tv-limit-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  text-align: left;
+  font: 700 16px var(--serif);
+  letter-spacing: 0.3em;
+  color: var(--gold-3);
+  padding: 10px 12px;
+  background: #721212;
+  box-shadow: 0 1px 0 #6b4c1d80;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table th {
+  text-align: left;
+  font: 700 16px var(--serif);
+  letter-spacing: 0.3em;
+  color: var(--gold-3);
+  padding: 8px 12px 12px;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table td {
+  padding: 7px 12px;
+  vertical-align: middle;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table td:first-child {
+  font: 700 20px var(--serif) !important;
+  color: var(--gold-2);
+  width: 28%;
+}
+
+.tv-settings.tv-settings-proposal .tv-limit-table input[data-limit-key] {
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: none !important;
+  box-sizing: content-box !important;
+  text-align: right;
+  font: 700 22px/1.2 var(--disp) !important;
+}
+
+.tv-settings.tv-settings-proposal input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #d9b568;
+}
+
+.tv-settings.tv-settings-proposal input[type="checkbox"] {
+  appearance: none;
+  width: 52px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 1px solid #735827;
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--control-2), #1a1210);
+  box-shadow: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.tv-settings.tv-settings-proposal input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ede0b7, #a67c35);
+  box-shadow: 0 2px 5px #000a;
+}
+
+.tv-settings.tv-settings-proposal input[type="checkbox"]:checked {
+  background: linear-gradient(90deg, #735827, #d9b568);
+}
+
+.tv-settings.tv-settings-proposal input[type="checkbox"]:checked::before {
+  left: 27px;
+}
+
+.tv-settings.tv-settings-proposal .tv-keys-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+}
+
+.tv-settings.tv-settings-proposal .tv-key-bind-row input {
+  width: 140px;
+  font-size: 22px;
+}
+
+.tv-settings.tv-settings-proposal #tvColorTarget,
+.tv-settings.tv-settings-proposal .tv-target-menu,
+.tv-settings.tv-settings-proposal .tv-target-menu button {
+  background: linear-gradient(180deg, var(--control-1), var(--control-2)) !important;
+  color: var(--gold-1) !important;
+  border-color: #6b4c1d !important;
+  font: 700 18px var(--serif);
+}
+
+.tv-settings.tv-settings-proposal #tvColorTarget {
+  min-height: 44px;
+  border-radius: 5px;
+}
+
+.tv-settings.tv-settings-proposal .tv-target-menu button[aria-selected="true"] {
+  background: linear-gradient(90deg, #d9b56833, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--gold-2);
+}
+
+.tv-settings.tv-settings-proposal .tv-target-menu button:hover,
+.tv-settings.tv-settings-proposal .tv-target-menu button:focus {
+  background: #d9b56822 !important;
+  outline: 0;
+}
+
+.tv-settings.tv-settings-proposal button.tv-color-swatch {
+  background: rgba(80, 14, 12, 0.45) !important;
+  border: 1px solid #6b4c1d !important;
+  color: var(--txt);
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.tv-settings.tv-settings-proposal button.tv-mini-audio-btn {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 16px;
+}
+
+.tv-settings.tv-settings-proposal #tvSettingsStatus {
+  color: var(--gold-1);
+}
+
+.tv-settings.tv-settings-proposal .tv-stats-font-control input[type="number"] {
+  width: 88px;
+}

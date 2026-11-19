@@ -1,0 +1,253 @@
+.tv-edit-toggle {
+  position: fixed; z-index: 10001; top: 12px; right: 14px; padding: 8px 15px;
+  border: 1px solid #d4a64a; border-radius: 4px; background: linear-gradient(180deg,#241b10,#100e0c);
+  color: #ffe6a2; font: 700 15px/1.2 "Noto Serif TC", "Cinzel", serif; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255,215,120,.12);
+}
+.tv-edit-toggle[aria-pressed="true"] { background: linear-gradient(180deg,#d9b568,#866022); color:#160f08; }
+.tv-edit-panel[hidden] { display:none; }
+.tv-edit-panel {
+  position: fixed; z-index: 10000; width: 360px; max-width: calc(100vw - 16px); max-height: min(82vh,800px);
+  overflow: hidden; border: 1px solid #a67c35; border-radius: 3px; color: #eee2c6;
+  background: linear-gradient(155deg,#1b1b18 0%,#101211 42%,#090b0b 100%);
+  box-shadow: inset 0 0 0 1px rgba(244,223,164,.12), 0 10px 34px rgba(0,0,0,.58);
+  font: 14px/1.45 "Noto Serif TC", "Cinzel", serif;
+}
+.tv-edit-panel-head { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; cursor:move; color:#f4dfa4; border-bottom:1px solid rgba(217,181,104,.35); background:linear-gradient(180deg,rgba(243,230,196,.09),transparent); }
+.tv-edit-panel-head-actions { display:flex; align-items:center; gap:6px; }
+.tv-edit-panel-head button,.tv-edit-actions button,.tv-edit-versions button { border:1px solid rgba(217,181,104,.55); border-radius:3px; background:linear-gradient(180deg,#29251c,#131310); color:#f4dfa4; padding:5px 9px; font:600 13px "Noto Serif TC",serif; cursor:pointer; }
+.tv-edit-panel-head button { font-size:20px; line-height:1; }
+#tvEditPopout { font:600 13px/1.2 "Noto Serif TC",serif; padding:5px 9px; }
+.tv-edit-content { max-height:calc(min(82vh,800px) - 46px); overflow:auto; padding:10px 12px 12px; }
+.tv-edit-selection { margin:0 0 9px; color:#c6ad78; overflow-wrap:anywhere; }
+.tv-edit-history { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 9px; }
+.tv-edit-history button { border:1px solid rgba(217,181,104,.55); border-radius:3px; background:linear-gradient(180deg,#29251c,#131310); color:#f4dfa4; padding:5px 9px; font:600 13px "Noto Serif TC",serif; cursor:pointer; }
+.tv-edit-history button:hover { background:linear-gradient(180deg,#4a3a21,#21190e); }
+.tv-edit-history button[disabled] { opacity:.38; cursor:default; background:linear-gradient(180deg,#29251c,#131310); }
+.tv-edit-text-label { display:flex; flex-direction:column; gap:4px; margin-bottom:9px; color:#d8c99e; }
+.tv-edit-text-label input { width:100%; box-sizing:border-box; border:1px solid rgba(217,181,104,.45); border-radius:3px; padding:6px 8px; background:#0b0d0c; color:#f5ecd9; font:14px "Noto Serif TC",serif; }
+.tv-edit-text-label input::placeholder { color:#b9a57a; opacity:1; }
+.tv-edit-text-note { margin:-4px 0 9px; color:#d9b568; font-size:12px; }
+.tv-edit-text-note[hidden] { display:none; }
+.tv-edit-bg { display:grid; gap:7px; margin:-2px 0 10px; padding:8px; border:1px solid rgba(217,181,104,.28); color:#d8c99e; }
+.tv-edit-bg label { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.tv-edit-bg input { width:65%; min-width:0; box-sizing:border-box; border:1px solid rgba(217,181,104,.45); border-radius:3px; padding:5px 7px; background:#0b0d0c; color:#f5ecd9; font:13px "Noto Serif TC",serif; }
+.tv-edit-bg [hidden] { display:none; }
+.tv-edit-bg-mode,.tv-edit-bg-dir { display:flex; flex-wrap:wrap; gap:4px; }
+.tv-edit-bg-mode button,.tv-edit-bg-dir button { border:1px solid rgba(217,181,104,.55); border-radius:3px; background:linear-gradient(180deg,#29251c,#131310); color:#f4dfa4; padding:4px 8px; font:600 12px "Noto Serif TC",serif; cursor:pointer; }
+.tv-edit-bg-mode button[aria-pressed="true"],.tv-edit-bg-dir button[aria-pressed="true"] { background:linear-gradient(180deg,#d9b568,#866022); color:#160f08; }
+.tv-edit-bg-advanced { display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+.tv-edit-bg-advanced input { width:100%; }
+.tv-edit-light { display:grid; gap:7px; margin:-2px 0 10px; padding:8px; border:1px solid rgba(217,181,104,.28); color:#d8c99e; }
+.tv-edit-light label { display:flex; align-items:center; gap:8px; }
+.tv-edit-light-toggle { cursor:pointer; }
+.tv-edit-light-toggle input { accent-color:#d9b568; }
+#tvEditLightOptions { display:grid; gap:8px; }
+#tvEditLightOptions[hidden] { display:none; }
+#tvEditLightOptions label { justify-content:space-between; font-size:13px; }
+#tvEditLightOptions input[type="range"] { flex:1; min-width:0; accent-color:#d9b568; }
+#tvEditLightOptions output { width:38px; text-align:right; font-variant-numeric:tabular-nums; }
+#tvEditSolidOptions,#tvEditGradientOptions { display:grid; gap:7px; }
+#tvEditControls { height:auto; overflow:visible; border:1px solid rgba(217,181,104,.2); }
+#tvEditControls .csc { --csc-bg:transparent; background:transparent; font-family:"Noto Serif TC",serif; }
+#tvEditControls .csc-dock { position:static; width:100%; max-height:none; overflow:visible; border:0; }
+#tvEditControls .csc-body { padding:8px; }
+#tvEditControls .csc-fields { display:grid; grid-template-columns:repeat(auto-fill,175px); gap:8px; align-items:start; }
+#tvEditControls .csc-group { grid-column:1 / -1; }
+#tvEditControls .csc-block { min-width:0; }
+#tvEditControls .csc-block[data-csc-type="size"],
+#tvEditControls .csc-block[data-csc-type="color"] { width:175px; height:25px; box-sizing:border-box; }
+#tvEditControls .csc-block[data-csc-type="size"] { gap:0; }
+#tvEditControls .csc-block[data-csc-type="color"] { flex-direction:row; align-items:center; gap:5px; }
+#tvEditControls .csc-block[data-csc-type="color"] > .csc-label { flex:0 0 58px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#tvEditControls .csc-block[data-csc-type="color"] > .csc-color { flex:1 1 auto; min-width:0; gap:4px; }
+#tvEditControls .csc-block[data-csc-type="color"] .csc-color-input { height:25px; box-sizing:border-box; padding:0 3px; font-size:11px; }
+#tvEditControls .csc-block[data-csc-type="color"] .csc-swatch { width:15px; height:15px; }
+#tvEditControls .csc-block[data-csc-type="gradient"],
+#tvEditControls .csc-block[data-csc-type="shadow"] { grid-column:1 / -1; }
+#tvEditControls .csc-header,#tvEditControls .csc-footer { display:none; }
+#tvEditControls .csc-foot { display:none; }
+.tv-edit-font-button { display:block; width:100%; margin-top:8px; border:1px solid rgba(217,181,104,.45); border-radius:3px; padding:7px; background:linear-gradient(180deg,#29251c,#131310); color:#f4dfa4; font:600 13px "Noto Serif TC",serif; cursor:pointer; }
+.tv-edit-actions { display:flex; flex-wrap:wrap; gap:6px; padding-top:9px; }
+.tv-edit-actions button:hover,.tv-edit-versions button:hover { background:linear-gradient(180deg,#4a3a21,#21190e); }
+.tv-edit-versions { display:flex; flex-direction:column; gap:5px; margin-top:8px; }
+.tv-edit-version-row { display:flex; align-items:center; gap:5px; }
+.tv-edit-version-row > button:first-child { flex:1 1 auto; min-width:0; }
+.tv-edit-versions .tv-edit-version-delete { flex:0 0 auto; white-space:nowrap; padding:4px 8px; }
+.tv-edit-status { min-height:1.2em; margin:6px 0 0; color:#d9b568; font-size:12px; }
+.tv-editing .tv-edit-target { outline:1px dashed rgba(255,218,130,.86)!important; outline-offset:2px; cursor:crosshair!important; }
+/* 選取提示改成獨立一層（#tvEditSelBox），不畫在格子身上，改圓角、框線、顏色都不影響它 */
+.tv-edit-selbox { position:fixed; z-index:9990; pointer-events:none; box-sizing:border-box; border:2px solid rgba(244,223,164,.9); border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.55), 0 0 8px rgba(217,181,104,.35); display:none; }
+.tv-edit-selbox:not(.tv-edit-selbox-primary) { opacity:.6; }
+.tv-edit-panel .tv-edit-selected,.tv-edit-toggle.tv-edit-selected { outline:none!important; }
+body.tv-edit-export .tv-edit-toggle,body.tv-edit-export .tv-edit-panel { display:none!important; }
+@media(max-width:600px) { .tv-edit-panel { width: min(360px,92vw); } }
+.fp.fp-dock.tv-edit-fp { top: 56px; max-width: 100vw; z-index: 10000; }
+.fp.fp-dock.tv-edit-fp[hidden] { display:none; }
+body.tv-edit-export .fp.tv-edit-fp { display:none!important; }
+.fp.fp-dock.tv-edit-fp { resize: both; min-width: min(860px, 100vw); min-height: min(760px, calc(100vh - 64px)); max-height: calc(100vh - 8px); }
+.fp.tv-edit-fp .tv-edit-fp-handle { cursor: move; }
+.fp.tv-edit-fp .fp-line:has(> input[aria-label="字色"]) { display:none; }
+.tv-edit-mixed { margin-left:6px; color:#d9b568; font-size:12px; }
+
+/* 統計格切割小塊的電視預設配色（只作用在已切割的格子） */
+.tv-app .tv-stats .stats-list .cs-leaf{color:#fff}
+.tv-app .tv-stats .stats-list .cs-leaf[data-kind="count"]{color:#ffe477;font-weight:900}
+
+.tv-edit-panel.pm-panel .tv-edit-content { flex:1 1 auto; max-height:none; }
+#tvEditPanel > .tv-edit-top-resize {
+  flex: 0 0 10px; height: 10px; min-height: 10px; box-sizing: border-box; touch-action: none;
+  cursor: ns-resize; position: relative; z-index: 3;
+  background:
+    linear-gradient(#d9b568, #d9b568) center 3px / 28px 2px no-repeat,
+    linear-gradient(#d9b568, #d9b568) center 6px / 28px 2px no-repeat;
+}
+html.tv-edit-popout #tvEditPanel > .tv-edit-top-resize { display: none; }
+
+/* 標籤本身就是滑桿：長條顯示名稱與數值，原本的 range 留在 DOM */
+#tvEditPanel .tv-slider-label-off { display:none !important; }
+#tvEditPanel .tv-slider-line { position:relative; align-items:center; gap:6px; min-width:0; }
+#tvEditControls .csc-block[data-csc-type="size"] > .tv-slider-line { height:25px; }
+#tvEditPanel .tv-slider-src {
+  position:absolute !important; left:0; top:0; width:1px !important; height:1px !important;
+  margin:0 !important; padding:0 !important; border:0 !important; opacity:0 !important;
+  pointer-events:none !important; overflow:hidden; clip:rect(0,0,0,0);
+}
+#tvEditPanel .tv-slider-bar {
+  position:relative; flex:0 0 175px; width:175px; height:25px; box-sizing:border-box;
+  display:flex; align-items:center; justify-content:space-between; gap:6px; padding:0 8px;
+  border:1px solid rgba(217,181,104,.55); border-radius:3px; overflow:hidden; cursor:ew-resize;
+  background:linear-gradient(180deg,#29251c,#131310); color:#f4dfa4;
+  font:600 13px/1 "Noto Serif TC","Cinzel",serif; user-select:none; touch-action:none;
+  transition:border-color 120ms ease, box-shadow 120ms ease;
+}
+#tvEditPanel .tv-slider-bar.is-active,
+#tvEditPanel .tv-slider-bar:focus {
+  border-color:#ffe6a2; box-shadow:0 0 10px rgba(217,181,104,.45); outline:none; z-index:2;
+}
+#tvEditPanel .tv-slider-fill {
+  position:absolute; left:0; top:0; bottom:0; width:0; background:rgba(217,181,104,.28); pointer-events:none;
+}
+#tvEditPanel .tv-slider-name,
+#tvEditPanel .tv-slider-val { position:relative; z-index:1; pointer-events:none; white-space:nowrap; }
+#tvEditPanel .tv-slider-name { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+#tvEditPanel .tv-slider-val { flex:none; margin-left:auto; }
+#tvEditPanel .tv-slider-line > .csc-num { display:none; position:absolute; left:0; top:calc(100% + 3px); z-index:5; width:175px; height:25px; box-sizing:border-box; }
+#tvEditPanel .tv-slider-line.tv-slider-num-open > .csc-num { display:block; }
+#tvEditPanel .tv-slider-line > .csc-unit-menu { position:absolute; right:0; top:0; z-index:3; height:25px; }
+#tvEditPanel .tv-slider-line > .csc-unit-menu .csc-unit-btn { height:25px; min-width:30px; padding:0 4px; }
+#tvEditPanel .tv-slider-bar:has(~ .csc-unit-menu) { padding-right:70px; }
+#tvEditControls .csc-grid2 { grid-template-columns:1fr; }
+
+/* Detached window keeps the editing panel floating above the font panel. */
+html.tv-edit-popout, html.tv-edit-popout body { margin:0; height:100%; overflow:hidden; background:#090b0b; }
+html.tv-edit-popout #tvEditPanel {
+  position:fixed; z-index:10002; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px);
+}
+html.tv-edit-popout #tvEditPanel .tv-edit-content { flex:1 1 auto; max-height:none; min-height:0; overflow:auto; }
+html.tv-edit-popout #tvEditPanel .tv-edit-panel-head { cursor:move; }
+html.tv-edit-popout #tvEditPanel > .tv-edit-top-resize { display:block; }
+html.tv-edit-popout .fp.fp-dock.tv-edit-fp {
+  position:fixed !important; inset:8px 8px 8px auto !important;
+  width:calc(100vw - 420px) !important; height:calc(100vh - 16px) !important;
+  min-width:280px !important; min-height:0 !important; max-width:calc(100vw - 16px) !important;
+  max-height:calc(100vh - 16px) !important; margin:0 !important; resize:none !important;
+}
+html.tv-edit-popout .fp.tv-edit-fp .tv-edit-fp-handle { cursor:default; }
+
+/* Every editing control uses the same compact cell, including nested editors. */
+#tvEditPanel .tv-edit-content {
+  display:grid; grid-template-columns:repeat(auto-fill,175px); gap:8px;
+  grid-auto-rows:max-content; align-content:start; align-items:start;
+}
+#tvEditPanel .tv-edit-content > :is(p,.tv-edit-text-note,#tvEditControls,.tv-edit-versions,.cs-tools) { grid-column:1 / -1; }
+#tvEditPanel :is(.tv-edit-history,.tv-edit-actions,.tv-edit-bg,.tv-edit-light,
+  #tvEditSolidOptions,#tvEditGradientOptions,#tvEditLightOptions,
+  .tv-edit-bg-mode,.tv-edit-bg-dir) { display:contents; }
+#tvEditPanel [hidden] { display:none !important; }
+#tvEditPanel :is(.tv-edit-text-label,.tv-edit-bg label,.tv-edit-light label) {
+  display:flex; flex-direction:row; align-items:center; justify-content:space-between;
+  gap:5px; width:175px; height:25px; margin:0; padding:0 5px;
+  box-sizing:border-box; overflow:hidden; white-space:nowrap;
+  border:1px solid rgba(217,181,104,.45); border-radius:3px; font-size:12px;
+}
+#tvEditPanel :is(.tv-edit-text-label,.tv-edit-bg label) input {
+  flex:1; min-width:0; width:0; height:23px; padding:0 3px; border:0;
+  font-size:11px; box-sizing:border-box;
+}
+#tvEditPanel .tv-edit-bg-advanced { font-size:0; }
+#tvEditPanel .tv-edit-bg-advanced::before { content:'CSS'; font-size:12px; }
+#tvEditPanel .tv-edit-light-toggle { justify-content:flex-start !important; }
+#tvEditPanel .tv-edit-light-toggle input { flex:none; margin:0; }
+#tvEditPanel #tvEditLightOptions label.tv-slider-line { padding:0; border:0; overflow:visible; }
+#tvEditPanel .tv-edit-content button {
+  width:175px; height:25px; box-sizing:border-box; margin:0; padding:0 5px;
+  font-size:12px; line-height:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#tvEditControls { min-width:0; border:0; }
+#tvEditControls .csc-body { padding:0; }
+#tvEditControls :is(.csc-grid2,.csc-layer) {
+  display:grid; grid-template-columns:repeat(auto-fill,175px); gap:8px; align-items:start;
+}
+#tvEditControls .csc-layer { padding:8px 0; }
+#tvEditControls .csc-layer > :is(.csc-grid2,.csc-line:not(.tv-slider-line)) { display:contents; }
+#tvEditControls :is(.csc-mini,.tv-slider-line,.csc-check,.csc-layer .csc-color,.csc-shadow-sample,.csc-grad) {
+  width:175px; height:25px; min-width:0; box-sizing:border-box;
+}
+#tvEditControls .csc-check { display:flex; align-items:center; gap:5px; }
+#tvEditControls .csc-layer .csc-color { display:flex; gap:4px; }
+#tvEditControls .csc-layer .csc-color::before { content:'顏色'; font-size:12px; flex:none; }
+#tvEditControls .csc-layer .csc-color-input { width:0; flex:1; min-width:0; height:25px; padding:0 3px; font-size:11px; }
+#tvEditControls .csc-layer .csc-swatch { width:18px; height:18px; flex:none; }
+#tvEditControls .tv-slider-line > .csc-num { width:175px; }
+#tvEditPanel .tv-edit-version-row { display:contents; }
+#tvEditPanel .tv-edit-versions { display:grid; grid-template-columns:repeat(auto-fill,175px); gap:8px; }
+
+#tvEditPanel .tv-edit-bg label.tv-edit-bg-advanced { font-size:0; }
+#tvEditPanel .tv-edit-content .csc-unit-menu .csc-unit-btn { width:30px; min-width:30px; padding:0 3px; }
+#tvEditPanel .cs-tools { display:grid; grid-template-columns:repeat(auto-fill,175px); gap:8px; padding:0; border:0; }
+#tvEditPanel .cs-tools-row { display:contents; }
+#tvEditPanel .cs-tools .cs-text-input { width:175px; height:25px; box-sizing:border-box; padding:0 5px; font-size:12px; }
+
+/* Commands are compact, quiet buttons; value controls keep their 175px cells. */
+#tvEditPanel .tv-edit-content :is(
+  .tv-edit-history button,.tv-edit-actions button,.tv-edit-versions button,
+  .cs-tools .cs-btn,.tv-edit-font-button,.tv-edit-workbench-button,.csc-textbtn,.csc-iconbtn
+) {
+  width:87.5px; min-width:87.5px; max-width:87.5px; height:25px; min-height:25px;
+  flex:none; padding:0 4px; border-radius:4px;
+  border:1px solid rgba(196,168,106,.42);
+  background:linear-gradient(180deg,#1d211e,#101411);
+  color:#d9caa8; box-shadow:none; letter-spacing:0;
+  font:600 11px/1.1 "Noto Serif TC",serif;
+}
+#tvEditPanel .tv-edit-content :is(
+  .tv-edit-history button,.tv-edit-actions button,.tv-edit-versions button,
+  .cs-tools .cs-btn,.tv-edit-font-button,.tv-edit-workbench-button,.csc-textbtn,.csc-iconbtn
+):hover:not(:disabled) { border-color:#d9b568; background:#252921; color:#f4dfa4; }
+#tvEditPanel .tv-edit-content :is(
+  .tv-edit-history button,.tv-edit-actions button,.tv-edit-versions button,
+  .cs-tools .cs-btn,.tv-edit-font-button,.tv-edit-workbench-button,.csc-textbtn,.csc-iconbtn
+):focus-visible { outline:2px solid #f4dfa4; outline-offset:1px; }
+#tvEditPanel .tv-edit-content :is(.tv-edit-history,.tv-edit-actions) {
+  display:flex !important; grid-column:1/-1; flex-wrap:wrap; gap:6px;
+  margin:0; padding:0;
+}
+#tvEditPanel .tv-edit-versions { display:flex; flex-wrap:wrap; gap:6px; }
+#tvEditPanel .tv-edit-version-row { display:flex; gap:6px; }
+#tvEditPanel .tv-edit-version-row > button:first-child { flex:none; }
+#tvEditPanel .cs-tools { display:flex; flex-wrap:wrap; gap:6px; }
+#tvEditPanel .cs-tools-row { display:contents; }
+#tvEditPanel .cs-tools .cs-text-input { flex:none; min-height:25px; }
+#tvEditPanel .cs-tools .cs-btn:is(.active,.is-on,[aria-pressed="true"]) {
+  border-color:#d9b568; background:linear-gradient(180deg,#bca067,#786033); color:#17120a;
+}
+#tvEditControls .csc-layer { grid-template-columns:repeat(auto-fill,87.5px); column-gap:0; }
+#tvEditControls .csc-layer :is(.csc-check,.csc-color,.csc-mini,.tv-slider-line) { grid-column:span 2; }
+#tvEditControls .csc-layer .csc-iconbtn { grid-column:span 1; }
+#tvEditPanel .tv-edit-content :is(.tv-edit-history,.tv-edit-actions,.tv-edit-versions,.cs-tools) {
+  column-gap:0; row-gap:6px;
+}
+#tvEditPanel .tv-edit-version-row { gap:0; }
+/* Keep limits readonly, but allow the editor to select the actual display field. */
+.tv-app.tv-editing .tv-limit .limit-input { pointer-events: auto; }

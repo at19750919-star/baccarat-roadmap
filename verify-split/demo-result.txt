@@ -1,0 +1,36 @@
+==== demo 2560
+塊內容 [["aa","幸運6"],["ab","小老虎"],["b","0"]]
+樹 {"0":{"dir":"row","r":0.64,"a":{"dir":"col","r":0.23,"a":{"parts":["prefix"]},"b":{"parts":["main"]}},"b":{"parts":["count"]}}}
+示範切法（上幸運6小、下小老虎大、右0） 通過 25,83
+字型選單列數 51
+選的字型 思源黑體 存檔 {"cs-0-ab":{"fontFamily":"思源黑體, sans-serif","fontSize":"28px","color":"rgb(204, 41, 41)"}}
+選字後字型面板關閉 是
+除錯 ["--cs-font: \"Noto Serif TC\", Cinzel, serif; flex: 1 1 0px; font-size: 28px; color: rgb(204, 41, 41); font-family: 思源黑體, sans-serif; font-weight: 700;",true,3]
+小老虎樣式 ["28px","rgb(204, 41, 41)","思源黑體, sans-serif"]
+塊尺寸 [["aa",111,25,54,26,"22px"],["ab",111,83,84,33,"28px"],["b",62,108,58,101,"22px"]]
+總尺寸不變 通過 無溢出
+莊格切 2 塊後合併回不切割 通過
++1 後右塊數字 1 通過
+重新載入後保留 通過 ["28px","rgb(204, 41, 41)","思源黑體, sans-serif"]
+回主頁按鈕 {"t":"回主頁","hit":true}
+清除後整頁截圖相同 否 ["已清除","尚未選取","開啟編輯"] 棋盤區逐像素相同 通過
+點回主頁後網址 共用元件/index.html
+console 錯誤 0 
+==== demo 390
+塊內容 [["aa","幸運6"],["ab","小老虎"],["b","0"]]
+樹 {"0":{"dir":"row","r":0.64,"a":{"dir":"col","r":0.23,"a":{"parts":["prefix"]},"b":{"parts":["main"]}},"b":{"parts":["count"]}}}
+示範切法（上幸運6小、下小老虎大、右0） 通過 19,63
+字型選單列數 51
+選的字型 思源黑體 存檔 {"cs-0-ab":{"fontFamily":"思源黑體, sans-serif","fontSize":"28px","color":"rgb(204, 41, 41)"}}
+選字後字型面板關閉 是
+除錯 ["--cs-font: \"Noto Serif TC\", Cinzel, serif; flex: 1 1 0px; font-size: 12px; color: rgb(204, 41, 41); font-family: 思源黑體, sans-serif; font-weight: 700;",true,3]
+小老虎樣式 ["12px","rgb(204, 41, 41)","思源黑體, sans-serif"]
+塊尺寸 [["aa",48,19,42,20,"15px"],["ab",48,63,36,14,"12px"],["b",27,82,25,44,"15px"]]
+總尺寸不變 通過 無溢出
+莊格切 2 塊後合併回不切割 通過
++1 後右塊數字 1 通過
+重新載入後保留 通過 ["12px","rgb(204, 41, 41)","思源黑體, sans-serif"]
+回主頁按鈕 {"t":"回主頁","hit":true}
+清除後整頁截圖相同 否 ["已清除","尚未選取","開啟編輯"] 棋盤區逐像素相同 通過
+點回主頁後網址 共用元件/index.html
+console 錯誤 0 

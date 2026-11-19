@@ -65,11 +65,11 @@
       return val;
     };
     setTxt('legendKeyConfirm', fmtKey(kb.keyConfirm || 'Enter'));
-    setTxt('legendKeyUndo', '7 / ' + fmtKey(kb.keyUndo || 'Backspace'));
+    setTxt('legendKeyUndo', '7');
     setTxt('legendKeyLimit', '77');
     setTxt('legendKeyBoss', '8');
     setTxt('legendKeyClear', fmtDoubleKey(kb.keyClear, '9'));
-    setTxt('legendKeyFullscreen', String(kb.keyFullscreen || 'F'));
+    setTxt('legendKeyFullscreen', '/');
   }
   const statsFontKeys = ["statsNameSize", "statsNumberSize", "statsHeaderSize"];
   const defaults = { columns: 46, bigStroke: 4, eyeStroke: 2, cockroachStroke: 3, starStroke: 3, dragonThreshold: 6, statsNameSize: 32, statsNumberSize: 36, statsHeaderSize: 22 };
@@ -113,7 +113,22 @@
     ]]
   ];
   const colorFields = colorGroups.flatMap(([, fields]) => fields);
-  let settings = { ...defaults, colors: {}, symbols: BaccaratSymbolSettings.normalize() };
+  // Table / shoe labels shown in the stats header; short text so the header never overflows.
+  const cleanLabel = (value, fallback) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 8) || fallback;
+  const cleanText = (value, fallback) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 60) || fallback;
+  const formatShoeNo = val => {
+    const trimmed = String(val ?? '').trim();
+    const num = parseInt(trimmed, 10);
+    return Number.isFinite(num) && num > 0 ? String(num).padStart(2, '0') : (trimmed.slice(0, 8) || '01');
+  };
+  let sessionShoeNo = '01';
+  try {
+    const stored = sessionStorage.getItem('baccarat_current_shoe');
+    if (stored) sessionShoeNo = formatShoeNo(stored);
+    else sessionStorage.setItem('baccarat_current_shoe', '01');
+  } catch (_) {}
+  let settings = { ...defaults, colors: {}, symbols: BaccaratSymbolSettings.normalize(), tableNo: '001', shoeEnabled: false, shoeNo: sessionShoeNo, clearPromptText: '確定要清盤？此操作無法復原', autoSaveOnClear: true, customSavePath: '', cloudBackup: false };
+  window.getBaccaratSettings = () => settings;
   let derivedColumns = 46;
   let beadColumns = 16;
   function normalize(value) {
@@ -128,11 +143,22 @@
       if (typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color)) result.colors[key] = color.toLowerCase();
     }
     result.symbols = BaccaratSymbolSettings.normalize(value?.symbols);
+    result.tableNo = cleanLabel(value?.tableNo, '001');
+    result.shoeEnabled = value?.shoeEnabled === true || value?.shoeEnabled === 'on';
+    result.shoeNo = formatShoeNo(value?.shoeNo || sessionShoeNo);
+    result.clearPromptText = cleanText(value?.clearPromptText, '確定要清盤？此操作無法復原');
+    result.autoSaveOnClear = value?.autoSaveOnClear !== false && value?.autoSaveOnClear !== 'off';
+    result.customSavePath = String(value?.customSavePath ?? '').trim();
+    result.cloudBackup = value?.cloudBackup === true || value?.cloudBackup === 'on';
     return result;
   }
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) settings = normalize(JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      parsed.shoeNo = sessionShoeNo; // 靴號重開一律重置為 01 (由 Session 管理)
+      settings = normalize(parsed);
+    }
   } catch (_) { /* Unavailable or damaged storage keeps the defaults. */ }
 
   // Apply the smaller label cap once to existing preferences; later manual choices remain valid.
@@ -412,10 +438,28 @@
     }
   }
 
+  function applyTableInfo() {
+    const stats = document.querySelector('.tv-app .tv-stats');
+    const table = stats?.querySelector('.tv-stat-table');
+    if (!table) return;
+    table.querySelector('b').textContent = settings.tableNo;
+    let shoe = stats.querySelector('.tv-stat-shoe');
+    if (!shoe) {
+      shoe = document.createElement('div');
+      shoe.className = 'tv-stat-head tv-stat-shoe';
+      shoe.innerHTML = '<span class="tv-stat-head-label">靴號</span><b></b>';
+      table.after(shoe);
+    }
+    shoe.querySelector('b').textContent = settings.shoeNo;
+    shoe.style.display = settings.shoeEnabled ? '' : 'none';
+    stats.style.gridTemplateColumns = settings.shoeEnabled ? 'repeat(3, minmax(0, 1fr))' : '';
+  }
+
   function applyLayout() {
     const app = document.querySelector('.tv-app');
     const set = (key, value) => app.style.setProperty(key, value);
     app.dataset.dragonThreshold = settings.dragonThreshold;
+    applyTableInfo();
     applyColors();
     document.documentElement.style.setProperty('--tv-stat-count-size', settings.statsNumberSize + 'px');
     document.documentElement.style.setProperty('--tv-stat-header-size', settings.statsHeaderSize + 'px');
@@ -460,6 +504,81 @@
     const form = document.getElementById('tvSettingsForm');
     const button = document.getElementById('tvSettingsButton');
     const status = document.getElementById('tvSettingsStatus');
+    // Anchor on the first size field: the compact layout script may regroup its container.
+    if (!document.getElementById('tvTableNo')) {
+      document.getElementById('tvBigColumns').closest('label').insertAdjacentHTML('beforebegin',
+        '<label for="tvTableNo">桌號 <span><input id="tvTableNo" name="tableNo" type="text" maxlength="8" autocomplete="off" spellcheck="false"/></span></label>' +
+        '<label for="tvShoeEnabled">顯示靴號 <span><input id="tvShoeEnabled" name="shoeEnabled" type="checkbox"/></span></label>' +
+        '<label for="tvShoeNo">靴號 <span><input id="tvShoeNo" name="shoeNo" type="text" maxlength="8" autocomplete="off" spellcheck="false"/></span></label>');
+    }
+    let tabSave = document.getElementById('tvTabSave');
+    if (!tabSave) {
+      const tabKeys = document.getElementById('tvTabKeys');
+      tabSave = document.createElement('button');
+      tabSave.type = 'button';
+      tabSave.id = 'tvTabSave';
+      tabSave.setAttribute('role', 'tab');
+      tabSave.dataset.settingsTab = 'save';
+      tabSave.setAttribute('aria-controls', 'tvSavePanel');
+      tabSave.setAttribute('aria-selected', 'false');
+      tabSave.tabIndex = -1;
+      tabSave.textContent = '儲存設定';
+      if (tabKeys && tabKeys.nextSibling) {
+        tabKeys.parentNode.insertBefore(tabSave, tabKeys.nextSibling);
+      } else if (tabKeys) {
+        tabKeys.parentNode.appendChild(tabSave);
+      }
+    }
+    let savePanel = document.getElementById('tvSavePanel');
+    if (!savePanel) {
+      savePanel = document.createElement('section');
+      savePanel.id = 'tvSavePanel';
+      savePanel.setAttribute('role', 'tabpanel');
+      savePanel.setAttribute('aria-labelledby', 'tvTabSave');
+      savePanel.hidden = true;
+      savePanel.innerHTML = `
+        <div class="tv-save-settings">
+          <div class="tv-save-subgroup">
+            <h3 class="tv-save-subhead">路單存檔設定</h3>
+            <div class="tv-save-grid">
+              <label class="tv-save-row" for="tvCustomSavePath">
+                <span>儲存路徑</span>
+                <span class="tv-path-picker-row">
+                  <input id="tvCustomSavePath" name="customSavePath" type="text" placeholder="預設：文件 ➔ 玖玖路單" spellcheck="false"/>
+                  <button type="button" id="tvPickFolderBtn" class="tv-pick-folder-btn">選擇資料夾</button>
+                </span>
+              </label>
+              <label class="tv-save-row" for="tvAutoSaveOnClear">
+                <span>清盤時自動儲存</span>
+                <span><input id="tvAutoSaveOnClear" name="autoSaveOnClear" type="checkbox"/></span>
+              </label>
+              <label class="tv-save-row" for="tvClearPromptText">
+                <span>清盤提示文字</span>
+                <span><input id="tvClearPromptText" name="clearPromptText" type="text" maxlength="40" autocomplete="off" spellcheck="false" placeholder="確定要清盤？此操作無法復原"/></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      `;
+      const keysPanel = document.getElementById('tvKeysPanel');
+      if (keysPanel && keysPanel.nextSibling) {
+        keysPanel.parentNode.insertBefore(savePanel, keysPanel.nextSibling);
+      } else {
+        const contentWrap = document.querySelector('.tv-settings-content');
+        if (contentWrap) contentWrap.appendChild(savePanel);
+      }
+    }
+    const tableInputs = ['tableNo', 'shoeEnabled', 'shoeNo'].map(name => form.elements.namedItem(name));
+    function previewTableInfo() {
+      const [tableNo, shoeEnabled, shoeNo] = tableInputs;
+      shoeNo.disabled = !shoeEnabled.checked;
+      if (!dialog.open) return;
+      const formattedShoe = formatShoeNo(shoeNo.value);
+      settings = { ...settings, tableNo: cleanLabel(tableNo.value, '001'), shoeEnabled: shoeEnabled.checked, shoeNo: formattedShoe };
+      try { sessionStorage.setItem('baccarat_current_shoe', formattedShoe); } catch (_) {}
+      applyTableInfo();
+    }
+    tableInputs.forEach(input => input.addEventListener(input.type === 'checkbox' ? 'change' : 'input', previewTableInfo));
     let draftColors = {};
     let editBaseline = null;
     function previewColors() {
@@ -626,11 +745,13 @@
       document.getElementById('tvBasicPanel').hidden = tab !== 'basic';
       const keysPanel = document.getElementById('tvKeysPanel');
       if (keysPanel) keysPanel.hidden = tab !== 'keys';
+      const savePanel = document.getElementById('tvSavePanel');
+      if (savePanel) savePanel.hidden = tab !== 'save';
       document.getElementById('tvColorPanel').hidden = !isColorTab;
       document.getElementById('tvSymbolsPanel').hidden = tab !== 'symbols';
       if (tab === 'symbols') symbolEditor.show();
       statsFontEditor.setActive(tab === 'statsFont');
-      document.getElementById('tvSettingsReset').hidden = tab !== 'basic' && tab !== 'keys' && tab !== 'symbols' && tab !== 'statsFont';
+      document.getElementById('tvSettingsReset').hidden = tab !== 'basic' && tab !== 'keys' && tab !== 'symbols' && tab !== 'statsFont' && tab !== 'save';
       document.getElementById('tvColorsReset').hidden = !isColorTab;
       groups.forEach((group, index) => { group.hidden = String(index) !== tab; });
       hexInput.disabled = true; activeColor = null;
@@ -871,28 +992,12 @@
         } else {
           finishSeven();
           if (shortcut === '8') document.getElementById('saveBtn').click();
-          else if (shortcut === 'X') document.getElementById('tvEditToggle').click();
+          else if (shortcut === 'X') document.getElementById('tvEditToggle')?.click();
           else undo();
         }
         return;
       }
       if (!event.repeat) finishSeven();
-      const isCustomKeyUsed = [
-        currentKeyBindings.keyConfirm, currentKeyBindings.keyUndo,
-        currentKeyBindings.keyLimit, currentKeyBindings.keyBoss, currentKeyBindings.keyClear,
-        currentKeyBindings.keyFullscreen
-      ].some(k => isMatchKey(k, event));
-      if (!isCustomKeyUsed && (code === 'KeyC' || code === 'KeyT')) {
-        if (!event.repeat) {
-          cancelOrdinary();
-          special = code === 'KeyC' ? 'small' : 'big';
-          seq = [];
-          hint.textContent = (special === 'small' ? '小老虎' : '大老虎') + '：Enter 記錄；Esc 取消';
-        }
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-      }
       if (code === 'Escape') { if (special || seq.length) { resetInput(); cancelOrdinary(); event.preventDefault(); } return; }
       if ((isMatchKey(currentKeyBindings.keyUndo || 'Backspace', event) || code === 'Backspace') && !event.repeat) { resetInput(); return; }
       const keyChar = codeToKeyChar(code);
@@ -940,6 +1045,19 @@
         resetInput();
       }
     });
+    document.addEventListener('baccarat:clear', () => {
+      const cur = parseInt(settings.shoeNo, 10);
+      const next = Number.isFinite(cur) ? cur + 1 : 1;
+      const nextShoeStr = String(next).padStart(2, '0');
+      settings.shoeNo = nextShoeStr;
+      sessionShoeNo = nextShoeStr;
+      try {
+        sessionStorage.setItem('baccarat_current_shoe', nextShoeStr);
+      } catch (_) {}
+      applyTableInfo();
+      const shoeInput = document.getElementById('tvShoeNo');
+      if (shoeInput) shoeInput.value = nextShoeStr;
+    });
     dialog.addEventListener('close', () => { resetInput(); cancelOrdinary(); });
     document.querySelectorAll('.tv-limit .limit-input').forEach(input => {
       input.addEventListener('focus', () => { input.value = input.value.replace(/,/g, ''); });
@@ -950,6 +1068,9 @@
       });
       input.dispatchEvent(new Event('blur'));
     });
+    // 連按鍵在面板上顯示成兩個字（77、99），存檔時收回單鍵，判斷邏輯不變。
+    const doubleKey = k => { const v = String(k || '').trim(); return v.length === 1 ? v.repeat(2) : v; };
+    const singleKey = k => { const v = String(k || '').trim(); return v.length === 2 && v[0] === v[1] ? v[0] : v; };
     function fillKeyBindings(kb) {
       const b = kb || currentKeyBindings;
       const allFields = [
@@ -958,7 +1079,7 @@
       ];
       for (const k of allFields) {
         const el = form.elements.namedItem(k);
-        if (el) el.value = k === 'keyLimit' ? '7' : k === 'keyBoss' ? '8' : b[k] || defaultKeyBindings[k];
+        if (el) el.value = k === 'keyLimit' ? '77' : k === 'keyBoss' ? '8' : k === 'keyClear' ? doubleKey(b[k] || defaultKeyBindings[k]) : b[k] || defaultKeyBindings[k];
       }
       const ac = form.elements.namedItem('autoCommit');
       if (ac) ac.checked = b.autoCommit !== false;
@@ -977,10 +1098,50 @@
     }
     function fill(values) {
       for (const key of Object.keys(defaults)) form.elements.namedItem(key).value = values[key];
+      tableInputs[0].value = values.tableNo;
+      tableInputs[1].checked = values.shoeEnabled;
+      tableInputs[2].value = values.shoeNo;
+      tableInputs[2].disabled = !values.shoeEnabled;
+      const clearPromptInput = form.elements.namedItem('clearPromptText');
+      if (clearPromptInput) clearPromptInput.value = values.clearPromptText || '確定要清盤？此操作無法復原';
+      const autoSaveInput = form.elements.namedItem('autoSaveOnClear');
+      if (autoSaveInput) autoSaveInput.checked = values.autoSaveOnClear !== false;
+      const customPathInput = form.elements.namedItem('customSavePath');
+      if (customPathInput) customPathInput.value = values.customSavePath || '';
+      const cloudInput = form.elements.namedItem('cloudBackup');
+      if (cloudInput) cloudInput.checked = values.cloudBackup === true;
       fillColors(values.colors);
       symbolEditor.setValue(values.symbols);
       fillKeyBindings(currentKeyBindings);
       statsFontEditor.sync();
+    }
+    const pickFolderBtn = document.getElementById('tvPickFolderBtn');
+    if (pickFolderBtn) {
+      pickFolderBtn.addEventListener('click', async () => {
+        const pathInput = document.getElementById('tvCustomSavePath');
+        if (window.OfflineRoadmap?.selectFolder) {
+          const chosen = await window.OfflineRoadmap.selectFolder(pathInput?.value || '');
+          if (chosen && pathInput) {
+            pathInput.value = chosen;
+            settings.customSavePath = chosen;
+            try {
+              const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+              s.customSavePath = chosen;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+            } catch (_) {}
+          }
+        } else if (window.showDirectoryPicker) {
+          try {
+            const dirHandle = await window.showDirectoryPicker();
+            if (dirHandle && pathInput) {
+              pathInput.value = dirHandle.name;
+              settings.customSavePath = dirHandle.name;
+            }
+          } catch (_) {}
+        } else {
+          alert('請直接在輸入框中填入儲存資料夾路徑（例如 E:\\ 或 D:\\路單）');
+        }
+      });
     }
     dialog.showModal = function() { this.show(); };
     button.addEventListener('click', () => {
@@ -1078,11 +1239,14 @@
     }, true);
     form.addEventListener('submit', event => {
       event.preventDefault();
-      if (document.getElementById('tvStatsFontPanel').querySelector('input:invalid')) { showTab('statsFont'); form.reportValidity(); return; }
-      if (document.getElementById('tvSymbolsPanel').querySelector('input:invalid')) { showTab('symbols'); form.reportValidity(); return; }
-      if (!document.getElementById('tvBasicPanel').querySelector('input:invalid')) { if (!form.reportValidity()) return; }
+      if (document.getElementById('tvStatsFontPanel')?.querySelector('input:invalid')) { showTab('statsFont'); form.reportValidity(); return; }
+      if (document.getElementById('tvSymbolsPanel')?.querySelector('input:invalid')) { showTab('symbols'); form.reportValidity(); return; }
+      if (document.getElementById('tvSavePanel')?.querySelector('input:invalid')) { showTab('save'); form.reportValidity(); return; }
+      if (!document.getElementById('tvBasicPanel')?.querySelector('input:invalid')) { if (!form.reportValidity()) return; }
       else { showTab('basic'); form.reportValidity(); return; }
-      settings = normalize({ ...Object.fromEntries(new FormData(form)), colors: draftColors, symbols: settings.symbols });
+      const formattedShoe = formatShoeNo(tableInputs[2].value);
+      settings = normalize({ ...Object.fromEntries(new FormData(form)), shoeNo: formattedShoe, colors: draftColors, symbols: settings.symbols });
+      try { sessionStorage.setItem('baccarat_current_shoe', formattedShoe); } catch (_) {}
       applyLayout();
 
       const fd = new FormData(form);
@@ -1097,9 +1261,9 @@
         keySeven: (fd.get('keySeven') || defaultKeyBindings.keySeven).toString().trim(),
         keyConfirm: (fd.get('keyConfirm') || defaultKeyBindings.keyConfirm).toString().trim(),
         keyUndo: (fd.get('keyUndo') || defaultKeyBindings.keyUndo).toString().trim(),
-        keyLimit: (fd.get('keyLimit') || defaultKeyBindings.keyLimit).toString().trim(),
+        keyLimit: singleKey(fd.get('keyLimit') || defaultKeyBindings.keyLimit),
         keyBoss: (fd.get('keyBoss') || defaultKeyBindings.keyBoss).toString().trim(),
-        keyClear: (fd.get('keyClear') || defaultKeyBindings.keyClear).toString().trim(),
+        keyClear: singleKey(fd.get('keyClear') || defaultKeyBindings.keyClear),
         keyFullscreen: (fd.get('keyFullscreen') || defaultKeyBindings.keyFullscreen).toString().trim(),
         autoCommit: form.elements.namedItem('autoCommit')?.checked ?? true,
         autoCommitDelay: parseFloat(fd.get('autoCommitDelay')) || 0.38
@@ -1133,7 +1297,7 @@
           else if (/^Numpad[0-9]$/.test(e.code)) keyVal = e.code.slice(6);
           else if (/^Digit[0-9]$/.test(e.code)) keyVal = e.code.slice(5);
           else if (/^Key[A-Z]$/.test(e.code)) keyVal = e.code.slice(3).toUpperCase();
-          input.value = keyVal;
+          input.value = id === 'tvKeyClear' ? doubleKey(keyVal) : keyVal;
         });
       }
     });

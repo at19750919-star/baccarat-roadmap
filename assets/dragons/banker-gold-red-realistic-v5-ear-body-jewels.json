@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-29",
+  "generator": "built-in image_gen",
+  "input": "banker-gold-red-realistic-v4-jeweled.png",
+  "reference_role": "使用者提供的龍圖，僅參考耳部寶石與身上少量珠寶點綴",
+  "reference": "C:/Users/at197/AppData/Local/Temp/codex-clipboard-cf9aea85-3ca9-42c0-9ad6-f95f214f2311.png",
+  "output": "banker-gold-red-realistic-v5-ear-body-jewels.png",
+  "purpose": "耳部與身體少量珠寶版候選圖；已發布獨立預覽，未替換正式特效",
+  "transparent_background": true,
+  "prompt": "Edit IMAGE 1, the full-body bright realistic gold-and-red Chinese dragon with the already-approved jeweled short horn crest. IMAGE 2 is a reference ONLY for jeweled ear ornament and the idea of sparse jewelry on the body; do not copy its cartoon style, fire breath, pose, or dense beaded body chains. Preserve IMAGE 1's exact face, beautiful existing sapphire/emerald/diamond forehead crest and short horns, mature fierce expression, head direction, S-shaped full-body pose, four legs and claws, tail, whiskers, gold scale texture, bright rich gold color and red mane. Make ONLY these small additions: (1) On the visible ear/side-head fin just behind the eye and cheek, add a refined sculpted gold ear ornament fitted into the existing ear shape, with a small deep-blue sapphire, a small emerald, and a few tiny clear diamonds, consistent with the forehead jewelry. The ear ornament should be clearly visible yet elegant, not a big human earring. (2) Add just 3 or 4 VERY SMALL isolated jewel accents across the otherwise bare golden torso, e.g. one on the side of the upper neck, one on the flank at the central body curve and one near the rear haunch. Mix tiny sapphire, emerald or clear diamond stones, each delicately embedded in an individual gold scale-shaped setting. Body jewels must be sparse and inconspicuous compared to the face crest: more than 95% of the body remains uninterrupted natural GOLD scales. No necklaces, bead chains, jewelry belts, repeated rows, full-body studding, cloth or extra armour. Keep cinematic photorealistic creature realism, realistic gem reflections, restrained diamond sparkle. Keep original composition and full-body framing. Preserve genuinely transparent alpha around the dragon, no background, surrounding fog rectangle, environment, text, numbers or new objects.",
+  "preview_url": "https://at19750919-star.github.io/baccarat-roadmap/dragon-preview.html"
+}

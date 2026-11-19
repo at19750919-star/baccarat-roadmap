@@ -1,0 +1,294 @@
+﻿agy.EXE : root agent idle; waiting for 1 background task(s) to finish
+位於 C:\Users\at197\AppData\Local\Temp\ps-script-0e0a8346-a414-4801-9c2a-a751253e195d.ps1:560 字元:1
++ & 'C:\Users\at197\AppData\Local\agy\bin\agy.EXE' -p $p --model gemini ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (root agent idle...sk(s) to finish:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+已讀取 `亂路規則說明.md` 與 `luanlu.js`，目前正在執行初步對照實驗腳本，等待執行完成後繼續分析。
+正在執行下三路各列（頂格與直落格）紅藍來源拆解腳本，稍候結果完成。
+正在驗證下三路紅藍顆數與大路欄長關係的精確數學公式，等待腳本完成。
+正在等待公式驗證腳本執行完成。
+正在測試不同下三路扣分權重配置對大路規律分與下三路各項指標的平衡，等待執行完成。
+正在以 16 執行緒平行產生並量測各組 500 份路單（含自然隨機、現行預設、現行下三路模式、建議改法），等待腳本執行完成。
+等待 500 份路單實驗腳本執行完畢中。
+# 亂路（`luanlu.js`）下三路評分研究與改進報告
+
+## 一、結論摘要（白話總結）
+
+1. **自然隨機狀態下，下三路的紅藍比例其實接近 50% 對 50%（約 49.3% 紅）**：
+   依真實百家樂機率（莊 45.86%、閒 44.62%、和 9.52%）產生 500 份 82 局有效莊閒路單，大眼仔、小路、蟑螂路的平均紅比例分別為 **49.45%、49.12%、49.24%**（三路整體平均 **49.27%**），P10～P90 落在 **42.1%～56.4%** 之間；紅比例衝上 65% 的機率幾乎是 **0%（0.0%～1.4%）**，紅藍換色（交替）比例約 **50.6%～50.7%**。
+2. **現行版本防不住下三路，有三個根本原因**：
+   - **原因 A（預設根本沒算下三路）**：[`luanlu.js` 第 10 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L10)預設 `scoreMode: 'big'`，在未手動切換「評分範圍」時，下三路分數標示「未計入總分」（[第 379、894–964 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L379)）。此時大眼仔紅比例平均高達 **71.76%**（**94.6% 的路單紅比例 ≥ 65%**），三路最長同色平均 **16.22 顆**（最長達 **42 顆**）。
+   - **原因 B（大路「同長行上限」造成結構性偏紅，刪掉紅比例扣分後全面失控）**：預設「單邊同長度行上限 2、合計 3」（[`luanlu.js` 第 9 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L9)），限制 2～6 顆的多顆欄合計最多只有 15 欄（實際約 13～14 欄），其餘近 30 欄全都是 1 顆的單跳欄。這會使下三路頂格（`row = 0`）因連續單跳欄同高（`1 === 1`）大量開紅，且第 3 格以上（`row >= 2`）因左方單跳欄「無對無（空對空）」高達 **88%～94% 開紅**。即便切換到 `scoreMode: 'both'`，大眼仔平均紅比例仍高達 **66.56%**（**71.2% 的路單 ≥ 65% 紅**），小路 **58.88%**、蟑螂路 **58.14%**，玩家無腦買紅就有近 6～7 成勝率。
+   - **原因 C（只扣「三路最長一段 `M > 6`」引發「一藍假斷紅龍」作弊效應）**：現行 [`scoreDerivedRoads`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L368-L370)（`luanlu.js` 第 368–370 行）只取三條路裡最長的一段，超過 6 顆才每顆扣 1 分。爬山演算法為了拿 0 扣分，學會**在長紅龍中間每隔 4～6 顆紅球插進 1 顆藍球**（如 `6紅-1藍-5紅-1藍-6紅`）。結果在 `scoreMode: 'both'` 下，大眼仔最長同色雖被卡在 6 顆（87.4% 路單剛好 ≥ 6 顆），但**三路合計長度 ≥ 4 的同色串反而從自然隨機的 13.28 串暴增到 16.79 串**（大眼仔 5.74 串中高達 **5.47 串全是紅串**！），且大眼仔「`≥3紅 + 1藍 + ≥3紅`（一藍假斷紅龍）」平均每份出現 **2.81 次**（自然隨機僅 0.53 次），形成極明顯的「下三路旺紅、逢紅必追」好路。
+3. **建議改法效果（500 份實測證明）**：
+   將預設 `scoreMode` 改為 `'both'`，並在 [`scoreDerivedRoads`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L340-L372) 對三條下三路**各自計算再加總**：
+   1. **紅比例目標區間（45%～55%）**：偏離 `[45%, 55%]` 部分每 1% 扣 1 分；
+   2. **同色串長度分布逐段累進扣分**：每段長度 `> 3`（即 `≥ 4` 顆）的同色串，依超出長度 $d = \text{run} - 3$ 扣 $d(d+1)$ 分（4 顆扣 2 分、5 顆扣 6 分、6 顆扣 12 分）；
+   3. **連續單跳（紅藍交替）過長扣分**：連續單跳超過 4 顆時，每多 1 顆扣 2 分（防止演算法為躲避同色串而排出 `紅藍紅藍...` 單跳長龍）。
+   - **實測結果**：大路行上限違規率維持 **0.0%**，三路合計紅比例從 **67.22% / 61.28%** 大幅壓低至 **54.47%**（小路 **53.15%**、蟑螂路 **52.87%** 幾乎貼齊自然隨機，大眼仔壓至大路行上限下的物理極限 **57.25%**，紅比例 ≥ 65% 從 94.6% / 71.2% 降至 **0.2% / 0.0% / 0.0%**）；三路最長同色平均降至 **3.85～4.02 顆**（**≥ 6 顆長串佔比 0.0%**）；三路合計長 ≥ 4 同色串從 **16.79 串**大砍至 **5.90 串**（長 ≥ 5 串僅 **0.06 串**）；紅藍交替率穩定在 **51.96%～55.13%**（貼近自然隨機的 50.6%），真正做到「下三路既接近自然紅藍平衡、又完全沒有長串或單跳好路可打」。
+
+---
+
+## 二、現行規則與程式邏輯解析（步驟 1）
+
+以下引用自唯讀目錄 [`亂路/亂路規則說明.md`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/%E4%BA%82%E8%B7%AF%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E.md) 與 [`亂路/luanlu.js`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js)：
+
+1. **下三路怎麼算**：
+   - **規則定義**（[`亂路規則說明.md` 第 90 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/%E4%BA%82%E8%B7%AF%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E.md#L90)）：大路為 6 列含向右拖尾；大眼仔從第 2 欄第 2 格（`offset = 1`）、小路從第 3 欄第 2 格（`offset = 2`）、蟑螂路從第 4 欄第 2 格（`offset = 3`）開始，若起點欄僅 1 格則從下一欄第 1 格開始。
+   - **程式實作**（[`luanlu.js` 第 11–15 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L11-L15)、[第 235–293 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L235-L293)）：
+     - [`buildBigRoadGrid(outcomes, rows = 6)`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L247-L271)（第 247–271 行）先將莊閒序列排入 6 列大路網格（滿列或下方被佔時向右拖尾）。
+     - [`buildDerivedRoad(bigGrid, offset, bigCols, bigRows)`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L273-L293)（第 273–293 行）依大路格逐欄逐列走訪，跳過 `col < offset` 及 `col === offset && row === 0`（第 278 行）：
+       - **新欄頂格（`row === 0`，第 280–283 行）**：比較前一欄 `col - 1` 與前第 `col - offset - 1` 欄的直落欄高 [`columnHeight`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L236-L243)，相等記 `'R'`（紅），不等記 `'B'`（藍）。
+       - **直落格（`row > 0`，第 284–288 行）**：檢查左方第 `col - offset` 欄的同列 `row` 與上一列 `row - 1` 是否有格 [`hasAt`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L244-L246)，同有或同無記 `'R'`（紅），一有一無記 `'B'`（藍）。
+   - **數學結構恆等式**：當大路無超過 6 顆拖尾時，偏移量 $k \in \{1,2,3\}$ 的下三路總格數為 $N_k = 82 - \sum_{c=0}^{k-1} L_c - 1$，而**藍球總數**恆等於：
+     $$B_k = \sum_{c=k+1}^{C-1} \mathbf{1}(L_{c-1} \ne L_{c-1-k}) + \sum_{c=k}^{C-1} \mathbf{1}(L_c > L_{c-k})$$
+     亦即：頂格只有在兩欄高度不同時才開藍；直落格在第 $c$ 欄（共 $L_c - 1$ 格）中，**最多只有跨過左方參考欄尾端的那唯一一格（當 $L_c > L_{c-k}$ 時）會開藍，其餘「有對有」與「無對無」全部必開紅**。
+
+2. **下三路怎麼扣分**：
+   - **規則定義**（[`亂路規則說明.md` 第 81–89 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/%E4%BA%82%E8%B7%AF%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E.md#L81-L89)）：已刪除 `derivedRedBase`、`derivedRed`（紅比例扣分）與個別衍生路規律扣分；只取三條下三路裡最長的連續同色段長度 $M$，超過 `derivedRunBase`（預設 6）時扣 $(M - 6) \times 1$ 分。
+   - **程式實作**（[`luanlu.js` 第 4–6 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L4-L6)、[第 340–397 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L340-L397)）：
+     - `WEIGHTS`（第 4–6 行）定義 `derivedRunBase: 6, derivedRun: 1`。
+     - [`scoreDerivedRoads(outcomes)`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L340-L372)（第 340–372 行）算出三條路的紅藍數與 [`longestSameColor`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L331-L339)，只取三條路最大的 `result.longestRun`（第 359–363 行），在第 368–370 行計算：
+       `if (result.longestRun > WEIGHTS.derivedRunBase) result.total = (result.longestRun - WEIGHTS.derivedRunBase) * WEIGHTS.derivedRun;`
+     - [`scoreWithCaps(runs, firstSide, opts, regular)`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L374-L397)（第 374–397 行）在 `mode === 'derived' || mode === 'both'` 時才把 `derived.total` 納入 `result.total`（第 379、394 行）；在預設 `scoreMode: 'big'` 時完全不計入總分。
+
+3. **產生器流程與預設參數**：
+   - **預設參數 `DEFAULTS`**（[`luanlu.js` 第 7–10 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L7-L10)、[`亂路規則說明.md` 第 37–63、81–103 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/%E4%BA%82%E8%B7%AF%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E.md#L37-L63)）：
+     - `count: 5`（每次產生 5 條）、`rounds: 82`（不含和 82 局）、`maxDifference: 4`（`|莊−閒| ≤ 4`）、`maxRun: 6`（長龍上限 6 顆）。
+     - `attempts: 3000`（每條隨機抽樣 3000 次）、`hillSteps: 2000`（局部變異爬山 2000 步）。
+     - `perSideMax: 2`（單邊同長度行上限 2 欄）、`combinedMax: 3`（莊閒合計同長度行上限 3 欄）、`includeSingles: false`（單跳不計入行上限）。
+     - `holeMax: ''`、`pillarMax: ''`、`maxHoleLength: ''`、`randomMode: false`、`scoreMode: 'big'`。
+   - **產生流程**（[`luanlu.js` 第 512–713 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L512-L713)、[`亂路規則說明.md` 第 94–100 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/%E4%BA%82%E8%B7%AF%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E.md#L94-L100)）：
+     1. **候選抽樣 [`randomCandidate`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L512-L561)**（第 512–561 行）：依短欄權重 `[50, 25, 12, 7, 4, 2]` 抽取欄長，動態排除已達 `perSideMax` / `combinedMax` 配額的欄長，湊滿 82 局並檢查 [`validRuns`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L505-L510)（長龍、莊閒差、洞最長）。
+     2. **爬山搜尋 [`roadSteps`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L646-L670)**（第 646–670 行）：前 3000 步呼叫 `randomCandidate`，後 2000 步對目前最佳解呼叫 [`mutate`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L563-L572)（第 563–572 行：相鄰欄交換、單欄拆二、相鄰兩欄合併、某欄+1另一欄−1）。優先取行洞柱違規項目數 `violations` 較少者，同違規數取 `scoreWithCaps` 總分 `<= bestScore` 者。
+     3. **同側交換與移顆微調 [`improveSameSideSteps`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L595-L636)**（第 595–636 行）：產出前嘗試同側（同為莊或同為閒）兩欄交換或移一顆（兩側總局數不變），支援寬度 8 的二步高原搜尋（中間步允許規律分高 5 分），最多檢查 8000 個候選、採用 6 輪改善，只接受違規與超限分不增加且總分嚴格下降的結果。
+     4. **多條前 20 局去重 [`generateRoads`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L699-L713)**（第 699–713 行）：比較每條最終路單的前 20 局（`prefixKey`），重複則重抽。
+
+---
+
+## 三、500 份路單實驗數據表（現行 vs 自然隨機 vs 建議改法）
+
+本實驗由 [`experiment.js`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF%E5%AF%A6%E9%A9%97-gemini/experiment.js) 產生並量測，每組各產生 **N = 500 份**路單（每份 82 局有效莊閒）。
+為了完整呈現現行狀況，表格同時列出**「現行預設（`scoreMode='big'`）」**與**「現行下三路（`scoreMode='both'`）」**兩組現行數據，與**「自然隨機（莊 45.86%、閒 44.62%、和 9.52%）」**及**「建議改法」**並列對照：
+
+### 表 1：整體與三路綜合指標對照表（N = 500 份平均值）
+
+| 指標項目 | 現行預設 (`scoreMode='big'`) | 現行下三路 (`scoreMode='both'`) | 自然隨機 (真實機率 82 局) | **建議改法 (Proposed)** |
+| :--- | :---: | :---: | :---: | :---: |
+| **大路規律分（平均 ± SD）** | 0.00 ± 0.00 | 0.08 ± 0.49 | 89.82 ± 41.55 | **5.60 ± 3.84** |
+| **大路同長行上限違規率** | 0.0% | 0.0% | 100.0% | **0.0%（全數合格）** |
+| **下三路整體紅比例（平均）** | **67.22%** ❌ | **61.28%** ❌ | 49.27% | **54.47%** ✅ |
+| **三路最大最長同色（平均 / P50 / P90 / 最大）** | **16.22** / 15 / 26 / **42** ❌ | 6.51 / 6 / 8 / 11 | 7.77 / 7 / 10 / 20 | **4.06 / 4 / 4 / 5** ✅ |
+| **三路最大最長同色 > 6 顆的路單佔比** | **98.2%** ❌ | **33.0%** ⚠️ | 75.8% | **0.0%** ✅ |
+| **三路合計長度 ≥ 4 同色串數量（平均）** | 14.92 串 | **16.79 串** ❌（暴增） | 13.28 串 | **5.90 串** ✅ |
+| **三路合計長度 ≥ 5 同色串數量（平均）** | **7.13 串** ❌ | 6.05 串 | 5.95 串 | **0.06 串** ✅ |
+| **三路合計長度 ≥ 6 同色串數量（平均）** | **5.37 串** ❌ | 3.04 串 | 2.95 串 | **0.00 串** ✅ |
+
+> 註：另測試「含和局共發 82 局（扣掉和局約 74 局莊閒）」之自然隨機 500 份，三路平均紅比例為大眼仔 **48.96%**、小路 **49.52%**、蟑螂路 **49.25%**（整體 **49.24%**），證實自然狀態下紅比例恆為 **~49.3%**。
+
+---
+
+### 表 2：大眼仔、小路、蟑螂路各項指標詳細對照表（N = 500 份）
+
+#### （1）大眼仔（`bigEye`, `offset = 1`）
+
+| 量測指標 | 現行預設 (`big`) | 現行下三路 (`both`) | 自然隨機 (真實機率) | **建議改法 (Proposed)** |
+| :--- | :---: | :---: | :---: | :---: |
+| **紅比例：平均 ± SD** | **71.76%** ± 4.25% ❌ | **66.56%** ± 3.27% ❌ | 49.45% ± 5.44% | **57.25% ± 1.73%** ✅ |
+| **紅比例分布：P10 / P50 / P90** | 66.3% / 71.4% / 77.5% | 62.5% / 66.3% / 70.7% | 42.5% / 49.4% / 56.4% | **55.0% / 57.3% / 60.0%** |
+| **紅比例 ≥ 65%（嚴重偏紅）路單佔比** | **94.6%** ❌ | **71.2%** ❌ | 0.0% | **0.2%** ✅ |
+| **紅比例 ≥ 60% 路單佔比** | **99.8%** ❌ | **98.2%** ❌ | 3.6% | **10.2%** ✅ |
+| **最長同色串：平均（P50 / P90 / 最大）** | **16.19** (15 / 26 / **42**) ❌ | 6.45 (6 / 8 / 11) | 6.42 (6 / 9 / 20) | **4.02 (4 / 4 / 5)** ✅ |
+| **最長同色串 ≥ 6 顆路單佔比** | **99.6%** ❌ | **87.4%** ❌ | 66.0% | **0.0%** ✅ |
+| **長度 ≥ 4 同色串數：平均（紅串 / 藍串）** | 4.88 (**4.63紅** / 0.25藍) | **5.74** (**5.47紅** / 0.27藍) ❌ | 4.57 (2.16紅 / 2.40藍) | **2.39 (2.12紅 / 0.26藍)** ✅ |
+| **長度 ≥ 5 / ≥ 6 同色串數（平均）** | 2.78 / 2.16 | 2.83 / 1.73 | 2.06 / 1.00 | **0.03 / 0.00** ✅ |
+| **紅藍交替（換色）比例** | **38.88%** ❌（過低） | 46.18% | 50.70% | **51.96%** ✅ |
+| **最長單跳（紅藍交替）串長度（平均）** | 5.88 | 6.09 | 6.60 | **5.50** ✅ |
+| **「一藍假斷紅龍（≥3紅+1藍+≥3紅）」次數** | 2.22 次 | **2.81 次** ❌（作弊斷龍） | 0.53 次 | **1.02 次** ✅ |
+| **各列紅比例：頂格 `row=0` / `row=1` / `row≥2`** | 65.3% / 62.7% / 87.1% | 55.1% / 57.7% / 87.8% | 33.5% / 49.3% / 81.5% | **45.0% / 45.9% / 81.4%** |
+
+#### （2）小路（`smallRoad`, `offset = 2`）
+
+| 量測指標 | 現行預設 (`big`) | 現行下三路 (`both`) | 自然隨機 (真實機率) | **建議改法 (Proposed)** |
+| :--- | :---: | :---: | :---: | :---: |
+| **紅比例：平均 ± SD** | **64.94%** ± 4.77% ❌ | **58.88%** ± 3.04% ⚠️ | 49.12% ± 5.40% | **53.15% ± 1.62%** ✅ |
+| **紅比例分布：P10 / P50 / P90** | 58.4% / 64.9% / 71.1% | 55.1% / 58.4% / 63.2% | 42.3% / 49.3% / 56.3% | **51.4% / 53.2% / 55.1%** |
+| **紅比例落在 45%～55% 均衡區間佔比** | **0.8%** ❌ | **9.6%** ❌ | 63.0% | **89.8%** ✅ |
+| **紅比例 ≥ 60% / ≥ 65% 路單佔比** | **83.2% / 49.0%** ❌ | **32.8% / 3.2%** ⚠️ | 1.8% / 0.0% | **0.0% / 0.0%** ✅ |
+| **最長同色串：平均（P50 / P90 / 最大）** | **15.11** (14 / 25 / **41**) ❌ | 5.53 (5 / 7 / 10) | 6.45 (6 / 9 / 15) | **3.85 (4 / 4 / 5)** ✅ |
+| **最長同色串 ≥ 6 顆路單佔比** | **96.0%** ❌ | 37.8% | 68.4% | **0.0%** ✅ |
+| **長度 ≥ 4 同色串數：平均（紅串 / 藍串）** | 4.62 (3.69紅 / 0.93藍) | **5.23** (**4.18紅** / 1.05藍) ❌ | 4.40 (2.06紅 / 2.33藍) | **1.48 (1.02紅 / 0.46藍)** ✅ |
+| **長度 ≥ 5 / ≥ 6 同色串數（平均）** | 2.01 / 1.54 | 1.76 / 0.67 | 2.03 / 1.01 | **0.00 / 0.00** ✅ |
+| **紅藍交替（換色）比例** | **41.26%** ❌ | 48.56% | 50.59% | **54.48%** ✅ |
+| **最長單跳（紅藍交替）串長度（平均）** | 6.26 | 6.49 | 6.60 | **5.76** ✅ |
+| **「一藍假斷紅龍（≥3紅+1藍+≥3紅）」次數** | 1.07 次 | **1.27 次** ❌ | 0.48 次 | **0.28 次** ✅ |
+| **各列紅比例：頂格 `row=0` / `row=1` / `row≥2`** | 57.1% / 44.6% / 88.6% | 44.6% / 37.3% / 90.8% | 33.1% / 49.0% / 81.3% | **37.3% / 24.9% / 92.4%** |
+
+#### （3）蟑螂路（`cockroachRoad`, `offset = 3`）
+
+| 量測指標 | 現行預設 (`big`) | 現行下三路 (`both`) | 自然隨機 (真實機率) | **建議改法 (Proposed)** |
+| :--- | :---: | :---: | :---: | :---: |
+| **紅比例：平均 ± SD** | **64.70%** ± 5.61% ❌ | **58.14%** ± 3.68% ⚠️ | 49.24% ± 5.68% | **52.87% ± 1.88%** ✅ |
+| **紅比例分布：P10 / P50 / P90** | 57.7% / 64.7% / 71.8% | 53.3% / 57.7% / 62.8% | 42.1% / 49.3% / 56.2% | **50.7% / 52.9% / 55.1%** |
+| **紅比例落在 45%～55% 均衡區間佔比** | **3.6%** ❌ | **19.6%** ❌ | 62.6% | **86.4%** ✅ |
+| **紅比例 ≥ 60% / ≥ 65% 路單佔比** | **79.2% / 46.6%** ❌ | **32.0% / 3.8%** ⚠️ | 2.4% / 1.4% | **0.0% / 0.0%** ✅ |
+| **最長同色串：平均（P50 / P90 / 最大）** | **14.23** (13 / 24 / **40**) ❌ | 5.32 (5 / 7 / 9) | 6.35 (6 / 9 / 16) | **3.94 (4 / 4 / 5)** ✅ |
+| **最長同色串 ≥ 6 顆路單佔比** | **95.0%** ❌ | 40.8% | 64.8% | **0.0%** ✅ |
+| **長度 ≥ 4 同色串數：平均（紅串 / 藍串）** | 5.42 (3.87紅 / 1.55藍) | **5.82** (**4.06紅** / 1.76藍) ❌ | 4.32 (2.07紅 / 2.25藍) | **2.03 (1.26紅 / 0.77藍)** ✅ |
+| **長度 ≥ 5 / ≥ 6 同色串數（平均）** | 2.35 / 1.67 | 1.45 / 0.63 | 1.85 / 0.94 | **0.02 / 0.00** ✅ |
+| **紅藍交替（換色）比例** | **38.83%** ❌ | 47.08% | 50.71% | **55.13%** ✅ |
+| **最長單跳（紅藍交替）串長度（平均）** | 5.40 | 5.41 | 6.48 | **5.45** ✅ |
+| **「一藍假斷紅龍（≥3紅+1藍+≥3紅）」次數** | 1.01 次 | **1.24 次** ❌ | 0.46 次 | **0.27 次** ✅ |
+| **各列紅比例：頂格 `row=0` / `row=1` / `row≥2`** | 57.0% / 37.6% / 92.1% | 43.5% / 29.8% / 94.1% | 33.2% / 48.9% / 81.5% | **36.8% / 23.3% / 93.0%** |
+
+---
+
+## 四、建議改法與 `luanlu.js` 修改位置說明（步驟 4）
+
+### 1. 為什麼這樣改？
+1. **預設開啟大路＋下三路共同評分（`scoreMode: 'both'`）**：避免預設只算大路而放任下三路出現 15～40 顆長紅龍。
+2. **三條下三路各自計分後加總，不再只取單一最長值**：大眼仔看相鄰欄（`offset=1`）、小路看隔一欄（`offset=2`）、蟑螂路看隔兩欄（`offset=3`），大路的某個排列可能只讓大眼仔斷龍，卻讓小路或蟑螂路連紅。三條各自把關才能全面防守。
+3. **加回「紅比例目標區間（45%～55%）」扣分**：每條路 `|redRatio - 0.5|` 超過 `0.05`（即紅比例 `> 55%` 或 `< 45%`）時，每偏離 1%（`0.01`）扣 1 分（`derivedRed: 100`）。這會引導爬山演算法將多顆欄與單跳欄交錯排列，最大化頂格高度差與直落突格藍球，把紅比例壓回接近自然隨機。
+4. **改用「同色串長度分布逐段累進扣分（`> 3` 即 `≥ 4` 起扣）」**：每條路裡**每一段**長度 $r > 3$ 的同色串，設 $d = r - 3$，扣 $\frac{d(d+1)}{2} \times 2 = d(d+1)$ 分（4 顆扣 2 分、5 顆扣 6 分、6 顆扣 12 分、7 顆扣 20 分）。這能徹底消滅現行「把 12 連紅切為 `6紅-1藍-5紅` 就拿 0 扣分」的假斷龍漏洞。
+5. **新增「連續單跳（紅藍交替 `run === 1`）過長扣分」**：當下三路連續單跳超過 4 顆（`derivedAltBase: 4`）時，每多 1 顆扣 2 分（`derivedAlt: 2`），防止演算法為了壓低同色長串而排出 `紅-藍-紅-藍-紅-藍...` 的單跳好路。
+
+---
+
+### 2. 要改 `luanlu.js` 的哪幾行、怎麼改？
+
+只需修改 [`亂路/luanlu.js`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js) 的 **兩處**（註：若同步更新卡片摘要文字可選改第 915、963 行）：
+
+#### 修改處一：[`luanlu.js` 第 4–10 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L4-L10)（`WEIGHTS` 與 `DEFAULTS` 常數）
+
+**修改前（第 4–10 行）：**
+```javascript
+const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
+  ordered: 3, period: 4, dominant: 3,
+  derivedRunBase: 6, derivedRun: 1 });
+const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
+  prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
+  perSideMax: 2, combinedMax: 3, includeSingles: false,
+  holeMax: '', pillarMax: '', maxHoleLength: '', randomMode: false, scoreMode: 'big' });
+```
+
+**修改後：**
+```javascript
+const WEIGHTS = Object.freeze({ adjacent: 3, sameExtra: 5, alternating: 4,
+  ordered: 3, period: 4, dominant: 3,
+  derivedRunBase: 3, derivedRun: 2,
+  derivedRedTolerance: 0.05, derivedRed: 100,
+  derivedAltBase: 4, derivedAlt: 2 });
+const DEFAULTS = Object.freeze({ count: 5, rounds: 82, maxDifference: 4, maxRun: 6,
+  prefix: '路單-AT', startNumber: 1, attempts: 3000, hillSteps: 2000, seed: '',
+  perSideMax: 2, combinedMax: 3, includeSingles: false,
+  holeMax: '', pillarMax: '', maxHoleLength: '', randomMode: false, scoreMode: 'both' });
+```
+
+---
+
+#### 修改處二：[`luanlu.js` 第 340–372 行](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L340-L372)（[`scoreDerivedRoads`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF/luanlu.js#L340-L372) 函式）
+
+**修改前（第 340–372 行）：**
+```javascript
+function scoreDerivedRoads(outcomes) {
+  const big = buildBigRoadGrid(outcomes);
+  const marks = {}, sequences = {}, result = {
+    total: 0, redRatio: 0, redCount: 0, blueCount: 0,
+    longestRun: 0, longestRoad: DERIVED_ROADS[0].key, longestColor: null, marks, sequences
+  };
+  for (const { key, offset } of DERIVED_ROADS) {
+    const roadMarks = buildDerivedRoad(big.grid, offset, big.cols, big.rows);
+    const redCount = roadMarks.filter(mark => mark === 'R').length;
+    const blueCount = roadMarks.filter(mark => mark === 'B').length;
+    const run = longestSameColor(roadMarks);
+    marks[key] = roadMarks;
+    sequences[key] = derivedRunLengths(roadMarks);
+    result[key] = {
+      redRatio: roadMarks.length ? redCount / roadMarks.length : 0, redCount, blueCount,
+      longestRun: run.longestRun, longestColor: run.longestColor
+    };
+    result.redCount += redCount;
+    result.blueCount += blueCount;
+    if (run.longestRun > result.longestRun) {
+      result.longestRun = run.longestRun;
+      result.longestRoad = key;
+      result.longestColor = run.longestColor;
+    }
+  }
+  const allCount = result.redCount + result.blueCount;
+  result.redRatio = allCount ? result.redCount / allCount : 0;
+  // 只扣最長的一條。紅比例抓不到長串同色；三條相加會把同一個現象扣三次。
+  if (result.longestRun > WEIGHTS.derivedRunBase) {
+    result.total = (result.longestRun - WEIGHTS.derivedRunBase) * WEIGHTS.derivedRun;
+  }
+  return result;
+}
+```
+
+**修改後：**
+```javascript
+function scoreDerivedRoads(outcomes) {
+  const big = buildBigRoadGrid(outcomes);
+  const marks = {}, sequences = {}, result = {
+    total: 0, redRatio: 0, redCount: 0, blueCount: 0,
+    longestRun: 0, longestRoad: DERIVED_ROADS[0].key, longestColor: null, marks, sequences
+  };
+  for (const { key, offset } of DERIVED_ROADS) {
+    const roadMarks = buildDerivedRoad(big.grid, offset, big.cols, big.rows);
+    const redCount = roadMarks.filter(mark => mark === 'R').length;
+    const blueCount = roadMarks.length - redCount;
+    const redRatio = roadMarks.length ? redCount / roadMarks.length : 0;
+    const run = longestSameColor(roadMarks);
+    const runs = derivedRunLengths(roadMarks);
+    marks[key] = roadMarks;
+    sequences[key] = runs;
+
+    // 1. 紅比例偏離目標區間 [45%, 55%] 扣分
+    const redDev = Math.max(0, Math.abs(redRatio - 0.5) - WEIGHTS.derivedRedTolerance);
+    let roadScore = redDev * WEIGHTS.derivedRed;
+
+    // 2. 每段超過 derivedRunBase (3) 的同色串累進扣分 + 3. 連續單跳超過 derivedAltBase (4) 扣分
+    let singleStreak = 0;
+    for (const r of runs) {
+      if (r > WEIGHTS.derivedRunBase) {
+        const d = r - WEIGHTS.derivedRunBase;
+        roadScore += (d * (d + 1) / 2) * WEIGHTS.derivedRun;
+      }
+      if (r === 1) {
+        singleStreak++;
+        if (singleStreak > WEIGHTS.derivedAltBase) roadScore += WEIGHTS.derivedAlt;
+      } else {
+        singleStreak = 0;
+      }
+    }
+
+    result[key] = {
+      redRatio, redCount, blueCount,
+      longestRun: run.longestRun, longestColor: run.longestColor, total: roadScore
+    };
+    result.redCount += redCount;
+    result.blueCount += blueCount;
+    result.total += roadScore;
+    if (run.longestRun > result.longestRun) {
+      result.longestRun = run.longestRun;
+      result.longestRoad = key;
+      result.longestColor = run.longestColor;
+    }
+  }
+  const allCount = result.redCount + result.blueCount;
+  result.redRatio = allCount ? result.redCount / allCount : 0;
+  return result;
+}
+```
+
+---
+
+## 五、本次建立的所有檔案清單
+
+所有檔案皆建立於目前實驗資料夾 `C:\Users\at197\OneDrive\Desktop\專案-進行中\百家樂路單\亂路實驗-gemini\`，未對 `亂路\` 資料夾進行任何寫入或修改：
+
+1. [`experiment.js`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF%E5%AF%A6%E9%A9%97-gemini/experiment.js)：Node.js 多執行緒實驗與統計腳本（載入 `../亂路/luanlu.js` 並實作自然隨機、現行預設、現行下三路、建議改法各 500 份路單之產生與指標量測）。
+2. [`experiment-results.json`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF%E5%AF%A6%E9%A9%97-gemini/experiment-results.json)：`experiment.js` 跑出的完整原始統計數據 JSON 檔。
+3. [`報告.md`](file:///C:/Users/at197/OneDrive/Desktop/%E5%B0%88%E6%A1%88-%E9%80%B2%E8%A1%8C%E4%B8%AD/%E7%99%BE%E5%AE%B6%E6%A8%82%E8%B7%AF%E5%96%AE/%E4%BA%82%E8%B7%AF%E5%AF%A6%E9%A9%97-gemini/%E5%A0%B1%E5%91%8A.md)：與本回覆相同內容之完整報告 Markdown 檔案。

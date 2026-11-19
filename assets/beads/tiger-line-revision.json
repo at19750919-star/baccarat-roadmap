@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "input": "tiger-v3.png",
+  "output": "tiger-v4.png",
+  "prompt": "Refine this exact gold tiger bead icon with a precise contrast adjustment only. Keep the deep emerald-green enamel background, thin polished gold rim, face geometry, large head size, eye positions, lighting and overall composition exactly the same. Darken the EXISTING tiger stripes and recessed engraved contour lines to a much deeper espresso / dark umber brown (around #382316 in shadow, #4c301a in lit bronze areas), making the stripes clearly distinct from the bright gold face at tiny 32–61px display size. Also subtly deepen the existing thin contours around the eyes, nostrils, nose edge and mouth so the facial expression reads cleanly. Preserve all stripe shapes and thickness: deepen their color rather than adding new stripes or making the lines thicker. Preserve the bright satin-gold planes, highlights and sculptural bevels of the cheeks, brow and muzzle; DO NOT darken the entire face, do not make it flat black, and do not add a heavy cartoon outline. Leave the dark emerald backing and the gold rim unchanged. Keep transparency outside the circle. No text, numbers, ornaments or additional effects. The result should look like the same refined gold sculpture with clearer dark bronze facial definition, not a redesigned animal."
+}

@@ -1,0 +1,10 @@
+﻿agy.EXE : warning: --mode auto is not available for this account; continuing in the default mode.
+位於 C:\Users\at197\AppData\Local\Temp\ps-script-8c25d1e3-72b7-4792-82ae-e063ba93caa6.ps1:562 字元:1
++ & 'C:\Users\at197\AppData\Local\agy\bin\agy.EXE' -p $p --model gemini ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: --mode...e default mode.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+jetski: no output produced — a tool required the "command" permission that headless mode cannot prompt for, so it was a
+uto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run 
+with --dangerously-skip-permissions to auto-approve all tools.

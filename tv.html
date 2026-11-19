@@ -14,12 +14,12 @@
 <link href="tv.css?v=73" rel="stylesheet"/>
 <link href="tv-layout-proposal.css?v=27" rel="stylesheet"/>
 <link href="tv-settings-compact.css?v=19" rel="stylesheet"/>
-
-
-
-
-
-
+<link href="tv-edit-mode.css?v=14" rel="stylesheet"/>
+<link href="../共用元件/css-controls/css-controls.css?v=2" rel="stylesheet"/>
+<link href="../共用元件/color-picker/color-picker.css?v=2" rel="stylesheet"/>
+<link href="../共用元件/font-picker/font-picker.css?v=9" rel="stylesheet"/>
+<link href="../共用元件/settings-io/settings-io.css" rel="stylesheet"/>
+<link href="../共用元件/version-snapshot/version-snapshot.css" rel="stylesheet"/>
 <link href="result-announcement.css?v=10" rel="stylesheet"/>
 <style>
 /* Equal cells; natural glyph proportions with one fitter in tv.js. */
@@ -182,7 +182,7 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 </style>
 </head>
 <body>
-
+<button type="button" id="tvEditToggle" hidden class="tv-edit-toggle" aria-pressed="false">編輯</button>
 <div class="app tv-app">
 <header class="title-bar"><div class="tv-shortcuts">
 <div class="tv-table-board tv-brand-slot" data-logo-status="ready">
@@ -203,11 +203,11 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <span>大幸運7<b id="legendKeyL73">222</b></span>
 <span>超級幸運7<b id="legendKeyS7">2222~</b></span>
 <span>確定<b id="legendKeyConfirm">⏎</b></span>
-<span>退局<b id="legendKeyUndo">⌫</b></span>
+<span>退局<b id="legendKeyUndo">7</b></span>
 <span>設定<b id="legendKeyLimit">77</b></span>
 <span>儲存<b id="legendKeyBoss">8</b></span>
 <span>清<b id="legendKeyClear">99</b></span>
-<span>全螢幕<b id="legendKeyFullscreen">F</b></span>
+<span>全螢幕<b id="legendKeyFullscreen">/</b></span>
 </div>
 <div class="tv-lucky7-key-hint" role="status" aria-live="polite" hidden></div>
 </div><div class="title-controls tv-hidden" aria-hidden="true">
@@ -424,11 +424,11 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <span class="dragon-badge-unit">連勝</span>
 </button>
 </section>
-<!-- 中間:左(大眼仔/小路) | 右(甲由路/公告欄) -->
+<!-- 中間:左(大眼仔/小路) | 右(曱甴路/公告欄) -->
 <section class="mid-row tv-road-row"><div class="panel derived-panel">
 <div class="grid-board derived-road" data-label="大眼仔" id="bigEye"></div>
 </div><div class="panel derived-panel">
-<div class="grid-board derived-road" data-label="甲由路" id="cockroachRoad"></div>
+<div class="grid-board derived-road" data-label="曱甴路" id="cockroachRoad"></div>
 </div></section><section class="mid-row tv-road-row"><div class="panel derived-panel">
 <div class="grid-board derived-road" data-label="小路" id="smallRoad"></div>
 </div><div class="panel derived-panel"><div aria-label="三星路" class="grid-board derived-road" data-label="三星路" id="starRoad"></div></div></section>
@@ -488,6 +488,7 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <div class="tv-settings-tabs" role="tablist" aria-label="設定分類">
 <button type="button" id="tvTabBasic" role="tab" data-settings-tab="basic" aria-controls="tvBasicPanel" aria-selected="true">基本設定</button>
 <button type="button" id="tvTabKeys" role="tab" data-settings-tab="keys" aria-controls="tvKeysPanel" aria-selected="false" tabindex="-1">按鍵設定</button>
+<button type="button" id="tvTabSave" role="tab" data-settings-tab="save" aria-controls="tvSavePanel" aria-selected="false" tabindex="-1">儲存設定</button>
 <button type="button" id="tvTabScreen" role="tab" data-settings-tab="0" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">畫面顏色</button>
 <button type="button" id="tvTabRoad" role="tab" data-settings-tab="1" aria-controls="tvColorPanel" aria-selected="false" tabindex="-1">路單顏色</button>
 <button type="button" id="tvTabStatsFont" role="tab" data-settings-tab="statsFont" aria-controls="tvStatsFontPanel" aria-selected="false" tabindex="-1">統計字級</button>
@@ -507,7 +508,7 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <label for="tvDragonThreshold">長龍起算 <span><input id="tvDragonThreshold" name="dragonThreshold" type="number" min="2" max="100" step="1" required/> 局</span></label>
 <label for="tvBigStroke">大路筆畫 <span><input id="tvBigStroke" name="bigStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
 <label for="tvEyeStroke">大眼仔筆畫 <span><input id="tvEyeStroke" name="eyeStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
-<label for="tvCockroachStroke">甲由路筆畫 <span><input id="tvCockroachStroke" name="cockroachStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
+<label for="tvCockroachStroke">曱甴路筆畫 <span><input id="tvCockroachStroke" name="cockroachStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
 <label for="tvStarStroke">三星路筆畫 <span><input id="tvStarStroke" name="starStroke" type="number" min="1" max="10" step="0.5" required/> px</span></label>
 </div>
 </section>
@@ -534,17 +535,20 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
       <label class="tv-key-bind-row"><span>老虎連按</span><input id="tvKeyTiger" name="keyTiger" maxlength="1" value="6" required/></label>
       <label class="tv-key-bind-row"><span>幸運七連按</span><input id="tvKeySeven" name="keySeven" maxlength="1" value="2" required/></label>
     </div>
+    <h3 class="tv-keys-subhead" style="margin-top:16px">固定快捷鍵</h3>
+    <div class="tv-keys-grid">
+      <label class="tv-key-bind-row"><span>倒退一局</span><input id="tvKeyBack7" value="7" readonly tabindex="-1" title="單按 7 稍候撤銷上一局"/></label>
+    </div>
   </div>
 
   <div class="tv-keys-subgroup">
     <h3 class="tv-keys-subhead">系統與輔助按鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>確定送出</span><input id="tvKeyConfirm" name="keyConfirm" maxlength="10" value="Enter" required/></label>
-      <label class="tv-key-bind-row"><span>退回上局</span><input id="tvKeyUndo" name="keyUndo" maxlength="10" value="Backspace" required/></label>
-      <label class="tv-key-bind-row"><span>開啟設定</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="7" readonly title="連按 77 開啟設定；單按 7 撤銷上一局" required/></label>
+      <label class="tv-key-bind-row"><span>開啟設定</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="77" readonly title="連按 77 開啟設定；單按 7 撤銷上一局" required/></label>
       <label class="tv-key-bind-row"><span>儲存路單</span><input id="tvKeyBoss" name="keyBoss" maxlength="5" value="8" readonly title="單按 8 儲存路單" required/></label>
-      <label class="tv-key-bind-row"><span>清空路單</span><input id="tvKeyClear" name="keyClear" maxlength="5" value="9" required/></label>
-      <label class="tv-key-bind-row"><span>全螢幕</span><input id="tvKeyFullscreen" name="keyFullscreen" maxlength="5" value="F" required/></label>
+      <label class="tv-key-bind-row"><span>清空路單</span><input id="tvKeyClear" name="keyClear" maxlength="5" value="99" title="連按兩下清空路單" required/></label>
+      <label class="tv-key-bind-row"><span>全螢幕（連按）</span><input id="tvKeyFullscreenEnter" maxlength="7" style="width:132px !important;padding-inline:4px !important" value="Enter×3" readonly tabindex="-1" title="沒有輸入中時，0.6 秒內連按 3 次 Enter"/></label>
     </div>
   </div>
 
@@ -571,13 +575,31 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
       </div>
     </div>
   </div>
-
-  <div class="tv-settings-help">
-    <p>小老虎：連按 2 次幸運6鍵 ｜ 大老虎：連按 3 次幸運6鍵</p>
-    <p>幸運七：連按 2～6 次閒贏鍵 ｜ 退局：7 或 Backspace ⌫</p>
-    <p>單按 7：稍候撤銷上一局 ｜ 連按 77：開啟設定 ｜ 單按 8：儲存路單</p>
-  </div>
 </div>
+</section>
+<section id="tvSavePanel" role="tabpanel" aria-labelledby="tvTabSave" hidden>
+  <div class="tv-save-settings">
+    <div class="tv-save-subgroup">
+      <h3 class="tv-save-subhead">路單存檔設定</h3>
+      <div class="tv-save-grid">
+        <label class="tv-save-row" for="tvCustomSavePath">
+          <span>儲存路徑</span>
+          <span class="tv-path-picker-row">
+            <input id="tvCustomSavePath" name="customSavePath" type="text" placeholder="預設：文件 ➔ 玖玖路單" spellcheck="false"/>
+            <button type="button" id="tvPickFolderBtn" class="tv-pick-folder-btn">選擇資料夾</button>
+          </span>
+        </label>
+        <label class="tv-save-row" for="tvAutoSaveOnClear">
+          <span>清盤時自動儲存</span>
+          <span><input id="tvAutoSaveOnClear" name="autoSaveOnClear" type="checkbox"/></span>
+        </label>
+        <label class="tv-save-row" for="tvClearPromptText">
+          <span>清盤提示文字</span>
+          <span><input id="tvClearPromptText" name="clearPromptText" type="text" maxlength="40" autocomplete="off" spellcheck="false" placeholder="確定要清盤？此操作無法復原"/></span>
+        </label>
+      </div>
+    </div>
+  </div>
 </section>
 <section id="tvSymbolsPanel" role="tabpanel" aria-labelledby="tvTabSymbols" hidden></section>
 <section id="tvColorPanel" role="tabpanel" aria-labelledby="tvTabScreen" hidden>
@@ -648,15 +670,68 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <script src="result-announcement.js?v=6"></script>
 <script src="tv-layout-proposal.js?v=16"></script>
 <script src="tv-settings-compact.js?v=9"></script>
-
-
-
-
-
-
-
-
-
+<aside id="tvEditPanel" class="tv-edit-panel" aria-label="畫面編輯面板" hidden>
+  <header class="tv-edit-panel-head" id="tvEditPanelHead"><strong>編輯畫面</strong><span class="tv-edit-panel-head-actions"><button type="button" id="tvEditPopout" aria-pressed="false">彈出面板</button><button type="button" id="tvEditClose" aria-label="關閉編輯面板">×</button></span></header>
+  <div class="tv-edit-content">
+    <p id="tvEditSelection" class="tv-edit-selection">點選牌桌資訊或統計格</p>
+    <div class="tv-edit-history" role="group" aria-label="復原與選層">
+      <button type="button" id="tvEditUndo" disabled>復原</button>
+      <button type="button" id="tvEditRedo" disabled>重做</button>
+      <button type="button" id="tvEditSelectUp" disabled>選上一層</button>
+      <button type="button" id="tvEditSelectDown" disabled>選下一層</button>
+    </div>
+    <label class="tv-edit-text-label">文字內容<input id="tvEditText" type="text" autocomplete="off"></label>
+    <div id="tvEditTextNote" class="tv-edit-text-note" hidden></div>
+    <div class="tv-edit-bg" aria-label="背景設定">
+      <div class="tv-edit-bg-mode" role="group" aria-label="背景模式">
+        <button type="button" id="tvEditBgSolid" aria-pressed="true">單色</button>
+        <button type="button" id="tvEditBgGradient" aria-pressed="false">漸層</button>
+      </div>
+      <div id="tvEditSolidOptions">
+        <label>顏色<input id="tvEditSolidColor" type="text" data-color-picker placeholder="#15100A" maxlength="9" spellcheck="false" autocomplete="off"></label>
+      </div>
+      <div id="tvEditGradientOptions" hidden>
+        <label>起始色<input id="tvEditGradientStart" type="text" data-color-picker placeholder="#15100A" maxlength="9" spellcheck="false" autocomplete="off"></label>
+        <label>結束色<input id="tvEditGradientEnd" type="text" data-color-picker placeholder="#5A3B16" maxlength="9" spellcheck="false" autocomplete="off"></label>
+        <div class="tv-edit-bg-dir" role="group" aria-label="漸層方向">
+          <button type="button" data-bg-angle="180" aria-pressed="true">往下</button>
+          <button type="button" data-bg-angle="90" aria-pressed="false">往右</button>
+          <button type="button" data-bg-angle="0" aria-pressed="false">往上</button>
+          <button type="button" data-bg-angle="270" aria-pressed="false">往左</button>
+          <button type="button" data-bg-angle="135" aria-pressed="false">右下</button>
+          <button type="button" data-bg-angle="45" aria-pressed="false">右上</button>
+        </div>
+      </div>
+      <label class="tv-edit-bg-advanced">進階：直接輸入 CSS<input id="tvEditBackground" type="text" placeholder="linear-gradient(...) 或 #15100A" autocomplete="off"></label>
+    </div>
+    <div class="tv-edit-light" aria-label="背景光源設定">
+      <label class="tv-edit-light-toggle"><input id="tvEditLightEnabled" type="checkbox">啟用柔和光源</label>
+      <div id="tvEditLightOptions" hidden>
+        <label>左右位置 <input id="tvEditLightX" type="range" min="0" max="100" value="50"><output for="tvEditLightX">50%</output></label>
+        <label>上下位置 <input id="tvEditLightY" type="range" min="0" max="100" value="35"><output for="tvEditLightY">35%</output></label>
+        <label>光源強度 <input id="tvEditLightStrength" type="range" min="0" max="100" value="45"><output for="tvEditLightStrength">45%</output></label>
+      </div>
+    </div>
+    <div id="tvEditControls"></div>
+    <div class="tv-edit-actions">
+      <button type="button" id="tvEditReset">重設此項</button>
+      <button type="button" id="tvEditExport">匯出設定</button>
+      <button type="button" id="tvEditImport">匯入設定</button>
+      <input id="tvEditImportFile" type="file" accept=".json,application/json" hidden>
+      <button type="button" id="tvEditSnapshot">存版本</button>
+    </div>
+    <div id="tvEditVersions" class="tv-edit-versions"></div>
+    <p id="tvEditStatus" class="tv-edit-status" role="status" aria-live="polite"></p>
+  </div>
+</aside>
+<script src="../共用元件/css-controls/css-controls.js?v=2"></script>
+<script src="../共用元件/color-picker/color-picker.js?v=2"></script>
+<script src="../共用元件/font-picker/font-picker.js?v=8"></script><link href="../共用元件/cell-splitter/cell-splitter.css" rel="stylesheet"/><script src="../共用元件/cell-splitter/cell-splitter.js"></script>
+<script src="../共用元件/settings-io/settings-io.js"></script>
+<script src="../共用元件/version-snapshot/version-snapshot.js"></script>
+<link href="../共用元件/panel-memory/panel-memory.css?v=2" rel="stylesheet"/><script src="../共用元件/panel-memory/panel-memory.js?v=3"></script>
+<script src="tv-font-bridge.js?v=1"></script>
+<script src="tv-edit-mode.js?v=22"></script>
 
 </body>
 </html>

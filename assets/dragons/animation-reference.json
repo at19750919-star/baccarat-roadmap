@@ -1,0 +1,43 @@
+{
+  "reference_file": "C:/Users/at197/Downloads/IMG_3852.MOV",
+  "reference_start_seconds": 80,
+  "reference_end_seconds": 89.93,
+  "scope": "本階段先完成紅、藍龍靜態角色圖；以下為後續動畫的移動參考，尚未製作或替換動畫。",
+  "observed_motion": [
+    {
+      "approx_reference_seconds": [
+        81.5,
+        83.5
+      ],
+      "description": "小體型龍逐漸顯形，龍身蜿蜒，拉成明顯的 S 形。"
+    },
+    {
+      "approx_reference_seconds": [
+        83.5,
+        87
+      ],
+      "description": "整條龍盤旋繞圈，身軀連續彎曲轉向，保持頭部與尾部的延續動作。"
+    },
+    {
+      "approx_reference_seconds": [
+        87,
+        88.5
+      ],
+      "description": "龍頭朝鏡頭快速衝近放大，頭部先掠過，龍身隨後近距離掃過畫面。"
+    },
+    {
+      "approx_reference_seconds": [
+        88.5,
+        89.5
+      ],
+      "description": "尾部依序退出，再回到路單畫面。"
+    }
+  ],
+  "design_constraints": [
+    "紅龍以金鱗、赤紅鬃毛及火焰感為主，接近使用者提供的造型參考。",
+    "藍龍與紅龍保持同系列材質、光線與比例，龍角、鬃毛、頭型及盤身姿勢須有區別。",
+    "後續動作需包含身軀彎曲、轉向與靠近鏡頭的透視變化。",
+    "角色素材保留透明背景，中文標題、連勝數字及路單不烘焙進角色圖。"
+  ],
+  "timing_note": "上述分段為依影片畫格觀察的約略時間，用於確認動作順序。"
+}

@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-29",
+  "generator": "built-in image_gen",
+  "input": "banker-gold-red-realistic-v3-bright.png",
+  "reference_role": "使用者提供的珠寶龍頭截圖，僅參考短龍角與珠寶鑲飾，不沿用卡通畫風",
+  "reference": "C:/Users/at197/AppData/Local/Temp/codex-clipboard-1bb2dc6d-fab6-4a85-85b6-4c1ba0201ef0.png",
+  "output": "banker-gold-red-realistic-v4-jeweled.png",
+  "purpose": "短龍角珠寶版候選圖；未接入或部署",
+  "transparent_background": true,
+  "prompt": "Edit IMAGE 1, the full-body realistic bright golden Chinese dragon. IMAGE 2 is a REFERENCE ONLY for the jeweled head crest and compact ornate horn styling, NOT for its cartoon drawing style. Make one localized design change: replace the extremely tall branching deer-antler horns on top of the dragon's head with shorter, elegant swept-back imperial gold horns/crest, integrated organically into the head and mane. Add tasteful embedded royal jewelry in those horn bases and the forehead crest, inspired by image 2: a few deep sapphire-blue and emerald-green cabochon gemstones in fine sculpted gold settings, with small brilliant clear faceted DIAMONDS as accents. Give the gems realistic depth, reflections and refraction, and the diamonds restrained crisp sparkle. The jeweled horn/crest must be visibly shorter and more compact than the original long antlers, with no tall deer-antler branches left above the head. It should look like an anatomically integrated imperial dragon head ornament, not a separate human crown or a pile of jewelry. Preserve the fierce mature realistic dragon face and its natural-sized eyes, the exact full-body S-curve pose, all four legs and claws, tail, whiskers, scale details, bright rich GOLD color, crimson-red mane/dorsal accents, existing framing and cinematic photorealistic material quality. No change to the torso, body pose or head direction. No cartoon eyes, flat illustration outlines, toy-like plastic materials, fire breath, text, additional characters or objects. Preserve a genuinely TRANSPARENT alpha background outside the entire dragon; no brown/black rectangular background, environment or surrounding glow field. Render the complete existing dragon, not a head-only crop."
+}

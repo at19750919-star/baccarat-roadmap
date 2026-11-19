@@ -1,0 +1,18 @@
+選取： tv-stat-main tv-edit-selected
+【1/2】改莊贏字級 40：主字差異 ["fontSize:49.24px→40px"] ；li 差異 [] ；數字差異 []
+  inline style： --edit-background-color: #00000000; --edit-color: rgb(255, 255, 255); --edit-border-color: rgb(255, 255, 255); --edit-border-width: 0px; --edit-border-radius: 0px; --edit-font-size: 40px; --edit-letter-spacing: 0px; --edit-box-shadow: inset 0px 1px 0px 0px rgba(243, 230, 196, 0.4), inset 0px -18px 32px -20px rgba(0, 0, 0, 0.62); font-size: 40px;
+  未儲存時 localStorage： []
+  選取中（編輯模式關閉後）背景/框線： rgba(0, 0, 0, 0) rgb(255, 255, 255) 0px ；改前 rgba(0, 0, 0, 0) rgb(255, 255, 255) 0px
+【3】未儲存重新整理：主字 [] keys []
+  儲存後 keys ["tv-edit-mode:controls:node-61","tv-edit-mode:settings","tv-edit-mode:splits"]
+【4】已儲存重新整理：主字差異 ["fontSize:49.24px→40px"] li 差異 []
+  對話框: 確定清除所有編輯設定（含切格、面板位置）並還原成原本的畫面？ → dismiss
+【全部還原-取消】keys 不變 true 字級仍為 40px
+【5】切大老虎： ["aa:幸運6","ab:大老虎","b:0"]
+  字高比例 ["cntBT aa 幸運6 字高/塊高=0.91","cntBT ab 大老虎 字高/塊高=0.79","cntBT b 0 字高/塊高=1.20"]
+  未儲存重新整理：切格數 0 keys ["tv-edit-mode:controls:node-61","tv-edit-mode:settings","tv-edit-mode:splits"]
+  已儲存重新整理：切格 ["aa","ab","b"] keys ["tv-edit-mode:controls:node-61","tv-edit-mode:settings","tv-edit-mode:splits"]
+【面板位置】拖曳後未儲存 keys 有 font-panel-rect？ false
+  對話框: 確定清除所有編輯設定（含切格、面板位置）並還原成原本的畫面？ → accept
+【全部還原-確定】keys []
+console 錯誤 0 []

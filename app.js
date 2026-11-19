@@ -47,18 +47,92 @@ function nextDefaultRoadmapName(list) {
   return `路單-${String(max + 1).padStart(3, '0')}`;
 }
 
-async function saveRoadmap() {
+function showSavePromptModal(message, defaultValue) {
+  return new Promise((resolve) => {
+    let modal = document.getElementById('tvSavePromptModal');
+    if (!modal) {
+      modal = document.createElement('dialog');
+      modal.id = 'tvSavePromptModal';
+      modal.className = 'tv-save-prompt-modal';
+      modal.innerHTML = `
+        <form method="dialog" class="tv-save-modal-box" id="tvSaveModalForm">
+          <div class="tv-save-modal-title">儲存路單</div>
+          <div class="tv-save-modal-msg" id="tvSaveModalMsg"></div>
+          <div class="tv-save-modal-field">
+            <input type="text" id="tvSaveModalInput" class="tv-save-modal-input" maxlength="60" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="tv-save-modal-actions">
+            <button type="button" class="tv-save-modal-btn cancel" id="tvSaveCancelBtn">取消</button>
+            <button type="submit" class="tv-save-modal-btn confirm" id="tvSaveConfirmBtn">確定</button>
+          </div>
+        </form>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const form = modal.querySelector('#tvSaveModalForm');
+    const msgEl = modal.querySelector('#tvSaveModalMsg');
+    const input = modal.querySelector('#tvSaveModalInput');
+    const cancelBtn = modal.querySelector('#tvSaveCancelBtn');
+
+    if (msgEl) msgEl.textContent = message || '請輸入路單名稱：';
+    if (input) input.value = defaultValue || '';
+
+    function cleanup() {
+      form.onsubmit = null;
+      cancelBtn.onclick = null;
+      modal.onkeydown = null;
+    }
+
+    function close(val) {
+      cleanup();
+      modal.close();
+      resolve(val);
+    }
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      close(input.value);
+    };
+
+    cancelBtn.onclick = function() {
+      close(null);
+    };
+
+    modal.onkeydown = function(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        close(null);
+      }
+    };
+
+    modal.showModal();
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  });
+}
+
+function formatAutoSaveName(tableNo, shoeNo, date = new Date()) {
+  const pad = n => String(n).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const MM = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mm = pad(date.getMinutes());
+  const timeStr = `${yyyy}${MM}${dd}_${hh}${mm}`;
+  const tNo = String(tableNo || '001').trim();
+  const sNo = String(shoeNo || '01').trim();
+  return `桌${tNo}-靴${sNo}-${timeStr}`;
+}
+
+async function executeSaveRoadmap(name, { silent = false } = {}) {
   const backup = window.RoadBackup;
   if (backup?.busy) return null;
-  if (!Array.isArray(state.rounds) || state.rounds.length === 0) {
-    alert('請先輸入路單紀錄再儲存！');
-    return null;
-  }
+  if (!Array.isArray(state.rounds) || state.rounds.length === 0) return null;
   const list = loadSavedRoadmaps();
-  const defaultName = nextDefaultRoadmapName(list);
-  const rawName = prompt('請輸入路單名稱（保留本機清單與 JSON 下載，並送出 JSON＋PNG 雲端備份）：', defaultName);
-  if (rawName === null) return null;
-  const name = rawName.trim() || defaultName;
   const outcomes = state.rounds.map(rd => rd.r === 'B' ? '莊' : rd.r === 'P' ? '閒' : '和');
   const nonTieOutcomes = outcomes.filter(o => o === '莊' || o === '閒');
   const banker = state.rounds.filter(rd => rd.r === 'B').length;
@@ -82,23 +156,43 @@ async function saveRoadmap() {
     listSaved = false;
     console.warn('無法寫入 localStorage:', err);
   }
-  try {
-    const blob = new Blob([JSON.stringify(entry, null, 2)], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const safeFile = name.replace(/[\\/:*?"<>|]/g, '_') || defaultName;
-    a.href = url;
-    a.download = `${safeFile}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (err) {
-    console.error('下載路單 JSON 失敗:', err);
+  if (!window.OfflineRoadmap) {
+    try {
+      const blob = new Blob([JSON.stringify(entry, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeFile = name.replace(/[\\/:*?"<>|]/g, '_') || '路單';
+      a.href = url;
+      a.download = `${safeFile}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      console.error('下載路單 JSON 失敗:', err);
+    }
   }
-  if (backup) await backup.save(entry, { listSaved });
-  else alert('已送出原本的 JSON 下載；備份模組未載入，未產生 PNG 或傳到雲端。');
+  if (backup) {
+    await backup.save(entry, { listSaved });
+  } else if (!silent) {
+    alert('已送出 JSON 下載；備份模組未載入，未傳到雲端。');
+  }
   return entry;
+}
+
+async function saveRoadmap() {
+  const backup = window.RoadBackup;
+  if (backup?.busy) return null;
+  if (!Array.isArray(state.rounds) || state.rounds.length === 0) {
+    alert('請先輸入路單紀錄再儲存！');
+    return null;
+  }
+  const list = loadSavedRoadmaps();
+  const defaultName = nextDefaultRoadmapName(list);
+  const rawName = await showSavePromptModal('請輸入路單名稱（保留本機清單與 JSON 存檔）：', defaultName);
+  if (rawName === null) return null;
+  const name = rawName.trim() || defaultName;
+  return executeSaveRoadmap(name, { silent: false });
 }
 
 // ---------- 持久化 ----------
@@ -172,12 +266,19 @@ function buildBigRoad(rounds) {
       return { row: 0, col: 0 };
     }
     if (color === curColor) {
-      // 嘗試往下
-      let nextRow = curRow + 1;
-      // 條件:沒超過底部 & 下方該格還沒被佔
-      if (nextRow < rows && !grid[nextRow][curCol]) {
-        curRow = nextRow;
-        return { row: nextRow, col: curCol };
+      // 若該次連勝已經拐彎向右走（curCol > curStartCol），則後續必須繼續向右，不再向下
+      if (curCol === curStartCol) {
+        // 嘗試往下
+        let nextRow = curRow + 1;
+        // 避碰：檢查下方左鄰格（nextRow, curCol - 1）是否已有同色球（避免不同欄同色球相撞黏在一起）
+        const leftNeighbor = (curCol > 0 && nextRow < rows) ? grid[nextRow][curCol - 1] : null;
+        const willCollideSameColor = leftNeighbor && leftNeighbor.r === color;
+
+        // 條件:沒超過底部 & 下方該格還沒被佔 & 沒有同色避碰
+        if (nextRow < rows && !grid[nextRow][curCol] && !willCollideSameColor) {
+          curRow = nextRow;
+          return { row: nextRow, col: curCol };
+        }
       }
       // 拖尾:往右走,row 停在 curRow
       let nextCol = curCol + 1;
@@ -973,10 +1074,121 @@ function undo() {
   renderAll();
 }
 
+function getClearPromptMessage() {
+  try {
+    const saved = localStorage.getItem('baccarat_tv_settings_v3');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.clearPromptText && parsed.clearPromptText.trim()) {
+        return parsed.clearPromptText.trim();
+      }
+    }
+  } catch (_) {}
+  return '確定要清盤？此操作無法復原';
+}
+
+function showClearConfirmModal(onConfirm) {
+  let modal = document.getElementById('tvClearConfirmModal');
+  if (!modal) {
+    modal = document.createElement('dialog');
+    modal.id = 'tvClearConfirmModal';
+    modal.className = 'tv-clear-confirm-modal';
+    modal.innerHTML = `
+      <div class="tv-clear-modal-box">
+        <div class="tv-clear-modal-title">清盤確認</div>
+        <div class="tv-clear-modal-msg" id="tvClearModalMsg"></div>
+        <div class="tv-clear-modal-actions">
+          <button type="button" class="tv-clear-modal-btn cancel" id="tvClearCancelBtn">取消</button>
+          <button type="button" class="tv-clear-modal-btn confirm" id="tvClearConfirmBtn" tabindex="-1">確定清盤</button>
+        </div>
+        <div class="tv-clear-modal-hint">※ 為防誤觸，確定按鈕僅限滑鼠點擊</div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  const msgEl = modal.querySelector('#tvClearModalMsg');
+  if (msgEl) msgEl.textContent = getClearPromptMessage();
+
+  const confirmBtn = modal.querySelector('#tvClearConfirmBtn');
+  const cancelBtn = modal.querySelector('#tvClearCancelBtn');
+
+  function cleanup() {
+    modal.removeEventListener('keydown', onKeyDown, true);
+    confirmBtn.onclick = null;
+    cancelBtn.onclick = null;
+  }
+
+  function close(confirmed) {
+    cleanup();
+    modal.close();
+    if (confirmed) {
+      onConfirm();
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      close(false);
+      return;
+    }
+    // 嚴格阻擋 Enter 與 空白鍵，防止鍵盤誤按觸發確定
+    if (e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter' || e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }
+
+  // 確定按鈕：嚴格只接受真實滑鼠點擊 (e.detail > 0)，任何鍵盤模擬觸發 (detail === 0) 均無效
+  confirmBtn.onclick = function(e) {
+    if (e && e.detail === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    close(true);
+  };
+
+  cancelBtn.onclick = function() {
+    close(false);
+  };
+
+  modal.addEventListener('keydown', onKeyDown, true);
+
+  modal.showModal();
+  if (cancelBtn) cancelBtn.focus();
+}
+
 function clearAll() {
-  if (!confirm('確定要清盤?此操作無法復原')) return;
-  state.rounds = [];
-  renderAll();
+  showClearConfirmModal(async () => {
+    const hasRounds = Array.isArray(state.rounds) && state.rounds.length > 0;
+    let autoSave = true;
+    let tableNo = '001', shoeNo = '01';
+    try {
+      const s = typeof window.getBaccaratSettings === 'function'
+        ? window.getBaccaratSettings()
+        : JSON.parse(localStorage.getItem('baccarat_tv_settings_v1') || '{}');
+      if (s.autoSaveOnClear === false) autoSave = false;
+      if (s.tableNo) tableNo = s.tableNo;
+      if (s.shoeNo) shoeNo = s.shoeNo;
+    } catch (_) {}
+
+    if (hasRounds && autoSave) {
+      const autoName = formatAutoSaveName(tableNo, shoeNo);
+      try {
+        await executeSaveRoadmap(autoName, { silent: true });
+      } catch (err) {
+        console.warn('清盤自動儲存失敗:', err);
+      }
+    }
+
+    state.rounds = [];
+    renderAll();
+    document.dispatchEvent(new CustomEvent('baccarat:clear'));
+  });
 }
 
 // ---------- 語音播報 (Web Speech API) ----------
@@ -1454,11 +1666,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const c = codeToKey(e.code);
     return (c && c.toUpperCase() === t) || (e.key && e.key.toUpperCase() === t);
   }
+  // 連按三次 Enter（0.6 秒內）切換全螢幕，與全螢幕鍵並存。
+  // 只算「閒置」的 Enter：有待送出的按鍵、正在打字、設定視窗開著都不算（關掉設定後焦點留在按鈕上也照算）；
+  // 會記錄一局的 Enter（包含小老虎/大老虎確認）事後也不算。
+  let fullscreenEnters = [];
+  window.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const isEnter = e.code === 'Enter' || e.code === 'NumpadEnter';
+    if (!isEnter || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || pageHidden || pendingKeys.size ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(t && t.tagName) || (t && t.isContentEditable) ||
+        document.querySelector('dialog[open]')) { fullscreenEnters = []; return; }
+    const before = state.rounds.length, now = performance.now();
+    fullscreenEnters = fullscreenEnters.filter(x => now - x < 600);
+    fullscreenEnters.push(now);
+    setTimeout(() => {
+      if (state.rounds.length !== before) { fullscreenEnters = []; return; }
+      if (fullscreenEnters.length >= 3) { fullscreenEnters = []; toggleFullscreen(); }
+    });
+  }, true);
   document.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     const tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-    if ((isMatchKey(activeKeyBindings.keyFullscreen || 'F', e) || e.code === 'NumpadDivide') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    if (isMatchKey(activeKeyBindings.keyFullscreen || 'F', e) && !e.ctrlKey && !e.altKey && !e.metaKey) {
       toggleFullscreen();
       e.preventDefault();
       return;

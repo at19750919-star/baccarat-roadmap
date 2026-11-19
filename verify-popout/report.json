@@ -1,0 +1,102 @@
+{
+  "steps": [
+    {
+      "name": "1 popup 有面板、主頁沒有",
+      "ok": true,
+      "main": false,
+      "status": ""
+    },
+    {
+      "name": "2 滑桿與背景反映到主頁",
+      "ok": true,
+      "borderBefore": "0px",
+      "styleAfter": {
+        "border": "38.4615px",
+        "background": "rgb(18, 52, 86)"
+      }
+    },
+    {
+      "name": "3 字型面板在 popup 且主頁字型改變",
+      "ok": true,
+      "mainFontCount": 0,
+      "fontPlace": {
+        "visible": 30,
+        "total": 96,
+        "vw": 1280,
+        "vh": 900
+      },
+      "fontBefore": "Cinzel, \"Noto Serif TC\", serif",
+      "fontAfter": "\"Palatino Linotype\", Palatino, PMingLiU, \"Songti TC\", serif"
+    },
+    {
+      "name": "4 調色盤在 popup 且主頁顏色改變",
+      "ok": true,
+      "colorPlace": {
+        "inPopup": true,
+        "top": 94.80987548828125,
+        "left": 51.38767623901367,
+        "width": 309.997802734375,
+        "height": 426.7154846191406,
+        "inside": true
+      },
+      "mainPopover": 0,
+      "colorBefore": "rgb(255, 215, 0)",
+      "colorAfter": "rgb(26, 22, 2)"
+    },
+    {
+      "name": "5 主頁 Ctrl+點選更新 popup 選取文字",
+      "ok": true,
+      "labelBefore": "選取：VIP BACCARAT",
+      "labelAfter": "選取：2 個區塊（Ctrl+點選加選或取消）"
+    },
+    {
+      "name": "6a 關閉後面板回到主頁且可拖曳",
+      "ok": true,
+      "back": {
+        "has": true,
+        "hidden": false,
+        "suspend": false
+      },
+      "leftBefore": 126.83566284179688,
+      "leftAfter": 262.8277893066406,
+      "head": {
+        "x": 127.53496551513672,
+        "y": 272.6944885253906,
+        "width": 358.5992202758789,
+        "height": 52.0760498046875
+      }
+    },
+    {
+      "name": "6b 再次彈出沿用位置大小",
+      "ok": true,
+      "firstRect": {
+        "w": 1280,
+        "h": 900,
+        "x": 0,
+        "y": 0
+      },
+      "second": {
+        "w": 1100,
+        "h": 760,
+        "x": 0,
+        "y": 0
+      },
+      "stored": "{\"left\":0,\"top\":0,\"width\":1100,\"height\":760}"
+    },
+    {
+      "name": "8 demos 無錯誤",
+      "ok": true,
+      "font": [],
+      "css": [],
+      "color": []
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "left": [],
+      "writes": [],
+      "sw": false
+    }
+  ],
+  "errors": []
+}
