@@ -1,0 +1,889 @@
+/* ==========================================================================
+   路單設定面板：賭金風格（Gemini7 比較版，可整份替換 tv-settings-casino.css）
+   - 主色鎖定已定案亮紅漸層（--panel: #a5171a -> --panel-2: #7a0f12）
+   - 嚴守新版《賭金風格》技能：外觀一律自《賭場綠金・元件總覽》原樣複製
+   - 同功能全頁同一款，不同功能各自挑選材質 / .kit（底色、紋理、光影、框層次、邊角裝飾）與形狀
+   - 只用襯線字（空心 0）、只用直角 0 / 正圓 50% / 膠囊 999px / 八角 clip-path、無 Emoji、720x887 三分頁零捲軸
+   ========================================================================== */
+
+/* ---- 0. 變數：規範 2.1 與主色 9 變數（專案已定案 tv 紅） ---- */
+#tvSettings.tv-settings {
+  --serif: "Noto Serif TC", "Cinzel", serif;
+  --disp: "Cinzel", "Noto Serif TC", serif;
+  --ink: #07090b;
+  --pit: #2a0607;
+  --felt-1: #a5171a;
+  --felt-2: #6e0c0f;
+  --glow: rgba(220, 50, 40, .35);
+  --state-1: #c0262a;
+  --state-2: #7a1013;
+  --panel: #a5171a;
+  --panel-2: #7a0f12;
+  --control-1: #4a090b;
+  --control-2: #2e0405;
+  --gold-1: #f4dfa4;
+  --gold-2: #d9b568;
+  --gold-3: #a67c35;
+  --gold-4: #6b4c1d;
+  --gold-line: linear-gradient(135deg, #6b4c1d, #e8c97a 25%, #8a6a2f 50%, #f4dfa4 75%, #6b4c1d);
+  --txt: #f3ecdc;
+  --txt-dim: #e2cfae;
+  --danger: #ff6b5e;
+  --ok: #67c98f;
+  color: var(--txt);
+  color-scheme: dark;
+}
+
+/* ---- 1. 對話框外框：對話彈窗與抽屜（.dialog + .dialog::before / ::after，亮紅主色，方形） ---- */
+html #tvSettings.tv-settings {
+  padding: 18px 20px 16px !important;
+  background: linear-gradient(160deg, var(--panel), var(--panel-2)) !important;
+  border: 1px solid var(--gold-2) !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  box-shadow: 0 20px 70px #000e !important;
+  position: fixed;
+}
+html #tvSettings.tv-settings::before,
+html #tvSettings.tv-settings::after {
+  content: "";
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  border: 2px solid var(--gold-1);
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+html #tvSettings.tv-settings::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+html #tvSettings.tv-settings::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+
+/* 內部整體排版間距（維持 720x887 三分頁零捲軸） */
+html #tvSettings.tv-settings #tvSettingsForm {
+  gap: 12px !important;
+}
+html #tvSettings.tv-settings .tv-settings-content {
+  padding: 2px 4px 2px 0 !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-3) var(--control-2);
+}
+html #tvSettings.tv-settings .tv-settings-content::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  background: var(--gold-3);
+}
+
+/* ---- 2. 字型底線：全區僅用襯線字，空心 0 ---- */
+html #tvSettings.tv-settings,
+html #tvSettings.tv-settings * {
+  font-family: var(--serif) !important;
+  font-feature-settings: "zero" 0 !important;
+}
+html #tvSettings.tv-settings input:not([type=checkbox]):not([type=range]):not([type=color]):not(#tvLimitPresetName):not(#tvCustomSavePath):not(#tvClearPromptText):not(#tvCaptionText),
+html #tvSettings.tv-settings #tvSoundVolumeText {
+  font-family: var(--disp) !important;
+  font-feature-settings: "zero" 0 !important;
+}
+
+/* ---- 3. 頁首標題與拖曳提示：總覽 h1 品牌漸層字 + .brand-rule ---- */
+html #tvSettings.tv-settings .tv-settings-header {
+  gap: 12px;
+  padding-bottom: 2px;
+}
+html #tvSettings.tv-settings h2 {
+  margin: 0;
+  font: 900 28px/1.25 var(--disp) !important;
+  letter-spacing: .14em !important;
+  background: linear-gradient(180deg, #fbeec7 10%, #e2bd72 45%, #9c7434 70%, #f0d491 95%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+}
+html #tvSettings.tv-settings .tv-drag-hint {
+  color: var(--txt-dim) !important;
+  font: 400 14px/1.4 var(--serif) !important;
+  letter-spacing: .08em;
+  padding-left: 12px;
+  border-left: 1px solid var(--gold-4);
+}
+html #tvSettings.tv-settings :is(p, .tv-audition-title, .tv-symbol-help) {
+  color: var(--txt-dim);
+}
+html #tvSettings.tv-settings :is(label, .tv-settings-skin > span, td) {
+  color: var(--txt);
+}
+
+/* ---- 4. 頁首圓形圖示鈕：圓形圖示按鈕（.btn-circle）+ .kit（純黑底 + 放射太陽紋 + 頂部高光 + 雙色框，正圓 50%） ---- */
+html #tvSettings.tv-settings :is(#tvSettingsClose, #tvSettingsSizeToggle) {
+  --kit-fill: linear-gradient(180deg, #1a1a1a, #050505);
+  --kit-tex: repeating-conic-gradient(from 0deg at 50% 50%, #ffffff14 0 4deg, #0000 4deg 9deg);
+  --kit-gloss: linear-gradient(180deg, #ffffff38, #ffffff08 48%, #0000 50%);
+  --kit-corner: linear-gradient(#0000, #0000);
+  --kit-border: 1px solid var(--gold-1);
+  --kit-frame-sh: inset 0 0 0 2px #2a1d0a, inset 0 0 0 3px var(--gold-3);
+  --kit-light-sh: inset 0 1px 0 #ffffff55, 0 3px 8px #0008;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: var(--kit-border) !important;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  box-shadow: var(--kit-frame-sh), var(--kit-light-sh) !important;
+  color: var(--gold-1) !important;
+  outline: 0 !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  transition: .2s;
+}
+html #tvSettings.tv-settings :is(#tvSettingsClose, #tvSettingsSizeToggle):hover {
+  border-color: var(--gold-1) !important;
+  color: #fff6dc !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--kit-frame-sh), 0 6px 14px #000a, 0 0 10px #d4b06a44 !important;
+}
+html #tvSettings.tv-settings :is(#tvSettingsClose, #tvSettingsSizeToggle):active {
+  transform: scale(.95) !important;
+}
+html #tvSettings.tv-settings #tvSettingsSizeToggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+/* ---- 5. 分頁切換列：資料夾式頁籤（.tabs-folder，已改直角 0）+ .kit
+          未選：.fill-dark + .tex-pin + .light-inset
+          選中：.fill-black + .light-gloss + .corner-bars ---- */
+html #tvSettings.tv-settings .tv-settings-tabs {
+  gap: 6px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--gold-3) !important;
+  border-radius: 0 !important;
+  padding: 0 6px !important;
+  background: transparent !important;
+}
+html #tvSettings.tv-settings .tv-settings-tabs button,
+html #tvSettings.tv-settings .tv-settings-tabs button[aria-selected=false] {
+  --kit-fill: linear-gradient(180deg, var(--control-1), var(--control-2));
+  --kit-tex: repeating-linear-gradient(90deg, #0000 0 9px, #ffffff1c 9px 10px);
+  --kit-gloss: linear-gradient(#0000, #0000);
+  --kit-corner: linear-gradient(#0000, #0000);
+  --kit-light-sh: inset 0 3px 8px #000c, inset 0 -1px 0 #ffffff14;
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+  margin-bottom: -1px !important;
+  border: 1px solid var(--gold-4) !important;
+  border-bottom: 0 !important;
+  border-radius: 0 !important;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  box-shadow: var(--kit-light-sh) !important;
+  color: var(--txt-dim) !important;
+  font: 600 18px/1.2 var(--serif) !important;
+  letter-spacing: .12em !important;
+  outline: 0 !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings .tv-settings-tabs button[aria-selected=false]:hover {
+  border-color: var(--gold-2) !important;
+  color: var(--gold-1) !important;
+  filter: brightness(1.12);
+}
+html #tvSettings.tv-settings .tv-settings-tabs button[aria-selected=true] {
+  --kit-fill: linear-gradient(180deg, #1a1a1a, #050505);
+  --kit-tex: linear-gradient(#0000, #0000);
+  --kit-gloss: linear-gradient(180deg, #ffffff38, #ffffff08 48%, #0000 50%);
+  --kit-corner: linear-gradient(90deg, #0000, var(--gold-1) 20% 80%, #0000) 50% 3px/100% 2px no-repeat,
+                linear-gradient(90deg, #0000, var(--gold-1) 20% 80%, #0000) 50% calc(100% - 3px)/100% 2px no-repeat;
+  --kit-light-sh: inset 0 1px 0 #ffffff55, 0 3px 8px #0008;
+  border: 1px solid var(--gold-2) !important;
+  border-bottom: 0 !important;
+  border-radius: 0 !important;
+  padding-bottom: 9px !important;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  box-shadow: var(--kit-light-sh) !important;
+  color: var(--gold-1) !important;
+  font-weight: 700 !important;
+  outline: 0 !important;
+}
+
+/* ---- 6. 分組卡片容器：金框小卡（.mini-card）+ .kit（純黑底 + 菱格紋 + 浮起 + 雙色框 + 四角 L 角飾，方形） ---- */
+html #tvSettings.tv-settings :is(.tv-settings-skin, .tv-settings-group, #tvProposalLimitSettings, .tv-keys-subgroup, .tv-save-subgroup) {
+  --kit-fill: linear-gradient(180deg, #1a1a1a, #050505);
+  --kit-tex: repeating-linear-gradient(45deg, #0000 0 7px, #0000003a 7px 8px),
+             repeating-linear-gradient(-45deg, #0000 0 7px, #0000003a 7px 8px);
+  --kit-gloss: linear-gradient(#0000, #0000);
+  --kit-corner: linear-gradient(var(--gold-1), var(--gold-1)) 3px 3px/9px 1.5px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) 3px 3px/1.5px 9px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) calc(100% - 3px) 3px/9px 1.5px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) calc(100% - 3px) 3px/1.5px 9px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) 3px calc(100% - 3px)/9px 1.5px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) 3px calc(100% - 3px)/1.5px 9px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) calc(100% - 3px) calc(100% - 3px)/9px 1.5px no-repeat,
+                linear-gradient(var(--gold-1), var(--gold-1)) calc(100% - 3px) calc(100% - 3px)/1.5px 9px no-repeat;
+  --kit-border: 1px solid var(--gold-1);
+  --kit-frame-sh: inset 0 0 0 2px #2a1d0a, inset 0 0 0 3px var(--gold-3);
+  --kit-light-sh: 0 6px 14px #000b;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  border: var(--kit-border) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--kit-frame-sh), var(--kit-light-sh) !important;
+  padding: 12px 14px 14px !important;
+  box-sizing: border-box;
+}
+html #tvSettings.tv-settings .tv-settings-skin {
+  margin: 0 0 12px !important;
+}
+html #tvSettings.tv-settings .tv-settings-group {
+  margin: 0 0 12px !important;
+}
+html #tvSettings.tv-settings #tvProposalLimitSettings {
+  margin-top: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  row-gap: 8px !important;
+  column-gap: 0 !important;
+}
+html #tvSettings.tv-settings #tvProposalLimitSettings > :not(.tv-settings-subhead):not(.tv-limit-presets) {
+  margin-top: 2px !important;
+}
+
+/* ---- 7. 區段小標題：中間裝飾分隔線（.div-line-wrap，全頁統一） ---- */
+html #tvSettings.tv-settings :is(#tvStyleLabel, .tv-settings-subhead, .tv-keys-subhead, .tv-save-subhead, .tv-symbol-preview-head) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  color: var(--gold-2) !important;
+  font: 600 18px/1.25 var(--serif) !important;
+  letter-spacing: .18em !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+html #tvSettings.tv-settings :is(#tvStyleLabel, .tv-settings-subhead, .tv-keys-subhead, .tv-save-subhead, .tv-symbol-preview-head)::before,
+html #tvSettings.tv-settings :is(#tvStyleLabel, .tv-settings-subhead, .tv-keys-subhead, .tv-save-subhead, .tv-symbol-preview-head)::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--gold-line);
+}
+html #tvSettings.tv-settings #tvProposalLimitSettings > .tv-settings-subhead {
+  grid-column: 1 / -1 !important;
+  margin: 0 !important;
+}
+html #tvSettings.tv-settings .tv-keys-subgroup h3.tv-keys-subhead[style*="margin-top"] {
+  margin-top: 10px !important;
+}
+
+/* ---- 8. 畫面風格單選（4 顆）：按鈕式單選 + 八角金邊材質（.skin-oct / .shape-oct）；選中轉金色漸層實心（.skin-gold） ---- */
+html #tvSettings.tv-settings .tv-style-options {
+  gap: 10px !important;
+}
+html #tvSettings.tv-settings .tv-style-options button {
+  --c: 8px;
+  position: relative !important;
+  isolation: isolate !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  min-height: 42px !important;
+  padding: 8px 10px !important;
+  background: linear-gradient(160deg, var(--panel), var(--panel-2)) !important;
+  color: var(--gold-1) !important;
+  font: 600 17px/1.2 var(--serif) !important;
+  letter-spacing: .06em !important;
+  clip-path: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)), 0 var(--c)) !important;
+  box-shadow: inset 0 0 0 2px var(--gold-2) !important;
+  text-shadow: none !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings .tv-style-options button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: var(--gold-line);
+  clip-path: inherit;
+  z-index: -1;
+  pointer-events: none;
+}
+html #tvSettings.tv-settings .tv-style-options button::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(160deg, var(--control-1), var(--control-2));
+  clip-path: inherit;
+  z-index: -1;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px #0009;
+  transition: .18s;
+}
+html #tvSettings.tv-settings .tv-style-options button:hover {
+  color: #fff6dc !important;
+}
+html #tvSettings.tv-settings .tv-style-options button:hover::after {
+  background: linear-gradient(180deg, #2a2a1f, var(--control-2));
+}
+html #tvSettings.tv-settings .tv-style-options button[aria-checked=true] {
+  color: #21190d !important;
+  font-weight: 700 !important;
+}
+html #tvSettings.tv-settings .tv-style-options button[aria-checked=true]::after {
+  background: linear-gradient(180deg, #f7e6ba, #d6ad5d 55%, #a77a32) !important;
+  box-shadow: inset 0 1px #fff8 !important;
+}
+html #tvSettings.tv-settings .tv-style-options button[aria-checked=true]:hover {
+  filter: brightness(1.06);
+  color: #21190d !important;
+}
+html #tvSettings.tv-settings .tv-style-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50% !important;
+  border: 1px solid var(--gold-1);
+}
+
+/* ---- 9. 一般動作按鈕：基本按鈕（.tool-btn）+ .kit（青銅底 + 拉絲紋 + 立體厚度 + 單線框 + 四角鉚釘，方形）
+          涵蓋：限紅列新增/儲存、語音試聽 7 顆、儲存設定選擇資料夾，全頁完全同款 ---- */
+html #tvSettings.tv-settings :is(#tvLimitPresetAdd, #tvLimitPresetSave, .tv-mini-audio-btn, .tv-pick-folder-btn) {
+  --kit-fill: linear-gradient(180deg, #765d28, #453312);
+  --kit-tex: repeating-linear-gradient(90deg, #ffffff14 0 1px, #0000 1px 3px, #00000018 3px 4px, #0000 4px 6px);
+  --kit-gloss: linear-gradient(#0000, #0000);
+  --kit-corner: radial-gradient(circle, #f6e6b8 0 1.6px, #8a6a2f 2.4px, #0000 3px) 5px 5px/7px 7px no-repeat,
+                radial-gradient(circle, #f6e6b8 0 1.6px, #8a6a2f 2.4px, #0000 3px) calc(100% - 5px) 5px/7px 7px no-repeat,
+                radial-gradient(circle, #f6e6b8 0 1.6px, #8a6a2f 2.4px, #0000 3px) 5px calc(100% - 5px)/7px 7px no-repeat,
+                radial-gradient(circle, #f6e6b8 0 1.6px, #8a6a2f 2.4px, #0000 3px) calc(100% - 5px) calc(100% - 5px)/7px 7px no-repeat;
+  --kit-border: 1px solid var(--gold-3);
+  --kit-frame-sh: 0 0 #0000;
+  --kit-light-sh: inset 0 1px 0 #ffffff40, 0 4px 0 #2b1d08, 0 8px 12px #000a;
+  border: var(--kit-border) !important;
+  border-radius: 0 !important;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  box-shadow: var(--kit-frame-sh), var(--kit-light-sh) !important;
+  color: var(--gold-1) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 0 #0009 !important;
+  outline: 0 !important;
+  margin-bottom: 0;
+  transition: .18s;
+}
+html #tvSettings.tv-settings :is(#tvLimitPresetAdd, #tvLimitPresetSave, .tv-mini-audio-btn, .tv-pick-folder-btn):hover:not(:disabled) {
+  border-color: var(--gold-1) !important;
+  filter: brightness(1.1);
+  color: #fff5d6 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--kit-frame-sh), inset 0 1px 0 #ffffff55, 0 5px 0 #2b1d08, 0 10px 14px #000b !important;
+}
+html #tvSettings.tv-settings :is(#tvLimitPresetAdd, #tvLimitPresetSave, .tv-mini-audio-btn, .tv-pick-folder-btn):active:not(:disabled) {
+  transform: translateY(3px) !important;
+  box-shadow: var(--kit-frame-sh), inset 0 2px 4px #0007, 0 1px 0 #2b1d08 !important;
+}
+html #tvSettings.tv-settings button:disabled {
+  opacity: .38 !important;
+  filter: grayscale(.5);
+  cursor: not-allowed;
+}
+html #tvSettings.tv-settings .tv-limit-presets :is(#tvLimitPresetAdd, #tvLimitPresetSave) {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 5px 15px !important;
+  font-size: 16px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-audition-btns {
+  gap: 5px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) button.tv-mini-audio-btn {
+  min-height: 36px !important;
+  padding: 5px 11px !important;
+  font-size: 14.5px !important;
+  letter-spacing: .02em !important;
+}
+html #tvSettings.tv-settings .tv-pick-folder-btn {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 6px 16px !important;
+  font-size: 16px !important;
+  letter-spacing: .06em !important;
+}
+
+/* ---- 10. 主要送出鍵（底部唯一送出「儲存」）：金錠浮雕（.skin-ingot，方形） ---- */
+html #tvSettings.tv-settings .tv-settings-actions button[type=submit] {
+  background: linear-gradient(180deg, #f7e6ba, var(--gold-2) 48%, var(--gold-3) 52%, #c9a25a) !important;
+  border: 1px solid var(--gold-1) !important;
+  border-radius: 0 !important;
+  color: #1f1607 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .25) !important;
+  box-shadow: inset 0 1px #fffc, 0 4px 0 var(--gold-4), 0 8px 12px #000a !important;
+  font: 800 18px/1.2 var(--serif) !important;
+  letter-spacing: .16em !important;
+  min-height: 40px !important;
+  padding: 8px 28px !important;
+  margin-bottom: 4px !important;
+  outline: 0 !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings .tv-settings-actions button[type=submit]:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px) !important;
+  box-shadow: inset 0 1px #fffc, 0 5px 0 var(--gold-4), 0 10px 16px #000a !important;
+}
+html #tvSettings.tv-settings .tv-settings-actions button[type=submit]:active {
+  transform: translateY(3px) !important;
+  box-shadow: inset 0 2px 4px #0006, 0 1px 0 var(--gold-4) !important;
+}
+
+/* ---- 11. 低干擾按鈕（恢復預設、取消、還原）：純文字連結按鈕（.btn-link） ---- */
+html #tvSettings.tv-settings :is(#tvSettingsReset, #tvSettingsCancel, #tvColorsReset, #tvColorReset) {
+  border: 0 !important;
+  border-bottom: 1px solid var(--gold-3) !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  min-height: 36px !important;
+  padding: 4px 8px !important;
+  font: 600 17px/1.3 var(--serif) !important;
+  letter-spacing: .08em !important;
+  color: var(--gold-1) !important;
+  transition: .2s;
+}
+html #tvSettings.tv-settings :is(#tvSettingsReset, #tvSettingsCancel, #tvColorsReset, #tvColorReset):hover {
+  background: none !important;
+  color: #fff6d8 !important;
+  border-bottom-color: var(--gold-1) !important;
+  text-shadow: 0 0 8px #f4dfa488 !important;
+}
+html #tvSettings.tv-settings :is(#tvSettingsReset, #tvSettingsCancel, #tvColorsReset, #tvColorReset):active {
+  background: none !important;
+  opacity: .8;
+}
+
+/* ---- 12. 危險按鈕（刪除限紅版本，兩段確認）：紅色危險按鈕（.tool-btn.danger / .tool-btn.danger-solid，方形） ---- */
+html #tvSettings.tv-settings #tvLimitPresetDelete {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 5px 12px !important;
+  margin-bottom: 0;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  border-radius: 0 !important;
+  border: 1px solid #a64540 !important;
+  background: linear-gradient(155deg, var(--control-1), var(--control-2)) !important;
+  color: var(--danger) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  transition: .2s;
+}
+html #tvSettings.tv-settings #tvLimitPresetDelete:hover:not(:disabled) {
+  border-color: var(--danger) !important;
+  color: #ff8a80 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 14px #0008, 0 0 10px #ff6b5e33 !important;
+}
+html #tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete.is-confirm {
+  background: linear-gradient(180deg, #e0483e, #ad241b 58%, #78140e) !important;
+  border-color: #ff8a80 !important;
+  color: #fff5f3 !important;
+  box-shadow: inset 0 1px #ffb3ad66, 0 4px 12px #0009 !important;
+}
+html #tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete.is-confirm:hover {
+  filter: brightness(1.1);
+  color: #fff !important;
+  border-color: #ffb3ad !important;
+}
+
+/* ---- 13. 文字輸入框（版本名稱、儲存路徑、清盤提示、字幕）：基本輸入框（.field）+ 淺色香檳材質（.skin-light，方形） ---- */
+html #tvSettings.tv-settings :is(#tvLimitPresetName, #tvCustomSavePath, #tvClearPromptText, #tvCaptionText, textarea) {
+  background: linear-gradient(180deg, #faf2df, #e6d4b1) !important;
+  border: 1px solid var(--gold-3) !important;
+  border-radius: 0 !important;
+  color: #23190b !important;
+  -webkit-text-fill-color: #23190b !important;
+  box-shadow: inset 0 1px #fff9, inset 0 -2px 5px rgba(107, 76, 29, .2), 0 4px 10px #0007 !important;
+  font: 600 17px/1.3 var(--serif) !important;
+  text-align: left !important;
+  outline: 0 !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings :is(#tvLimitPresetName, #tvCustomSavePath, #tvClearPromptText, #tvCaptionText, textarea)::placeholder {
+  color: #7a6341 !important;
+  -webkit-text-fill-color: #7a6341 !important;
+}
+html #tvSettings.tv-settings :is(#tvLimitPresetName, #tvCustomSavePath, #tvClearPromptText, #tvCaptionText, textarea):focus {
+  border-color: var(--gold-1) !important;
+  box-shadow: 0 0 10px #d4b06a55, inset 0 1px #fffc, inset 0 -2px 5px rgba(107, 76, 29, .2) !important;
+}
+html #tvSettings.tv-settings .tv-limit-presets #tvLimitPresetName {
+  height: 38px !important;
+  min-height: 38px !important;
+  margin-bottom: 0;
+  padding: 5px 10px !important;
+}
+
+/* ---- 14. 數字與可編輯鍵位輸入框：數字框（.numbox）+ .kit（深暗底 + 內凹陰影 + 漸層金框，方形） ---- */
+html #tvSettings.tv-settings input:not([type=checkbox]):not([type=range]):not([type=color]):not([readonly]):not(#tvLimitPresetName):not(#tvCustomSavePath):not(#tvClearPromptText):not(#tvCaptionText) {
+  --kit-fill: linear-gradient(180deg, var(--control-1), var(--control-2));
+  --kit-tex: linear-gradient(#0000, #0000);
+  --kit-gloss: linear-gradient(#0000, #0000);
+  --kit-corner: linear-gradient(#0000, #0000);
+  --kit-light-sh: inset 0 3px 8px #000c, inset 0 -1px 0 #ffffff14;
+  border: 1px solid !important;
+  border-image: var(--gold-line) 1 !important;
+  border-radius: 0 !important;
+  background: var(--kit-corner), var(--kit-gloss), var(--kit-tex), var(--kit-fill) !important;
+  box-shadow: var(--kit-light-sh) !important;
+  color: var(--gold-1) !important;
+  -webkit-text-fill-color: var(--gold-1) !important;
+  font: 700 20px/1.2 var(--disp) !important;
+  outline: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 4px 6px !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings input:not([type=checkbox]):not([type=range]):not([type=color]):not([readonly]):not(#tvLimitPresetName):not(#tvCustomSavePath):not(#tvClearPromptText):not(#tvCaptionText):focus {
+  border-image: none !important;
+  border-color: var(--gold-1) !important;
+  box-shadow: 0 0 10px #d4b06a40, inset 0 3px 8px #000c !important;
+}
+html #tvSettings.tv-settings input:disabled {
+  opacity: .38 !important;
+  filter: grayscale(.5);
+}
+
+/* ---- 15. 唯讀固定按鍵欄：唯讀專用明顯樣式（.field-readonly-distinct，已改直角 0，無 Emoji） ---- */
+html #tvSettings.tv-settings input[readonly] {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 4px 6px !important;
+  border: 1px dashed var(--gold-4) !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: repeating-linear-gradient(-45deg, rgba(217, 181, 104, .05) 0 6px, transparent 6px 12px), var(--ink) !important;
+  color: var(--gold-2) !important;
+  -webkit-text-fill-color: var(--gold-2) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  font: 600 18px/1.2 var(--disp) !important;
+  cursor: default;
+}
+
+/* ---- 16. 自訂下拉選單：自訂下拉選單（.picker）+ 皮革扶手材質（.skin-leather，方形） ---- */
+html #tvSettings.tv-settings :is(.tv-select-button, #tvColorTarget, #tvSkinToggle) {
+  position: relative !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 5px 14px !important;
+  margin-bottom: 0;
+  border-radius: 0 !important;
+  background: radial-gradient(120% 70% at 50% 0%, #ffffff22, #0000 55%),
+              linear-gradient(180deg, var(--state-1), var(--state-2) 45%, var(--felt-2)) !important;
+  border: 1px solid color-mix(in srgb, var(--felt-2) 60%, #000) !important;
+  box-shadow: inset 0 2px 2px #ffffff40, inset 0 -4px 6px #0009, 0 2px 0 color-mix(in srgb, var(--felt-2) 50%, #000), 0 8px 16px #000b !important;
+  color: #f1f7ef !important;
+  font: 600 16px/1.2 var(--serif) !important;
+  outline: 0 !important;
+  transition: .18s;
+}
+html #tvSettings.tv-settings :is(.tv-select-button, #tvColorTarget, #tvSkinToggle)::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 0 !important;
+  border: 1.5px dashed #e9cfa3a8;
+  pointer-events: none;
+}
+html #tvSettings.tv-settings :is(.tv-select-button, #tvColorTarget, #tvSkinToggle):hover,
+html #tvSettings.tv-settings :is(.tv-select-button, #tvColorTarget, #tvSkinToggle)[aria-expanded=true] {
+  border-color: var(--gold-2) !important;
+  box-shadow: inset 0 2px 2px #ffffff55, inset 0 -4px 6px #0009, 0 0 18px color-mix(in srgb, var(--state-1) 60%, transparent), 0 8px 16px #000b !important;
+}
+/* 展開清單：.picker-list + .picker-item（已改直角 0） */
+html #tvSettings.tv-settings :is(#tvColorOptions, #tvSkinMenu, .tv-select-menu) {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2)) !important;
+  border: 1px solid #8a6a2f !important;
+  border-radius: 0 !important;
+  box-shadow: 0 12px 30px #000b !important;
+  padding: 5px 0 !important;
+}
+html #tvSettings.tv-settings :is(#tvColorOptions button, #tvSkinMenu li, .tv-select-menu button) {
+  background: none !important;
+  color: var(--txt) !important;
+  border: 0 !important;
+  border-left: 2px solid transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  min-height: 36px !important;
+  padding: 7px 14px 7px 16px !important;
+  font: 500 16px/1.3 var(--serif) !important;
+  margin: 0 !important;
+}
+html #tvSettings.tv-settings :is(#tvColorOptions button, #tvSkinMenu li, .tv-select-menu button):hover,
+html #tvSettings.tv-settings :is(#tvColorOptions button, #tvSkinMenu li, .tv-select-menu button):focus {
+  background: #d9b56822 !important;
+  color: var(--gold-1) !important;
+}
+html #tvSettings.tv-settings :is(#tvColorOptions button, #tvSkinMenu li, .tv-select-menu button)[aria-selected=true] {
+  border-left-color: var(--gold-2) !important;
+  color: var(--gold-1) !important;
+  background: #d9b56814 !important;
+}
+
+/* ---- 17. 開關：勾選、單選與金色開關（.chip-toggle .rule-control，已改膠囊 999px + 正圓 50% 金球） ---- */
+html #tvSettings.tv-settings input[type=checkbox] {
+  appearance: none;
+  position: relative;
+  width: 54px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  border: 1px solid #735827 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, var(--control-2), var(--panel)) !important;
+  box-shadow: inset 0 0 0 3px #6b4c1d88, 0 3px 12px #0008 !important;
+  cursor: pointer;
+  transition: .2s;
+}
+html #tvSettings.tv-settings input[type=checkbox]::before {
+  content: "";
+  position: absolute;
+  top: 3px !important;
+  left: 3px !important;
+  width: 21px !important;
+  height: 21px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ede0b7, #a67c35) !important;
+  box-shadow: 0 2px 5px #000a !important;
+  transition: .2s;
+}
+html #tvSettings.tv-settings input[type=checkbox]:checked {
+  background: linear-gradient(90deg, #735827, #d9b568) !important;
+  border-color: var(--gold-2) !important;
+}
+html #tvSettings.tv-settings input[type=checkbox]:checked::before {
+  left: 28px !important;
+}
+
+/* ---- 18. 單軸滑桿與音量標籤：.range-track（膠囊 999px）+ 正圓立體金滑塊 + .badge.soft ---- */
+html #tvSettings.tv-settings input[type=range]:not(#tvColorHue) {
+  appearance: none;
+  height: 7px !important;
+  border: 1px solid var(--gold-4) !important;
+  border-radius: 999px !important;
+  background: var(--control-2) !important;
+  accent-color: #d9b568;
+}
+html #tvSettings.tv-settings input[type=range]:not(#tvColorHue)::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #f4dfa4, #a67c35) !important;
+  border: 2px solid #6b4c1d !important;
+  box-shadow: 0 2px 8px #0009 !important;
+  cursor: grab;
+}
+html #tvSettings.tv-settings #tvColorHue {
+  border-radius: 999px !important;
+}
+html #tvSettings.tv-settings #tvSoundVolumeText {
+  display: inline-block;
+  border: 1px solid var(--gold-3);
+  border-radius: 0;
+  background: #d9b56822;
+  color: var(--gold-1);
+  padding: 2px 8px;
+  font: 700 15px/1.2 var(--disp) !important;
+  min-width: 54px;
+  text-align: center;
+}
+
+/* ---- 19. 限紅雙表：金頭資料表（.table） ---- */
+html #tvSettings.tv-settings .tv-limit-tables {
+  gap: 14px !important;
+}
+html #tvSettings.tv-settings .tv-limit-table {
+  border-collapse: collapse;
+}
+html #tvSettings.tv-settings .tv-limit-table th {
+  color: var(--gold-2) !important;
+  font: 600 16px/1.3 var(--serif) !important;
+  letter-spacing: .1em;
+  padding: 4px 3px 6px !important;
+  border-bottom: 1px solid #6b4c1d77 !important;
+  box-shadow: none !important;
+}
+html #tvSettings.tv-settings .tv-limit-table td {
+  padding: 4px 3px !important;
+  border-bottom: 1px solid #6b4c1d77 !important;
+  font: 500 17px/1.2 var(--serif) !important;
+}
+html #tvSettings.tv-settings .tv-limit-table tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+html #tvSettings.tv-settings .tv-limit-table tbody tr:hover td {
+  background: #d9b56812;
+}
+html #tvSettings.tv-settings .tv-limit-table :is(td, th):first-child {
+  min-width: 56px !important;
+}
+html #tvSettings.tv-settings .tv-limit-table input[data-limit-key] {
+  width: 112px !important;
+  font-size: 18px !important;
+  text-align: right !important;
+}
+
+/* ---- 20. 基本設定與按鍵設定版面微調（確保三頁在 720x887 卡片化後零捲軸、無水平溢出） ---- */
+html #tvSettings.tv-settings .tv-size-fields {
+  gap: 8px 12px !important;
+}
+html #tvSettings.tv-settings .tv-size-fields label {
+  min-height: 38px !important;
+  font-size: 17px !important;
+}
+html #tvSettings.tv-settings .tv-size-fields label > span {
+  grid-template-columns: 60px 24px !important;
+  column-gap: 5px !important;
+  color: var(--gold-2);
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+html #tvSettings.tv-settings .tv-size-fields label > span > input:not([type=checkbox]) {
+  width: 60px !important;
+}
+html #tvSettings.tv-settings .tv-limit-presets {
+  gap: 8px !important;
+}
+html #tvSettings.tv-settings .tv-limit-presets .tv-select-picker {
+  flex: 0 0 144px !important;
+}
+
+/* 按鍵設定兩欄卡片佈局 */
+html #tvSettings.tv-settings .tv-keys-settings {
+  grid-template-columns: minmax(0, 1.03fr) minmax(0, .97fr) !important;
+  gap: 12px 12px !important;
+  width: 100% !important;
+}
+html #tvSettings.tv-settings .tv-keys-subgroup:first-child .tv-keys-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 10px !important;
+}
+html #tvSettings.tv-settings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-keys-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+}
+html #tvSettings.tv-settings .tv-keys-grid .tv-key-bind-row,
+html #tvSettings.tv-settings .tv-keys-subgroup:has(#tvKeyConfirm) .tv-key-bind-row {
+  min-width: 0 !important;
+  font-size: 17px !important;
+  gap: 6px !important;
+}
+html #tvSettings.tv-settings .tv-key-bind-row input:not([type=range]) {
+  width: 52px !important;
+  font-size: 19px !important;
+}
+html #tvSettings.tv-settings .tv-key-bind-row input[maxlength="10"] {
+  width: 120px !important;
+  font-size: 17px !important;
+}
+html #tvSettings.tv-settings #tvKeyFullscreenEnter {
+  width: 120px !important;
+  font-size: 16px !important;
+}
+html #tvSettings.tv-settings #tvAutoCommitDelay {
+  width: 76px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) {
+  row-gap: 8px !important;
+  column-gap: 16px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > :is(.tv-check-row, .tv-key-bind-row) {
+  font-size: 17px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-key-bind-row > span:first-child {
+  white-space: nowrap !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-vol-wrap input {
+  width: 96px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) > .tv-audition-row {
+  margin-top: 6px !important;
+}
+html #tvSettings.tv-settings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) .tv-audition-title {
+  font-size: 14px !important;
+  margin-bottom: 6px !important;
+}
+html #tvSettings.tv-settings .tv-path-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---- 21. 儲存設定卡片與虛線分隔線（.div-dashed） ---- */
+html #tvSettings.tv-settings .tv-save-grid {
+  display: grid;
+  gap: 0 !important;
+}
+html #tvSettings.tv-settings .tv-save-row {
+  color: var(--txt);
+  font-size: 18px !important;
+  padding: 12px 0 !important;
+}
+html #tvSettings.tv-settings .tv-save-row + .tv-save-row {
+  border-top: 1.5px dashed var(--gold-3) !important;
+}
+html #tvSettings.tv-settings .tv-save-row > span:first-child {
+  min-width: 156px;
+}
+html #tvSettings.tv-settings .tv-save-row > span:last-child:has(input[type=text]) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+html #tvSettings.tv-settings .tv-save-row input[type=text] {
+  width: 100% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 6px 12px !important;
+  font-size: 16px !important;
+}
+
+/* ---- 22. 狀態訊息：帶圖示與左邊色條通知（.toast-bar-item，方形） ---- */
+html #tvSettings.tv-settings #tvSettingsStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px !important;
+  background: var(--panel) !important;
+  border: 1px solid #6b4c1d88 !important;
+  border-left: 4px solid var(--gold-1) !important;
+  border-radius: 0 !important;
+  font: 500 15px/1.4 var(--serif) !important;
+  color: var(--txt) !important;
+}
+
+/* ---- 23. 焦點、減少動態、隱藏分頁直角收尾 ---- */
+html #tvSettings.tv-settings :focus-visible {
+  outline: 2px solid var(--gold-1) !important;
+  outline-offset: 3px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html #tvSettings.tv-settings *,
+  html #tvSettings.tv-settings *::before,
+  html #tvSettings.tv-settings *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+html #tvSettings.tv-settings :is(.tv-color-spectrum, .tv-color-presets button, .tv-resizer, .tv-settings-content, .tv-settings-content > section, .tv-stats-font-preview, .tv-color-editor, .tv-color-settings, .tv-color-swatch, .tv-color-swatch i, .tv-symbol-scopes button, .tv-target-picker, .tv-limit-presets, select, #tvSymbolBeadPreview, #tvSymbolResultPreview, #tvSymbolSample, #tvSymbolTarget, #tvCaptionColor) {
+  border-radius: 0 !important;
+}
