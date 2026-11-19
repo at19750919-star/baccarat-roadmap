@@ -113,8 +113,9 @@ function roadOneDrivePair_(data, json, image) {
     if (!folder || !folder.id) roadFail_('storage_unavailable');
     let name = data.roadmap.name.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/[. ]+$/, '').slice(0, 100) || '路單';
     if (/^(CON|PRN|AUX|NUL|COM\d|LPT\d)(\.|$)/i.test(name) || name.startsWith('~')) name = '_' + name;
-    const files = [{name: name + '.json', bytes: Utilities.newBlob(json).getBytes(), type: 'application/json'},
-      {name: name + '.png', bytes: image, type: 'image/png'}];
+    // v18: PNG is optional. Without it only the .json is stored (one file = complete).
+    const files = [{name: name + '.json', bytes: Utilities.newBlob(json).getBytes(), type: 'application/json'}];
+    if (image) files.push({name: name + '.png', bytes: image, type: 'image/png'});
     for (const file of files) {
       const stored = roadOneDriveRequest_(token, '/items/' + encodeURIComponent(folder.id) + ':/' + encodeURIComponent(file.name) + ':/content',
         'put', Utilities.newBlob(file.bytes, file.type, file.name), file.type);
@@ -125,7 +126,7 @@ function roadOneDrivePair_(data, json, image) {
         if (sha1.toLowerCase() !== expected) roadFail_('storage_unavailable');
       }
     }
-    // A complete receipt is written by the caller only after both uploads validate.
+    // A complete receipt is written by the caller only after every file in the list validates.
   } catch (error) {
     if (folder && folder.id) {
       try { roadOneDriveRequest_(token, '/items/' + encodeURIComponent(folder.id), 'delete'); }

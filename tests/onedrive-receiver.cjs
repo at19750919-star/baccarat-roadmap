@@ -41,4 +41,47 @@ test('Persistent error bounded; missing/wrong/nonempty parent data fail closed',
 test('Unrelated HTTP errors and public sharing do not retry',()=>{for(const mode of ['http401','http403','http429','http503','shared']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.posts,mode==='shared'?0:1);assert.equal(e.uploads.length,0);assert.equal(e.sleeps.length,0);}});
 test('Partial write, mismatched size and hash fail and recycle only new folder',()=>{for(const mode of ['partial','badSize','badHash']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.deleted,1);}});
 test('Owner-consented Files.ReadWrite works; legacy scope stays narrow and unexpected scopes fail',()=>{const full=env('full');save(full);assert.equal(full.uploads.length,2);assert.equal(JSON.parse(full.props.get('road_inbox_v1_onedrive_config')).scope,'Files.ReadWrite');for(const mode of ['fullMissing','fullExcess','legacyExcess','unknownScope']){const e=env(mode);assert.throws(()=>save(e));assert.equal(e.uploads.length,0);assert.equal(e.posts,0);}});
+test('v18 JSON-only: one file, exact bytes, no png; failure cleans up folder; json+png path unchanged',()=>{
+ const e=env();e.ctx.roadOneDrivePair_(data,json,null);assert.equal(e.uploads.length,1);assert(e.uploads[0].bytes.equals(Buffer.from(json)));assert.equal(e.uploads[0].type,'application/json');
+ assert(!e.calls.some(c=>/\.png/.test(decodeURIComponent(c.url))));
+ const e2=env();e2.ctx.roadOneDrivePair_(data,json,undefined);assert.equal(e2.uploads.length,1);
+ for(const mode of ['badSize','badHash']){const f=env(mode);assert.throws(()=>f.ctx.roadOneDrivePair_(data,json,null));assert.equal(f.deleted,1);assert.equal(f.uploads.length,1);}
+ const g=env('http503');assert.throws(()=>g.ctx.roadOneDrivePair_(data,json,null));assert.equal(g.uploads.length,0);
+});
+// ---- Full v18 receiver (roadReceive_) with mocked Apps Script services ----
+function receiver(provider){
+ const code=fs.readFileSync(path.join(__dirname,'../backend/程式碼-v18-只收JSON.gs'),'utf8');
+ const props=new Map([['road_inbox_v1_provider',provider]]),pairs=[],files=[];
+ const blob=(b,type,name)=>({type,name,getBytes:()=>Array.from(typeof b==='string'?Buffer.from(b):Buffer.from(b))});
+ const folder={createFolder:()=>folder,createFile:b=>files.push({name:b.name,type:b.type}),setTrashed(){}};
+ const ctx={console:{log(){},error(){}},
+  PropertiesService:{getScriptProperties:()=>({getProperty:k=>props.get(k)??null,setProperty:(k,v)=>props.set(k,v),getProperties:()=>Object.fromEntries(props),deleteProperty:k=>props.delete(k)})},
+  LockService:{getScriptLock:()=>({tryLock:()=>true,releaseLock(){}})},
+  Utilities:{newBlob:blob,formatDate:()=>'2026-11-19',DigestAlgorithm:{SHA_256:'sha256'},Charset:{UTF_8:'utf8'},computeDigest:(a,b)=>Array.from(crypto.createHash(a).update(Buffer.from(b)).digest()),base64Decode:b=>Array.from(Buffer.from(b,'base64'))},
+  DriveApp:{}};
+ vm.createContext(ctx);vm.runInContext(code,ctx);
+ ctx.roadRoot_=()=>folder;ctx.roadPng_=s=>Array.from(Buffer.from(s,'base64'));
+ ctx.roadOneDrivePair_=(d,j,img)=>pairs.push({json:j,image:img});
+ return{ctx,props,pairs,files};
+}
+const road=()=>({id:'road-1',name:'v18測試',createdAt:'2026-11-19T01:02:03.000Z',counts:{banker:1,player:1,tie:0,total:2},outcomes:['莊','閒'],nonTieOutcomes:['莊','閒'],rounds:[{r:'B',bp:false,pp:false,l6:false,l7:2},{r:'P',bp:false,pp:false,l6:false,tiger:'big'}]});
+const submit=(rc,o)=>rc.ctx.roadReceive_({action:'roadSubmit',receipt:'b'.repeat(64),roadmap:road(),...o});
+test('v18 roadReceive_ OneDrive: JSON-only is complete (1 file); with PNG still pairs; v17 optional fields accepted',()=>{
+ const a=receiver('onedrive'),r=submit(a);assert.deepEqual({s:r.success,st:r.state,p:r.provider},{s:true,st:'complete',p:'onedrive'});
+ assert.equal(a.pairs.length,1);assert.equal(a.pairs[0].image,null);assert.equal(JSON.parse(a.props.get('road_inbox_v1_r_'+'b'.repeat(64))).files,1);
+ const again=submit(a);assert.equal(again.success,true);assert.equal(a.pairs.length,1);
+ const st=a.ctx.roadStatus_('b'.repeat(64));assert.equal(st.state,'complete');
+ const b=receiver('onedrive'),r2=submit(b,{pngBase64:Buffer.from('png-bytes').toString('base64')});assert.equal(r2.state,'complete');assert.equal(b.pairs[0].image.length,9);assert.equal(JSON.parse(b.props.get('road_inbox_v1_r_'+'b'.repeat(64))).files,2);
+});
+test('v18 roadReceive_ Google Drive: JSON-only creates only .json; with PNG creates .json and .png',()=>{
+ const a=receiver('gdrive');assert.equal(submit(a).success,true);assert.deepEqual(a.files.map(f=>f.name),['v18測試.json']);
+ const b=receiver('gdrive');assert.equal(submit(b,{pngBase64:Buffer.from('x').toString('base64')}).success,true);assert.deepEqual(b.files.map(f=>f.name),['v18測試.json','v18測試.png']);
+});
+test('v18 roadReceive_ rejects bad input and failed upload is recorded failed',()=>{
+ const a=receiver('onedrive');assert.equal(submit(a,{extra:1}).error,'invalid_schema');
+ assert.equal(submit(a,{pngBase64:null}).error,'invalid_png');assert.equal(submit(a,{pngBase64:123}).error,'invalid_png');
+ const bad=road();bad.counts.banker=5;assert.equal(submit(a,{roadmap:bad}).error,'invalid_counts');
+ const f=receiver('onedrive');f.ctx.roadOneDrivePair_=()=>{throw Error('ROAD:storage_unavailable')};const r=submit(f);assert.equal(r.success,false);assert.equal(r.state,'failed');assert.equal(JSON.parse(f.props.get('road_inbox_v1_r_'+'b'.repeat(64))).state,'failed');
+ f.ctx.roadOneDrivePair_=(d,j,i)=>{};assert.equal(submit(f).success,true);
+});
 console.log('OneDrive adapter '+groups+' regression groups passed (mocked cloud).');

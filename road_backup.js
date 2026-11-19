@@ -8,9 +8,8 @@
   function buttons(){el('saveBtn').disabled=busy;el('backupRetryBtn').disabled=busy;}
   function links(pack){
     urls.forEach(URL.revokeObjectURL);urls=[];
-    for(const [id,blob,ext]of [['backupJsonLink',pack.json,'json'],['backupPngLink',pack.png,'png']]){
-      const a=el(id);a.hidden=!blob;if(blob){a.href=URL.createObjectURL(blob);urls.push(a.href);a.download=pack.name+'.'+ext;}
-    }
+    const a=el('backupJsonLink');a.hidden=!pack.json;
+    if(pack.json){a.href=URL.createObjectURL(pack.json);urls.push(a.href);a.download=pack.name+'.json';}
   }
   async function png(entry){
     if(typeof html2canvas!=='function')throw Error('截圖套件未載入，JSON仍可下載；請恢復網路後重試儲存。');
@@ -57,7 +56,7 @@
     }finally{host.remove();}
   }
 
-  const messages={rate_limit:'收件暫時繁忙，請稍後再試。',daily_size_limit:'今天收件容量已滿，請保留下載檔案。',busy:'收件服務忙碌，請稍後重試。',invalid_png:'PNG 格式或尺寸不符合收件限制。',invalid_rounds:'路單局數超出收件限制（最多1000局）。',invalid_schema:'路單格式不符合收件要求。',invalid_counts:'路單統計與內容不一致。',json_too_large:'JSON 超出收件大小限制。',receipt_conflict:'提交識別碼衝突，未覆寫既有備份。',submission_incomplete:'上次收件未完成，請保留下載檔案。',storage_unavailable:'雲端收件未完成，請稍後再試。'};
+  const messages={rate_limit:'收件暫時繁忙，請稍後再試。',daily_size_limit:'今天收件容量已滿，請保留下載檔案。',busy:'收件服務忙碌，請稍後重試。',invalid_png:'收件格式不符合限制。',invalid_rounds:'路單局數超出收件限制（最多1000局）。',invalid_schema:'路單格式不符合收件要求。',invalid_counts:'路單統計與內容不一致。',json_too_large:'JSON 超出收件大小限制。',receipt_conflict:'提交識別碼衝突，未覆寫既有備份。',submission_incomplete:'上次收件未完成，請保留下載檔案。',storage_unavailable:'雲端收件未完成，請稍後再試。'};
   Object.assign(messages,{onedrive_not_configured:'OneDrive 收件尚未啟用，請通知業主。',onedrive_authorization_required:'OneDrive 授權已失效，請通知業主重新授權。',folder_not_private:'收件資料夾的私人設定已改變，為保護資料已停止上傳；請通知業主。'});
   function receipt(){if(!root.crypto?.getRandomValues)throw Error('此瀏覽器無法建立安全收件碼，請保留下載檔案。');return Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');}
   async function request(url,options={},ms=40000){
@@ -66,9 +65,8 @@
   }
   async function body(pack){
     if(pack.payload)return pack.payload;
-    if(pack.png.size>6291456||pack.json.size>262144)throw Error('備份檔案過大（PNG限6MB／JSON限256KB），請使用下載檔案。');
-    const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('PNG讀取失敗'));r.readAsDataURL(pack.png);});
-    pack.payload=JSON.stringify({action:'roadSubmit',receipt:pack.receipt,roadmap:pack.snapshot,pngBase64:data});return pack.payload;
+    if(pack.json.size>262144)throw Error('備份檔案過大（JSON限256KB），請使用下載檔案。');
+    pack.payload=JSON.stringify({action:'roadSubmit',receipt:pack.receipt,roadmap:pack.snapshot});return pack.payload;
   }
   async function send(pack){
     const payload=await body(pack);let response;
@@ -76,20 +74,20 @@
     catch(_){
       // A timeout can occur after storage. Query the unguessable receipt rather than
       // reporting success or automatically sending a second submission.
-      try{const check=await request(ENDPOINT+'?action=roadStatus&receipt='+pack.receipt,{},12000);if(check.success&&check.receipt===pack.receipt&&check.state==='complete')return check;if(check.state==='failed')throw Error('雲端收件失敗；請保留 JSON／PNG 下載檔案。');}catch(_){}
+      try{const check=await request(ENDPOINT+'?action=roadStatus&receipt='+pack.receipt,{},12000);if(check.success&&check.receipt===pack.receipt&&check.state==='complete')return check;if(check.state==='failed')throw Error('雲端收件失敗；請保留 JSON 下載檔案。');}catch(_){}
       throw Error('尚無法確認雲端是否收齊；本機檔案已保留，可按重試查核同一筆提交。');
     }
     if(response.receipt===pack.receipt&&response.success&&response.state==='complete')return response;
-    throw Error(messages[response.error]||'雲端尚未確認兩個檔案均已儲存，請保留下載檔案。');
+    throw Error(messages[response.error]||'雲端尚未確認 JSON 已儲存，請保留下載檔案。');
   }
   async function upload(pack,note){
-    try{const received=await send(pack);pending=null;el('backupRetryBtn').hidden=true;const provider=received.provider==='onedrive'?'OneDrive':'Google Drive';status(note+' '+provider+' 已收齊 JSON＋完整路單 PNG。');return {ok:true,pack};}
-    catch(error){pending={pack,note};el('backupRetryBtn').hidden=false;status(note+' '+error.message+' 可下載 JSON／PNG。');return {ok:false,error:error.message,pack};}
+    try{const received=await send(pack);pending=null;el('backupRetryBtn').hidden=true;const provider=received.provider==='onedrive'?'OneDrive':'Google Drive';status(note+' '+provider+' 已收齊 JSON。');return {ok:true,pack};}
+    catch(error){pending={pack,note};el('backupRetryBtn').hidden=false;status(note+' '+error.message+' 可下載 JSON。');return {ok:false,error:error.message,pack};}
   }
   async function save(entry,{listSaved=true}={}){
     if(busy)return {ok:false,error:'saving'};busy=true;buttons();el('backupRetryBtn').hidden=true;
-    const snapshot=JSON.parse(JSON.stringify(entry)),pack={snapshot,name:safeName(snapshot.name),json:new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'})},note=listSaved?'本機清單已儲存。':'本機清單寫入失敗。';pending=null;links(pack);status(note+' 正在產生完整路單 PNG…');
-    try{pack.receipt=receipt();const image=await png(snapshot);pack.png=image.blob;pack.image=image;links(pack);if(document.querySelector('.tv-app'))el('backupPngLink').click();status(note+' 正在送出雲端備份…');return await upload(pack,note);}
+    const snapshot=JSON.parse(JSON.stringify(entry)),pack={snapshot,name:safeName(snapshot.name),json:new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'})},note=listSaved?'本機清單已儲存。':'本機清單寫入失敗。';pending=null;links(pack);status(note+' 正在送出雲端備份…');
+    try{pack.receipt=receipt();status(note+' 正在送出雲端備份…');return await upload(pack,note);}
     catch(error){status(note+' '+error.message+' JSON仍可下載；未確認雲端備份。');return {ok:false,error:error.message,pack};}
     finally{busy=false;buttons();}
   }
