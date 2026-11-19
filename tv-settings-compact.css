@@ -105,3 +105,7 @@
 
 /* 本機只顯示三個分頁（基本、按鍵、儲存）；其餘分頁暫時隱藏 */
 #tvSettings:not(.tv-settings-limited) .tv-settings-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* 基本設定欄位對齊：每格固定「輸入框欄＋單位欄」，沒有單位的桌號、靴號、開關也對齊同一直線 */
+#tvSettings .tv-size-fields label > span { display: grid; grid-template-columns: 64px 26px; column-gap: 6px; align-items: center; justify-items: start; }
+#tvSettings .tv-size-fields label > span > input { grid-column: 1; }
+#tvSettings .tv-size-fields label > span > input[type="checkbox"] { justify-self: center; }
