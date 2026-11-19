@@ -153,7 +153,7 @@ button, input, select, textarea {
 
 /* ---------- 側欄 ---------- */
 .side {
-  width: 360px; flex: none; height: auto; display: flex; flex-direction: column; gap: 14px;
+  width: 300px; flex: none; height: auto; display: flex; flex-direction: column; gap: 14px;
   padding: 14px 12px 24px;
   background: linear-gradient(160deg, var(--panel), var(--panel-2));
   border-right: 1px solid var(--gold-4);
@@ -272,7 +272,7 @@ button, input, select, textarea {
   background: linear-gradient(90deg, rgba(23,114,139,.28), var(--panel-2));
   box-shadow: 0 0 0 1px var(--gold-3), 0 8px 22px rgba(0,0,0,.55);
 }
-.road-item .n { font-size: 14px; font-weight: 700; word-break: break-all; padding-right: 54px; }
+.road-item .n { font-size: 12px; font-weight: 700; word-break: break-all; padding-right: 54px; }
 .road-item .m { margin-top: 2px; padding-right: 54px; font-family: var(--serif); font-weight: 400; font-size: 12px; color: var(--txt-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .road-item .m b { font-weight: 700; color: var(--gold-1); font-family: var(--disp); }
 .road-item .m .cB { color: #ff8a8a; } .road-item .m .cP { color: #8ab4ff; } .road-item .m .cT { color: #7fe0a3; }
@@ -929,7 +929,7 @@ function counts(rounds) {
 const META_KEY = 'road_viewer_meta_v1';
 const CAT_FILTER_KEY = 'road_viewer_cat_filter_v1';
 const ALL = '__all', NONE = '__none';
-let meta = { cats: [], items: {} };
+let meta = { cats: [], items: {}, updatedAt: '' };
 let catFilter = ALL;
 let editingKey = '';
 const openNotes = new Set();
@@ -938,10 +938,16 @@ try {
   if (raw && typeof raw === 'object') {
     meta.cats = Array.isArray(raw.cats) ? raw.cats.map(String).filter(Boolean) : [];
     meta.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
+    meta.updatedAt = typeof raw.updatedAt === 'string' ? raw.updatedAt : '';
   }
 } catch (_) {}
 try { catFilter = localStorage.getItem(CAT_FILTER_KEY) || ALL; } catch (_) {}
-function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (_) { setMsg('瀏覽器不允許存資料，分類與備註重新整理後會不見。', 'err'); } }
+function persistMeta() { try { localStorage.setItem(META_KEY, JSON.stringify(meta)); return true; } catch (_) { return false; } }
+function saveMeta() {
+  meta.updatedAt = new Date().toISOString();
+  if (!persistMeta()) setMsg('瀏覽器不允許存資料，分類與備註重新整理後會不見。', 'err');
+  if (typeof Inbox !== 'undefined') Inbox.pushMeta();
+}
 function metaOf(e) { return meta.items[e._key] || {}; }
 function dispName(e) { return metaOf(e).name || e.name; }
 function catOf(e) { const c = metaOf(e).cat; return c && meta.cats.includes(c) ? c : ''; }
@@ -1081,6 +1087,8 @@ function renderList() {
     const nEl = item.querySelector('.n');
     nEl.textContent = dispName(e);
     if (m.name) { const o = document.createElement('span'); o.className = 'orig'; o.textContent = '原名：' + e.name; nEl.appendChild(o); }
+    nEl.title = nEl.textContent.trim();
+    const mEl = item.querySelector('.m'); mEl.title = mEl.textContent.replace(/\s+/g, ' ').trim();
     if (editing) {
       item.appendChild(editorEl(e));
     } else {
@@ -1565,6 +1573,53 @@ const Inbox = (() => {
   const supported = typeof window.showDirectoryPicker === 'function';
   const KEY = 'inbox';
   let handle = null, timer = 0, busy = false;
+  const NOTE_DIR = '備註', NOTE_FILE = '路單備註.json';
+  let noteSig = '', noteAt = '', writing = Promise.resolve();
+  const hasMeta = () => meta.cats.length > 0 || Object.keys(meta.items).length > 0;
+  async function canWrite() {
+    try { return !!handle && await handle.queryPermission({ mode: 'readwrite' }) === 'granted'; } catch (_) { return false; }
+  }
+  async function writeNote() {
+    const dir = await handle.getDirectoryHandle(NOTE_DIR, { create: true });
+    const fh = await dir.getFileHandle(NOTE_FILE, { create: true });
+    const at = meta.updatedAt || (meta.updatedAt = new Date().toISOString());
+    const w = await fh.createWritable();
+    await w.write(JSON.stringify({ version: 1, updatedAt: at, cats: meta.cats, items: meta.items }, null, 2));
+    await w.close();
+    const f = await fh.getFile();
+    noteSig = f.size + ':' + f.lastModified; noteAt = at;
+    persistMeta();
+  }
+  const NOTE_WARN = '備註只存在這台電腦（收件資料夾未連結或沒有寫入權限）';
+  function pushMeta() {
+    writing = writing.then(async () => {
+      if (!(await canWrite())) { setMsg(NOTE_WARN, 'err'); return; }
+      try { await writeNote(); } catch (_) { setMsg(NOTE_WARN, 'err'); }
+    });
+    return writing;
+  }
+  async function syncNotes() {
+    if (!(await canWrite())) return false;
+    let fh = null, f = null;
+    try { fh = await (await handle.getDirectoryHandle(NOTE_DIR)).getFileHandle(NOTE_FILE); f = await fh.getFile(); } catch (_) {}
+    try {
+      if (!f) { if (hasMeta()) await writeNote(); return false; }
+      const sig = f.size + ':' + f.lastModified;
+      if (sig === noteSig && !(meta.updatedAt > noteAt)) return false;
+      const data = JSON.parse(await f.text());
+      const fu = typeof data.updatedAt === 'string' ? data.updatedAt : '';
+      noteSig = sig; noteAt = fu;
+      if (fu > (meta.updatedAt || '')) {
+        meta.cats = Array.isArray(data.cats) ? data.cats.map(String).filter(Boolean) : [];
+        meta.items = data.items && typeof data.items === 'object' ? data.items : {};
+        meta.updatedAt = fu;
+        persistMeta();
+        return true;
+      }
+      if ((meta.updatedAt || hasMeta()) && meta.updatedAt !== fu) await writeNote();
+    } catch (_) { /* 寫到一半：下次再試 */ }
+    return false;
+  }
   const seen = new Map(); // 路徑 → 大小:修改時間，沒變的檔不重讀
 
   const db = () => new Promise((res, rej) => {
@@ -1588,7 +1643,7 @@ const Inbox = (() => {
   }
   async function scan(dir, path, out, depth) {
     for await (const [name, h] of dir.entries()) {
-      if (h.kind === 'directory') { if (depth < 3) await scan(h, path + name + '/', out, depth + 1); }
+      if (h.kind === 'directory') { if (depth === 0 && name === NOTE_DIR) continue; if (depth < 3) await scan(h, path + name + '/', out, depth + 1); }
       else if (/\.json$/i.test(name)) out.push({ h, path: path + name });
     }
   }
@@ -1600,6 +1655,7 @@ const Inbox = (() => {
       try { await scan(handle, '', found, 0); }
       catch (_) { stop(); state(`讀不到「${handle.name}」，資料夾可能被移走或改名，請重新連結。`); $('inboxBtn').hidden = false; $('inboxBtn').textContent = '重新連結收件資料夾'; return; }
       let added = 0;
+      const notesChanged = await syncNotes();
       const wasNewest = current === 0;
       for (const { h, path } of found) {
         try {
@@ -1612,6 +1668,7 @@ const Inbox = (() => {
       }
       const time = new Date().toLocaleTimeString('zh-TW', { hour12: false });
       state(`已連結「${handle.name}」${found.length} 檔・${time}`, true);
+      if (notesChanged && !first && !added) renderList();
       if (first || added) {
         if (store.length && (first || wasNewest || current < 0)) current = 0; // 原本看最新的，就跟著跳到最新
         renderList(); showCurrent();
@@ -1628,11 +1685,11 @@ const Inbox = (() => {
   }
   async function connect() {
     try {
-      if (handle && await handle.queryPermission({ mode: 'read' }) !== 'granted') {
-        if (await handle.requestPermission({ mode: 'read' }) === 'granted') return start();
+      if (handle && await handle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+        if (await handle.requestPermission({ mode: 'readwrite' }) === 'granted') return start();
       }
-      const h = await window.showDirectoryPicker({ id: 'road-inbox', mode: 'read' });
-      handle = h; seen.clear();
+      const h = await window.showDirectoryPicker({ id: 'road-inbox', mode: 'readwrite' });
+      handle = h; seen.clear(); noteSig = ''; noteAt = '';
       await kv(KEY, h);
       return start();
     } catch (err) {
@@ -1640,7 +1697,7 @@ const Inbox = (() => {
     }
   }
   async function forget() {
-    stop(); handle = null; seen.clear(); await kv(KEY, undefined, true);
+    stop(); handle = null; seen.clear(); noteSig = ''; noteAt = ''; await kv(KEY, undefined, true);
     $('inboxBtn').hidden = false; $('inboxBtn').textContent = '連結收件資料夾'; $('inboxForget').hidden = true;
     state('已取消連結');
   }
@@ -1653,11 +1710,11 @@ const Inbox = (() => {
     const h = await kv(KEY);
     if (!h || typeof h.queryPermission !== 'function') return;
     handle = h;
-    if (await h.queryPermission({ mode: 'read' }) === 'granted') return start();
+    if (await h.queryPermission({ mode: 'readwrite' }) === 'granted') return start();
     $('inboxBtn').textContent = `按一下讀取「${h.name}」`;
     state('跳出詢問時選「每次造訪都允許」');
   }
-  return { init };
+  return { init, pushMeta };
 })();
 Inbox.init();
 
