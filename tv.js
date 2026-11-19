@@ -793,13 +793,15 @@
     const dragHandle = dialog.querySelector('.tv-settings-header');
     let panelPositioned = false;
     const panelScale = () => Math.min(innerWidth / 1920, innerHeight / 1080);
+    const isCompactSettings = dialog.classList.contains('tv-settings-compact');
+    const standardSize = isCompactSettings ? { width: 800, height: 900 } : { width: 720, height: 887 };
     const SETTINGS_SIZE_KEY = 'baccarat_tv_settings_size_v1';
     function applyDialogSize(w, h) {
       if (w) dialog.style.setProperty('width', Math.round(w) + 'px', 'important');
       if (h) dialog.style.setProperty('height', Math.round(h) + 'px', 'important');
       clampPanel();
     }
-    applyDialogSize(720, 800);
+    applyDialogSize(standardSize.width, isCompactSettings ? standardSize.height : 800);
 
     function clampPanel() {
       if (!dialog.open) return;
@@ -837,9 +839,9 @@
     });
 
     function toggleSettingsSize() {
-      const isExpanded = parseInt(dialog.style.width, 10) > 720;
-      const targetW = isExpanded ? 720 : 840;
-      const targetH = isExpanded ? 887 : 960;
+      const isExpanded = parseInt(dialog.style.width, 10) > standardSize.width;
+      const targetW = isExpanded ? standardSize.width : 840;
+      const targetH = isExpanded ? standardSize.height : 960;
       applyDialogSize(targetW, targetH);
       const btn = document.getElementById('tvSettingsSizeToggle');
       if (btn) btn.textContent = isExpanded ? '⛶' : '🗗';
@@ -1152,9 +1154,15 @@
       showTab('basic');
       dialog.show();
       if (!panelPositioned) {
-        const gap = 20 * panelScale();
-        dialog.style.left = innerWidth - dialog.getBoundingClientRect().width - gap + 'px';
-        dialog.style.top = gap + 'px';
+        const rect = dialog.getBoundingClientRect();
+        if (isCompactSettings) {
+          dialog.style.left = Math.max(12, (innerWidth - rect.width) / 2) + 'px';
+          dialog.style.top = Math.max(12, (innerHeight - rect.height) / 2) + 'px';
+        } else {
+          const gap = 20 * panelScale();
+          dialog.style.left = innerWidth - rect.width - gap + 'px';
+          dialog.style.top = gap + 'px';
+        }
         panelPositioned = true;
       }
       clampPanel();
@@ -1171,7 +1179,8 @@
         statsFontEditor.sync(); previewSettings();
       } else {
         fill({ ...defaults, ...Object.fromEntries(statsFontKeys.map(key => [key, settings[key]])), symbols: settings.symbols });
-        applyDialogSize(520, 820);
+        applyDialogSize(isCompactSettings ? standardSize.width : 520, isCompactSettings ? standardSize.height : 820);
+        if (isCompactSettings && sizeToggleBtn) sizeToggleBtn.textContent = '⛶';
         try { localStorage.removeItem(SETTINGS_SIZE_KEY); } catch (_) {}
         previewSettings();
       }
