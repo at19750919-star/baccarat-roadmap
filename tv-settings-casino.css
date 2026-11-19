@@ -7,13 +7,13 @@
 #tvSettings.tv-settings {
   --serif: "Noto Serif TC", "Cinzel", serif;
   --disp: "Cinzel", "Noto Serif TC", serif;
-  --ink: #07090b; --pit: #1f0505;
-  --felt-1: #9c1414; --felt-2: #5e0909; --glow: rgba(200,40,30,.35);
-  --state-1: #b42222; --state-2: #6e0d0d;
-  --panel: #5a0f0f; --panel-2: #300606;
-  --control-1: #2e0808; --control-2: #1c0404;
+  --ink: #07090b; --pit: #2a0607;
+  --felt-1: #a5171a; --felt-2: #6e0c0f; --glow: rgba(220,50,40,.35);
+  --state-1: #c0262a; --state-2: #7a1013;
+  --panel: #a5171a; --panel-2: #7a0f12;
+  --control-1: #4a090b; --control-2: #2e0405;
   --gold-1: #f4dfa4; --gold-2: #d9b568; --gold-3: #a67c35; --gold-4: #6b4c1d;
-  --txt: #e8e4d8; --txt-dim: #b3a993; --danger: #ff6b5e; --ok: #67c98f;
+  --txt: #f3ecdc; --txt-dim: #e2cfae; --danger: #ff6b5e; --ok: #67c98f;
   --gold-solid: linear-gradient(180deg, #f7e6ba, #d6ad5d 55%, #a77a32);
   --engrave: linear-gradient(160deg, var(--control-1), var(--control-2));
   color: var(--txt); color-scheme: dark;
@@ -64,8 +64,8 @@ html #tvSettings.tv-settings .tv-settings-actions button[type=submit] {
 }
 html #tvSettings.tv-settings .tv-settings-actions button[type=submit]:hover { filter: brightness(1.08); }
 /* 危險：刪除（兩段確認，第二段實心） */
-html #tvSettings.tv-settings #tvLimitPresetDelete { background: rgba(255,107,94,.1); border-color: var(--danger); color: var(--danger); outline-color: #ff6b5e66; }
-html #tvSettings.tv-settings #tvLimitPresetDelete:hover { background: rgba(255,107,94,.18); border-color: var(--danger); color: var(--danger); }
+html #tvSettings.tv-settings #tvLimitPresetDelete { background: var(--engrave); border-color: var(--danger); color: var(--danger); outline-color: #ff6b5e66; }
+html #tvSettings.tv-settings #tvLimitPresetDelete:hover { background: linear-gradient(rgba(255,107,94,.16), rgba(255,107,94,.16)), var(--engrave); border-color: var(--danger); color: var(--danger); }
 html #tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete.is-confirm { background: linear-gradient(180deg, #e0483e, #ad241b 58%, #78140e) !important; border-color: #ff8a80 !important; color: #fff5f3 !important; outline: 0; }
 
 /* 標題列圓形圖示鈕（正圓） */
