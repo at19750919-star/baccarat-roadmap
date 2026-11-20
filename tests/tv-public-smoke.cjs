@@ -30,6 +30,7 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
         return route.fulfill({ body: fs.readFileSync(file), contentType: types[path.extname(file)] || 'application/octet-stream' });
       });
       await page.addInitScript(value => localStorage.setItem('tv_skin_v1', value), skin);
+      await page.addInitScript(() => localStorage.setItem('jiujiu_owner_gate_v1', '1'));
       await page.goto(origin + 'tv.html', { waitUntil: 'load' });
       assert.equal(await page.locator('#tvEditToggle, #tvEditPanel').count(), 0);
       assert.equal(await page.locator('script[src*="tv-edit"], link[href*="tv-edit"]').count(), 0);

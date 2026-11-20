@@ -6,6 +6,14 @@ contextBridge.exposeInMainWorld('OfflineRoadmap', {
   prompt: (message, initial) => ipcRenderer.sendSync('roadmap:prompt', message, initial),
   selectFolder: currentPath => ipcRenderer.invoke('roadmap:select-folder', currentPath)
 });
+contextBridge.exposeInMainWorld('RoadmapLicense', {
+  status: () => ipcRenderer.invoke('roadmap:license-status'),
+  submit: code => ipcRenderer.invoke('roadmap:license-submit', code),
+  retry: () => ipcRenderer.invoke('roadmap:license-retry'),
+  reset: () => ipcRenderer.invoke('roadmap:license-reset'),
+  quit: () => ipcRenderer.send('roadmap:quit-license'),
+  onView: callback => ipcRenderer.on('roadmap:license-view', (_event, view) => callback(view))
+});
 
 
 // Desktop-only: pressing 0 three times in a row (within 1.5 s) closes the app,

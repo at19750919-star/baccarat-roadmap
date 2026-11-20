@@ -16,6 +16,7 @@ with sync_playwright() as p:
                 else:r.fulfill(status=404,body='')
             page.route('https://at19750919-star.github.io/**',site)
         origin='https://at19750919-star.github.io/baccarat-roadmap/' if deployed else 'http://127.0.0.1:8082/roadmap/'
+        page.add_init_script("localStorage.setItem('jiujiu_owner_gate_v1','1')")
         page.goto(origin+'tv.html?settings=statsFont',wait_until='domcontentloaded')
         if deployed:expect(page.locator('#tvSettings')).not_to_be_visible()
         else:expect(page.locator('#tvStatsFontPanel')).to_be_visible();page.locator('#tvSettingsCancel').click()

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>玖玖百家樂路單</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #4a090b; color: #fff2ce; font: 22px "Microsoft JhengHei", sans-serif; }
+  main { box-sizing: border-box; width: min(560px, calc(100% - 48px)); background: #5c1012; border: 1px solid #d4a64a; padding: 36px 32px; }
+  h1 { margin: 0 0 12px; font-size: 40px; letter-spacing: .08em; }
+  @media (max-width: 520px) { h1 { font-size: 28px; letter-spacing: .04em; } }
+  p { margin: 0 0 18px; line-height: 1.5; }
+  label { display: block; margin-bottom: 8px; }
+  input { box-sizing: border-box; width: 100%; padding: 12px 14px; font: 24px "Microsoft JhengHei", sans-serif; background: #fff0ce; color: #3a0a0a; border: 1px solid #d4a64a; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  button { padding: 10px 22px; font: inherit; border: 1px solid #d4a64a; background: #f0cf85; color: #3a0a0a; }
+  button.ghost { background: transparent; color: #fff2ce; }
+  .note { min-height: 1.5em; color: #ffd0d0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>玖玖百家樂路單</h1>
+  <p id="lead">請輸入業主給你的授權碼。</p>
+  <form id="form">
+    <label for="code">授權碼</label>
+    <input id="code" autocomplete="off" spellcheck="false">
+    <p class="note" id="message"></p>
+    <div class="row">
+      <button type="button" id="submit">啟用</button>
+      <button type="button" class="ghost" id="quit">關閉程式</button>
+    </div>
+  </form>
+  <div id="locked" hidden>
+    <p class="note" id="lockedMessage"></p>
+    <div class="row">
+      <button type="button" id="retry">重新檢查</button>
+      <button type="button" id="reset">改輸入授權碼</button>
+      <button type="button" class="ghost" id="quitLocked">關閉程式</button>
+    </div>
+  </div>
+</main>
+<script>
+(function () {
+  const form = document.getElementById('form');
+  const locked = document.getElementById('locked');
+  const lead = document.getElementById('lead');
+  function show(view) {
+    const mode = view && view.mode;
+    const message = view && view.message || '';
+    if (mode === 'wait') {
+      form.hidden = true;
+      locked.hidden = true;
+      lead.textContent = message || '正在確認授權，請稍候。';
+      return;
+    }
+    const isLock = mode === 'locked';
+    form.hidden = isLock;
+    locked.hidden = !isLock;
+    lead.textContent = isLock ? '請聯絡業主' : '請輸入業主給你的授權碼。';
+    document.getElementById(isLock ? 'lockedMessage' : 'message').textContent = isLock ? message : (message === lead.textContent ? '' : message);
+    if (!isLock) document.getElementById('code').focus();
+  }
+  async function run(work) {
+    const result = await work();
+    if (!result || result.ok) return;
+    show(result);
+  }
+  document.getElementById('quit').onclick = () => RoadmapLicense.quit();
+  document.getElementById('quitLocked').onclick = () => RoadmapLicense.quit();
+  function submitLicense(event) {
+    if (event) event.preventDefault();
+    const button = document.getElementById('submit');
+    button.disabled = true;
+    run(() => RoadmapLicense.submit(document.getElementById('code').value)).finally(() => { button.disabled = false; });
+  }
+  form.onsubmit = submitLicense;
+  document.getElementById('submit').onclick = submitLicense;
+  document.getElementById('retry').onclick = () => run(() => RoadmapLicense.retry());
+  document.getElementById('reset').onclick = () => run(() => RoadmapLicense.reset());
+  if (!window.RoadmapLicense) return;
+  RoadmapLicense.onView(show);
+  RoadmapLicense.status().then(show);
+})();
+</script>
+</body>
+</html>

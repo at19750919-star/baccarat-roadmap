@@ -19,6 +19,7 @@ with sync_playwright() as p:
         context.route('https://fonts.gstatic.com/**',lambda r:r.abort())
         context.route('https://cdn.jsdelivr.net/**',lambda r:r.fulfill(body=''))
         errors=[]
+        context.add_init_script("localStorage.setItem('jiujiu_owner_gate_v1','1')")
         if hosted and not LIVE:
             def site(r):
                 name=urlparse(r.request.url).path.removeprefix('/baccarat-roadmap/')

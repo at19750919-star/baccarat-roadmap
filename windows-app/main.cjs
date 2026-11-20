@@ -1,7 +1,9 @@
 const { app, BrowserWindow, Menu, ipcMain, session, dialog } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
+const { execFileSync } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
+const licenseCore = require('./license-core.cjs');
 
 if (process.env.ROADMAP_TEST_PROFILE) app.setPath('userData', process.env.ROADMAP_TEST_PROFILE);
 let mainWindow;
@@ -18,6 +20,66 @@ async function cloudRequest(url, options, ms) {
   const data = await response.json();
   if (!data || typeof data.success !== 'boolean') throw Error('invalid response');
   return data;
+}
+const LICENSE_TIMEOUT_MS = 8000;
+function licenseEnforced() {
+  if (app.isPackaged) return true;
+  return process.env.ROADMAP_LICENSE_ENFORCE === '1';
+}
+function currentMachineId() {
+  if (process.env.ROADMAP_MACHINE_ID) return String(process.env.ROADMAP_MACHINE_ID).trim();
+  if (process.platform !== 'win32') return '';
+  try {
+    const out = execFileSync('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Cryptography', '/v', 'MachineGuid'], { encoding: 'utf8', windowsHide: true });
+    return licenseCore.parseMachineGuid(out);
+  } catch {
+    return '';
+  }
+}
+function licenseStatePath() {
+  return path.join(app.getPath('userData'), 'license-state.json');
+}
+function readLicenseState() {
+  try { return JSON.parse(fs.readFileSync(licenseStatePath(), 'utf8')); }
+  catch { return null; }
+}
+function writeLicenseState(state) {
+  if (!state) {
+    try { fs.unlinkSync(licenseStatePath()); } catch { /* 還沒有授權紀錄 */ }
+    return;
+  }
+  fs.mkdirSync(path.dirname(licenseStatePath()), { recursive: true });
+  fs.writeFileSync(licenseStatePath(), JSON.stringify(state));
+}
+function persistLicense(verdict, code) {
+  if (verdict.store) { writeLicenseState(verdict.store); return; }
+  if (!verdict.clearGrace) return;
+  const normalized = licenseCore.normalizeCode(code);
+  writeLicenseState(verdict.rememberCode && normalized ? { version: 1, code: normalized } : null);
+}
+async function requestLicense(code, machineId) {
+  const endpoint = process.env.ROADMAP_LICENSE_URL || CLOUD_ENDPOINT;
+  try {
+    const body = JSON.stringify({ action: 'licenseCheck', code: licenseCore.normalizeCode(code), machineId });
+    const data = await cloudRequest(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body }, LICENSE_TIMEOUT_MS);
+    if (!data || data.success !== true || typeof data.payload !== 'string' || typeof data.signature !== 'string') return { invalid: true };
+    return { payload: data.payload, signature: data.signature };
+  } catch {
+    return null;
+  }
+}
+function judgeLicense(code, machineId, fresh, interactive) {
+  const now = Date.now();
+  return licenseCore.evaluate({
+    stored: readLicenseState(), fresh, code, machineId, now, today: licenseCore.todayTaipei(now), interactive: !!interactive
+  });
+}
+let licenseView = { mode: 'activate', message: '請輸入業主給你的授權碼。' };
+function publishLicense(view) {
+  licenseView = { mode: view.mode, message: view.message || '' };
+  const send = () => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('roadmap:license-view', licenseView); };
+  if (mainWindow.webContents.isLoading()) mainWindow.webContents.once('did-finish-load', send);
+  else send();
 }
 const builtinSite = path.join(__dirname, 'site-public');
 let overrideRoot, activeSite = null, pagePath, pageURL;
@@ -67,7 +129,7 @@ async function pickUpdate() {
   if (!pick.canceled && pick.filePaths[0]) await importUpdate(pick.filePaths[0]);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
   overrideRoot = path.join(app.getPath('userData'), 'site-override');
   chooseSite();
@@ -127,6 +189,41 @@ app.whenReady().then(() => {
   });
   ipcMain.on('roadmap:update-file', (event, filePath) => { if (isMain(event)) importUpdate(filePath); });
   ipcMain.on('roadmap:quit', event => { if (isMain(event) && mainWindow && !mainWindow.isDestroyed()) mainWindow.close(); });
+  const isLicenseWindow = event => event.sender === mainWindow?.webContents;
+  ipcMain.handle('roadmap:license-status', event => isLicenseWindow(event) ? licenseView : null);
+  ipcMain.handle('roadmap:license-submit', async (event, code) => {
+    if (!isLicenseWindow(event)) return { ok: false, message: '無法送出' };
+    const machineId = currentMachineId();
+    if (!licenseCore.machineOk(machineId)) return publishAndReturn({ allow: false, mode: 'locked', message: '讀不到這台電腦的識別碼。請聯絡業主。', clearGrace: false });
+    if (!licenseCore.codeOk(code)) return publishAndReturn({ allow: false, mode: 'activate', message: '授權碼格式不對。請向業主確認授權碼。', clearGrace: false });
+    const fresh = await requestLicense(code, machineId);
+    const verdict = judgeLicense(code, machineId, fresh, true);
+    persistLicense(verdict, code);
+    if (verdict.allow) { await mainWindow.loadFile(pagePath); return { ok: true }; }
+    return publishAndReturn(verdict);
+  });
+  ipcMain.handle('roadmap:license-retry', async event => {
+    if (!isLicenseWindow(event)) return { ok: false, message: '無法送出' };
+    const saved = readLicenseState();
+    if (!saved?.code) return publishAndReturn({ allow: false, mode: 'activate', message: '請輸入業主給你的授權碼。', clearGrace: false });
+    const machineId = currentMachineId();
+    if (!licenseCore.machineOk(machineId)) return publishAndReturn({ allow: false, mode: 'locked', message: '讀不到這台電腦的識別碼。請聯絡業主。', clearGrace: false });
+    const fresh = await requestLicense(saved.code, machineId);
+    const verdict = judgeLicense(saved.code, machineId, fresh, false);
+    persistLicense(verdict, saved.code);
+    if (verdict.allow) { await mainWindow.loadFile(pagePath); return { ok: true }; }
+    return publishAndReturn(verdict);
+  });
+  ipcMain.handle('roadmap:license-reset', event => {
+    if (!isLicenseWindow(event)) return null;
+    writeLicenseState(null);
+    return publishAndReturn({ allow: false, mode: 'activate', message: '請輸入業主給你的授權碼。', clearGrace: false });
+  });
+  ipcMain.on('roadmap:quit-license', event => { if (isLicenseWindow(event) && mainWindow && !mainWindow.isDestroyed()) mainWindow.close(); });
+  function publishAndReturn(verdict) {
+    publishLicense(verdict);
+    return { ok: false, mode: verdict.mode, message: verdict.message || '' };
+  }
   ipcMain.on('roadmap:prompt', (event, message, initial) => {
     if (!isMain(event)) { event.returnValue = null; return; }
     let answered = false;
@@ -144,8 +241,31 @@ app.whenReady().then(() => {
     promptWindow.webContents.once('did-finish-load', () => promptWindow.webContents.send('roadmap:prompt-data', { message: String(message), initial: String(initial || '') }));
     promptWindow.loadFile(path.join(__dirname, 'prompt.html'));
   });
-  mainWindow.loadFile(pagePath);
+  if (!licenseEnforced()) {
+    mainWindow.loadFile(pagePath);
+  } else {
+    const saved = readLicenseState();
+    const machineId = currentMachineId();
+    if (!licenseCore.machineOk(machineId)) {
+      publishLicense({ mode: 'locked', message: '讀不到這台電腦的識別碼。請聯絡業主。' });
+      mainWindow.loadFile(path.join(__dirname, 'license.html'));
+    } else if (!saved?.code) {
+      publishLicense({ mode: 'activate', message: '請輸入業主給你的授權碼。' });
+      mainWindow.loadFile(path.join(__dirname, 'license.html'));
+    } else {
+      publishLicense({ mode: 'wait', message: '正在確認授權，請稍候。' });
+      mainWindow.loadFile(path.join(__dirname, 'license.html'));
+      const fresh = await requestLicense(saved.code, machineId);
+      const verdict = judgeLicense(saved.code, machineId, fresh, false);
+      persistLicense(verdict, saved.code);
+      if (verdict.allow) mainWindow.loadFile(pagePath);
+      else publishLicense(verdict);
+    }
+  }
   if (!process.env.ROADMAP_TEST_PROFILE) mainWindow.maximize();
+}).catch(error => {
+  dialog.showErrorBox('玖玖百家樂路單', '授權檢查發生問題。請聯絡業主。\n' + (error && error.message || ''));
+  app.quit();
 });
 app.on('window-all-closed', () => app.quit());
 

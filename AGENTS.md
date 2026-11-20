@@ -27,6 +27,7 @@
 - 雲端收件：`road_backup.js` 前端上傳；後端 `backend/`（Google Apps Script，`road_entry.gs`、`road_onedrive.gs` 為來源快照），細節見 `CLOUD_BACKUP.md`。
 - 亂路子工具：`亂路/`（`luanlu.html`）。測試在 `tests/`。
 - 正式網址（GitHub Pages）：https://at19750919-star.github.io/baccarat-roadmap/tv.html
+- 客人付費授權：安裝版在 `windows-app/license.html`、`windows-app/license-core.cjs`；後端在 `backend/程式碼-v19-授權.gs`（尚未發布，步驟見 `backend/更新步驟-v19-授權.md`）。授權私鑰只在本機 `backend/授權私鑰.pem`，不進 Git。網路版密碼在 `owner-gate.js`，只擋公開網址上的一般人。
 
 ## 規則
 - 專案內有許多他人未提交的改動與暫存檔；存版本只提交自己改的檔，明確列檔名。

@@ -30,7 +30,9 @@
       "preload.cjs",
       "prompt-preload.cjs",
       "update-core.cjs",
+      "license-core.cjs",
       "prompt.html",
+      "license.html",
       "site-public/**/*",
       "package.json"
     ],
