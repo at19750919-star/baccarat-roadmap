@@ -93,7 +93,7 @@ html:not([data-skin]) .tv-app .predict-panel .predict-title {
 html:not([data-skin]) body { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120' font-family='serif' font-size='26' fill='%23ffd98a' fill-opacity='.07'%3E%3Ctext x='14' y='40'%3E%E2%99%A0%3C/text%3E%3Ctext x='74' y='40'%3E%E2%99%A5%3C/text%3E%3Ctext x='44' y='100'%3E%E2%99%A6%3C/text%3E%3Ctext x='104' y='100'%3E%E2%99%A3%3C/text%3E%3C/svg%3E") repeat, #7a0b0b !important; }
 </style>
 <link href="tv-panel-style.css?v=14" rel="stylesheet"/>
-<link href="tv-settings-casino.css?v=3" rel="stylesheet"/>
+<link href="tv-settings-casino.css?v=4" rel="stylesheet"/>
 <style id="tv-ref-frame">
 /* 參考圖風格（僅紅色預設風格）：紅緞頂列、金框四角飾、白底格子、限紅區無分隔線 */
 html:not([data-skin]) body { background: radial-gradient(ellipse at 50% 30%, #5e0505 0%, #3c0101 70%, #2a0000 100%) !important; }
@@ -482,10 +482,10 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 </div>
 </section>
 <button type="button" id="saveBtn" hidden>儲存路單</button>
-<dialog id="tvSettings" class="tv-settings tv-settings-proposal tv-settings-compact" aria-labelledby="tvSettingsTitle">
+<dialog id="tvSettings" class="tv-settings tv-settings-proposal tv-settings-compact dialog" aria-labelledby="tvSettingsTitle">
 <form method="dialog" id="tvSettingsForm" novalidate>
-<header class="tv-settings-header"><h2 id="tvSettingsTitle">路單設定</h2><span class="tv-drag-hint">拖曳移動 ｜ 邊緣縮放</span><button type="button" id="tvSettingsSizeToggle" class="tv-settings-size-btn" title="切換大視窗/標準視窗" aria-label="切換視窗尺寸">⛶</button><button type="button" id="tvSettingsClose" aria-label="關閉設定">×</button></header>
-<div class="tv-settings-tabs" role="tablist" aria-label="設定分類">
+<header class="tv-settings-header"><h2 id="tvSettingsTitle">路單設定</h2><span class="tv-drag-hint">拖曳移動 ｜ 邊緣縮放</span><button type="button" id="tvSettingsSizeToggle" class="tv-settings-size-btn btn-circle" title="切換大視窗/標準視窗" aria-label="切換視窗尺寸">⛶</button><button type="button" id="tvSettingsClose" class="btn-circle" aria-label="關閉設定">×</button></header>
+<div class="tv-settings-tabs ex-pill-tabs" role="tablist" aria-label="設定分類">
 <button type="button" id="tvTabBasic" role="tab" data-settings-tab="basic" aria-controls="tvBasicPanel" aria-selected="true">基本設定</button>
 <button type="button" id="tvTabKeys" role="tab" data-settings-tab="keys" aria-controls="tvKeysPanel" aria-selected="false" tabindex="-1">按鍵設定</button>
 <button type="button" id="tvTabSave" role="tab" data-settings-tab="save" aria-controls="tvSavePanel" aria-selected="false" tabindex="-1">儲存設定</button>
@@ -497,11 +497,11 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 </div>
 <div class="tv-settings-content">
 <section id="tvBasicPanel" role="tabpanel" aria-labelledby="tvTabBasic">
-<div class="tv-settings-skin"><span id="tvStyleLabel">畫面風格</span><div class="tv-style-options" role="radiogroup" aria-labelledby="tvStyleLabel">
-<button type="button" role="radio" aria-checked="true" data-skin-value="red"><i class="tv-style-swatch" style="--style-swatch:#b32424" aria-hidden="true"></i>紅金風格</button>
-<button type="button" role="radio" aria-checked="false" data-skin-value="green" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#297052" aria-hidden="true"></i>綠金風格</button>
-<button type="button" role="radio" aria-checked="false" data-skin-value="black" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#252525" aria-hidden="true"></i>黑金風格</button>
-<button type="button" role="radio" aria-checked="false" data-skin-value="led" tabindex="-1"><i class="tv-style-swatch" style="--style-swatch:#d9b568" aria-hidden="true"></i>電子看板</button>
+<div class="tv-settings-skin kit fill-dark tex-diamond light-inset frame-twotone corner-rivet"><span id="tvStyleLabel" class="div-line-wrap">畫面風格</span><div class="tv-style-options rbtn-group" role="radiogroup" aria-labelledby="tvStyleLabel">
+<button type="button" class="rbtn-item" role="radio" aria-checked="true" data-skin-value="red"><span><i class="tv-style-swatch" style="--style-swatch:#b32424" aria-hidden="true"></i>紅金風格</span></button>
+<button type="button" class="rbtn-item" role="radio" aria-checked="false" data-skin-value="green" tabindex="-1"><span><i class="tv-style-swatch" style="--style-swatch:#297052" aria-hidden="true"></i>綠金風格</span></button>
+<button type="button" class="rbtn-item" role="radio" aria-checked="false" data-skin-value="black" tabindex="-1"><span><i class="tv-style-swatch" style="--style-swatch:#252525" aria-hidden="true"></i>黑金風格</span></button>
+<button type="button" class="rbtn-item" role="radio" aria-checked="false" data-skin-value="led" tabindex="-1"><span><i class="tv-style-swatch" style="--style-swatch:#d9b568" aria-hidden="true"></i>電子看板</span></button>
 </div></div>
 <div class="tv-size-settings">
 <label for="tvBigColumns">大路欄數 <span><input id="tvBigColumns" name="columns" type="number" min="38" max="48" step="1" required/> 欄</span></label>
@@ -523,8 +523,8 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 </section>
 <section id="tvKeysPanel" role="tabpanel" aria-labelledby="tvTabKeys" hidden>
 <div class="tv-keys-settings">
-  <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">開獎按鍵</h3>
+  <div class="tv-keys-subgroup kit fill-dark tex-diamond light-inset frame-twotone corner-rivet">
+    <h3 class="tv-keys-subhead div-line-wrap">開獎按鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>莊贏</span><input id="tvKeyB" name="keyB" maxlength="1" value="1" required/></label>
       <label class="tv-key-bind-row"><span>閒贏</span><input id="tvKeyP" name="keyP" maxlength="1" value="2" required/></label>
@@ -535,14 +535,14 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
       <label class="tv-key-bind-row"><span>老虎連按</span><input id="tvKeyTiger" name="keyTiger" maxlength="1" value="6" required/></label>
       <label class="tv-key-bind-row"><span>幸運七連按</span><input id="tvKeySeven" name="keySeven" maxlength="1" value="2" required/></label>
     </div>
-    <h3 class="tv-keys-subhead" style="margin-top:16px">固定快捷鍵</h3>
+    <h3 class="tv-keys-subhead div-line-wrap" style="margin-top:16px">固定快捷鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>倒退一局</span><input id="tvKeyBack7" value="7" readonly tabindex="-1" title="單按 7 稍候撤銷上一局"/></label>
     </div>
   </div>
 
-  <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">系統與輔助按鍵</h3>
+  <div class="tv-keys-subgroup kit fill-dark tex-diamond light-inset frame-twotone corner-rivet">
+    <h3 class="tv-keys-subhead div-line-wrap">系統與輔助按鍵</h3>
     <div class="tv-keys-grid">
       <label class="tv-key-bind-row"><span>確定送出</span><input id="tvKeyConfirm" name="keyConfirm" maxlength="10" value="Enter" required/></label>
       <label class="tv-key-bind-row"><span>開啟設定</span><input id="tvKeyLimit" name="keyLimit" maxlength="5" value="77" readonly title="連按 77 開啟設定；單按 7 撤銷上一局" required/></label>
@@ -552,14 +552,26 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
     </div>
   </div>
 
-  <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">操作模式</h3>
+  <div class="tv-keys-subgroup kit fill-dark tex-diamond light-inset frame-twotone corner-rivet">
+    <h3 class="tv-keys-subhead div-line-wrap">操作模式</h3>
     <label class="tv-check-row"><span>免按 ENTER 自動開獎</span><input id="tvAutoCommit" name="autoCommit" type="checkbox" checked/></label>
-    <label class="tv-key-bind-row"><span>連按停頓等待時間</span><span><input id="tvAutoCommitDelay" name="autoCommitDelay" type="number" min="0.2" max="0.8" step="0.01" value="0.38"/> 秒</span></label>
+    <div class="tv-key-bind-row">
+      <label for="tvAutoCommitDelay">連按停頓等待時間</label>
+      <span class="tv-delay-value">
+        <span class="ex-vstep">
+          <input id="tvAutoCommitDelay" name="autoCommitDelay" type="number" min="0.2" max="0.8" step="0.01" value="0.38"/>
+          <span class="ex-vstep-btns">
+            <button type="button" data-delay-step="up" aria-label="增加等待時間" aria-controls="tvAutoCommitDelay">▲</button>
+            <button type="button" data-delay-step="down" aria-label="減少等待時間" aria-controls="tvAutoCommitDelay">▼</button>
+          </span>
+        </span>
+        <span class="unit">秒</span>
+      </span>
+    </div>
   </div>
 
-  <div class="tv-keys-subgroup">
-    <h3 class="tv-keys-subhead">語音播報</h3>
+  <div class="tv-keys-subgroup kit fill-dark tex-diamond light-inset frame-twotone corner-rivet">
+    <h3 class="tv-keys-subhead div-line-wrap">語音播報</h3>
     <label class="tv-check-row"><span>語音播報開關</span><input id="tvSoundEnabled" name="soundEnabled" type="checkbox" checked/></label>
     <label class="tv-key-bind-row"><span>語音音量大小</span><span class="tv-vol-wrap"><input id="tvSoundVolume" name="soundVolume" type="range" min="10" max="100" step="5" value="100"/><b id="tvSoundVolumeText">100%</b></span></label>
     <div class="tv-audition-row">
@@ -579,8 +591,8 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 </section>
 <section id="tvSavePanel" role="tabpanel" aria-labelledby="tvTabSave" hidden>
   <div class="tv-save-settings">
-    <div class="tv-save-subgroup">
-      <h3 class="tv-save-subhead">路單存檔設定</h3>
+    <div class="tv-save-subgroup kit fill-dark tex-diamond light-inset frame-twotone corner-rivet">
+      <h3 class="tv-save-subhead div-line-wrap">路單存檔設定</h3>
       <div class="tv-save-grid">
         <label class="tv-save-row" for="tvCustomSavePath">
           <span>儲存路徑</span>
@@ -607,8 +619,13 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <div class="tv-color-workspace"><div id="tvColorSettings" class="tv-color-settings"></div><div id="tvColorEditorHost"></div></div>
 </section>
 </div>
-<p id="tvSettingsStatus" role="status" hidden></p>
-<footer class="tv-settings-actions"><button type="button" id="tvSettingsReset">恢復預設</button><button type="button" id="tvColorsReset" hidden>全部還原</button><span class="tv-settings-spacer"></span><button type="button" id="tvSettingsCancel">取消</button><button type="submit">儲存</button></footer>
+<footer class="tv-settings-actions">
+  <button type="button" id="tvSettingsReset">恢復預設</button>
+  <button type="button" id="tvColorsReset" hidden>全部還原</button>
+  <div class="tv-settings-spacer"><p id="tvSettingsStatus" class="toast" role="status" hidden></p></div>
+  <button type="button" id="tvSettingsCancel">取消</button>
+  <button type="submit" class="skin-ingot">儲存</button>
+</footer>
 </form>
 <div class="tv-resizer tv-resizer-left" data-dir="w" title="拖曳調整寬度"></div>
 <div class="tv-resizer tv-resizer-right" data-dir="e" title="拖曳調整寬度"></div>
@@ -616,6 +633,37 @@ html:not([data-skin]):not(#_) .tv-app .tv-stats .tv-stat-head :is(.tv-stat-head-
 <div class="tv-resizer tv-resizer-bottom-left" data-dir="sw" title="拖曳調整大小"></div>
 <div class="tv-resizer tv-resizer-bottom-right" data-dir="se" id="tvSettingsResizer" title="拖曳縮放視窗大小"></div>
 </dialog>
+<script>
+(() => {
+  const dialog = document.getElementById('tvSettings');
+  const input = document.getElementById('tvAutoCommitDelay');
+  const up = dialog.querySelector('[data-delay-step="up"]');
+  const down = dialog.querySelector('[data-delay-step="down"]');
+
+  function syncStepButtons() {
+    up.disabled = input.disabled || input.valueAsNumber >= Number(input.max);
+    down.disabled = input.disabled || input.valueAsNumber <= Number(input.min);
+  }
+
+  for (const button of [up, down]) {
+    button.addEventListener('click', () => {
+      if (button === up) input.stepUp();
+      else input.stepDown();
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      if (button.disabled) input.focus();
+    });
+  }
+
+  input.addEventListener('input', syncStepButtons);
+  input.addEventListener('change', syncStepButtons);
+  dialog.addEventListener('toggle', syncStepButtons);
+  dialog.addEventListener('focusin', syncStepButtons);
+  document.getElementById('tvSettingsReset').addEventListener('click', () => {
+    requestAnimationFrame(syncStepButtons);
+  });
+})();
+</script>
 </div>
 <!-- 巨龍特效層 -->
 <div class="dragon-overlay" id="dragonOverlay" aria-hidden="true">
