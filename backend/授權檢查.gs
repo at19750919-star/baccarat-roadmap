@@ -151,7 +151,7 @@ function licenseReply_(result, extras) {
   });
   var key = licensePrivateKey_();
   if (!key) return { success: false, error: 'license_unconfigured' };
-  var bytes = Utilities.computeRsaSha256Signature(payload, key);
+  var bytes = Utilities.computeRsaSha256Signature(payload, key, Utilities.Charset.UTF_8);
   return { success: true, payload: payload, signature: Utilities.base64Encode(bytes) };
 }
 
