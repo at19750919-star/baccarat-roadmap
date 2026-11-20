@@ -1,0 +1,326 @@
+/* 賭場綠金・元件總覽。外觀套用在比較頁的設定對話框內。 */
+#tvSettings.tv-settings {
+  --serif: "Noto Serif TC", "Cinzel", serif;
+  --disp: "Cinzel", "Noto Serif TC", serif;
+  --ink: #07090b; --pit: #2a0607;
+  --felt-1: #a5171a; --felt-2: #6e0c0f; --glow: rgba(220,50,40,.35);
+  --state-1: #c0262a; --state-2: #7a1013;
+  --panel: #a5171a; --panel-2: #7a0f12;
+  --control-1: #4a090b; --control-2: #2e0405;
+  --gold-1: #f4dfa4; --gold-2: #d9b568; --gold-3: #a67c35; --gold-4: #6b4c1d;
+  --gold-line: linear-gradient(135deg,#6b4c1d,#e8c97a 25%,#8a6a2f 50%,#f4dfa4 75%,#6b4c1d);
+  --txt: #f3ecdc; --txt-dim: #e2cfae; --danger: #ff6b5e; --ok: #67c98f;
+  color: var(--txt);
+  font-family: var(--serif);
+  background: linear-gradient(160deg,var(--panel),var(--panel-2)) !important;
+  border: 1px solid var(--gold-2) !important;
+  border-image: none !important;
+  border-radius: 0;
+  box-shadow: 0 20px 70px #000e !important;
+}
+
+#tvSettings::backdrop { background: #000b; }
+#tvSettings:is(dialog)::before, #tvSettings:is(dialog)::after {
+  content: ""; position: absolute; width: 17px; height: 17px;
+  border: 2px solid var(--gold-1); pointer-events: none;
+}
+#tvSettings:is(dialog)::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+#tvSettings:is(dialog)::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+
+#tvSettings.tv-settings h2 {
+  font: 900 32px/1.25 var(--disp); letter-spacing: .14em;
+  background: linear-gradient(180deg,#fbeec7 10%,#e2bd72 45%,#9c7434 70%,#f0d491 95%);
+  background-clip: text; color: transparent;
+}
+#tvSettings .tv-drag-hint { color: var(--txt-dim); font-weight: 400; }
+
+#tvSettings .btn-circle {
+  display: inline-grid; place-items: center; border-radius: 50%;
+  border: 1px solid var(--gold-2);
+  background: linear-gradient(155deg,var(--control-1),var(--control-2));
+  color: var(--gold-1); box-shadow: 0 4px 10px #0008 !important;
+  transition: .2s; font-size: 22px; line-height: 1;
+}
+#tvSettings .btn-circle:hover {
+  border-color: var(--gold-1); transform: translateY(-2px);
+  box-shadow: 0 6px 14px #000a,0 0 10px #d4b06a44 !important;
+}
+#tvSettings .btn-circle svg {
+  width: 15px; height: 15px; stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+#tvSettings #tvSettingsClose { font-family: var(--serif); }
+
+/* .ex-pill-tabs：選中狀態直接讀既有 aria-selected。 */
+#tvSettings .ex-pill-tabs {
+  gap: 4px; padding: 4px;
+  border: 1px solid var(--gold-4); background: var(--pit); border-radius: 999px;
+}
+#tvSettings.tv-settings .ex-pill-tabs button {
+  border: 0; background: transparent; color: var(--txt-dim);
+  border-radius: 999px; transition: .18s; min-height: 42px; padding: 6px 16px;
+  font: 600 18px/1.3 var(--serif);
+}
+#tvSettings.tv-settings .ex-pill-tabs button:hover { color: var(--gold-1); }
+#tvSettings.tv-settings .ex-pill-tabs button[aria-selected=true] {
+  background: linear-gradient(180deg,#f7e6ba,#d6ad5d 55%,#a77a32) !important;
+  color: #21190d !important; box-shadow: 0 2px 10px rgba(217,181,104,.35) !important;
+}
+#tvSettings.tv-settings .ex-pill-tabs button:focus-visible { outline-offset: -3px; }
+
+/* .kit.fill-dark.tex-diamond.light-inset.frame-twotone.corner-rivet。
+   路單尺寸與限紅由既有腳本建立，套用相同的卡片外觀。 */
+#tvSettings :is(.kit, .tv-settings-group, #tvProposalLimitSettings) {
+  --kit-fill: linear-gradient(180deg,var(--control-1),var(--control-2));
+  --kit-gloss: linear-gradient(#0000,#0000);
+  --kit-tex: repeating-linear-gradient(45deg,#0000 0 7px,#0000003a 7px 8px),repeating-linear-gradient(-45deg,#0000 0 7px,#0000003a 7px 8px);
+  --kit-light-sh: inset 0 3px 8px #000c,inset 0 -1px 0 #ffffff14;
+  --kit-border: 1px solid var(--gold-1);
+  --kit-frame-sh: inset 0 0 0 2px #2a1d0a,inset 0 0 0 3px var(--gold-3);
+  --kit-corner:
+    radial-gradient(circle,#f6e6b8 0 1.6px,#8a6a2f 2.4px,#0000 3px) 5px 5px/7px 7px no-repeat,
+    radial-gradient(circle,#f6e6b8 0 1.6px,#8a6a2f 2.4px,#0000 3px) calc(100% - 5px) 5px/7px 7px no-repeat,
+    radial-gradient(circle,#f6e6b8 0 1.6px,#8a6a2f 2.4px,#0000 3px) 5px calc(100% - 5px)/7px 7px no-repeat,
+    radial-gradient(circle,#f6e6b8 0 1.6px,#8a6a2f 2.4px,#0000 3px) calc(100% - 5px) calc(100% - 5px)/7px 7px no-repeat;
+  position: relative; min-width: 0;
+  border: var(--kit-border); border-radius: 0;
+  background: var(--kit-corner),var(--kit-gloss),var(--kit-tex),var(--kit-fill);
+  box-shadow: var(--kit-frame-sh),var(--kit-light-sh);
+  padding: 13px 18px 16px;
+}
+#tvSettings :is(.div-line-wrap,.tv-settings-subhead,#tvStyleLabel) {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  color: var(--gold-2); font: 600 18px/1.4 var(--serif); letter-spacing: .18em;
+  margin: 0 0 10px;
+}
+#tvSettings :is(.div-line-wrap,.tv-settings-subhead)::before,
+#tvSettings :is(.div-line-wrap,.tv-settings-subhead)::after {
+  content: ""; flex: 1; height: 1px; background: var(--gold-line);
+}
+
+/* .rbtn-item span：保留路單已支援鍵盤操作的 button[role=radio]。 */
+#tvSettings .rbtn-group .rbtn-item,
+#tvSettings .rbtn-group .rbtn-item:is(:hover,[aria-checked=true]) {
+  padding: 0; border: 0; border-radius: 0; background: none;
+  outline: 0;
+}
+#tvSettings .rbtn-item > span {
+  display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+  width: 100%; min-height: 44px; padding: 6px 10px;
+  border: 1px solid var(--gold-4); border-radius: 0;
+  background: var(--control-2); color: var(--txt-dim);
+  font: 600 17px/1.35 var(--serif); transition: .18s;
+}
+#tvSettings .rbtn-item[aria-checked=true] > span {
+  border-color: var(--gold-1);
+  background: linear-gradient(180deg,#f7e6ba,#d6ad5d 55%,#a77a32);
+  color: #21190d; box-shadow: 0 4px 12px #0008;
+}
+#tvSettings .rbtn-group .rbtn-item:focus-visible { outline: 2px solid var(--gold-1); outline-offset: 3px; }
+
+/* .tool-btn、修飾狀態與 .skin-ingot。 */
+#tvSettings.tv-settings :is(.tv-settings-actions button, .tv-limit-presets button:not([role]),
+  .tv-mini-audio-btn, .tv-pick-folder-btn, :where(#tvColorReset)) {
+  border: 1px solid #6b4c1d !important; border-radius: 0 !important;
+  color: var(--gold-2) !important;
+  background: linear-gradient(155deg,var(--control-1),var(--control-2)) !important;
+  font-weight: 600; letter-spacing: .04em; transition: .2s;
+}
+#tvSettings.tv-settings :is(.tv-settings-actions button, .tv-limit-presets button:not([role]),
+  .tv-mini-audio-btn, .tv-pick-folder-btn, :where(#tvColorReset)):hover:not(:disabled) {
+  border-color: #c9a25a !important; color: var(--gold-1) !important;
+  transform: translateY(-2px); box-shadow: 0 6px 14px #0008,0 0 10px #d4b06a33 !important;
+}
+#tvSettings.tv-settings :is(.tv-settings-actions button, .tv-limit-presets button:not([role]),
+  .tv-mini-audio-btn, .tv-pick-folder-btn, :where(#tvColorReset)):active:not(:disabled) { transform: scale(.97); }
+#tvSettings.tv-settings :is(#tvSettingsReset,#tvSettingsCancel,#tvColorsReset,#tvColorReset) {
+  border-color: transparent !important; background: transparent !important;
+}
+#tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete {
+  color: var(--danger) !important; border-color: #a64540 !important;
+}
+#tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete.is-confirm {
+  background: linear-gradient(180deg,#e0483e,#ad241b 58%,#78140e) !important;
+  border-color: #ff8a80 !important; color: #fff5f3 !important;
+  box-shadow: inset 0 1px #ffb3ad66,0 4px 12px #0009 !important;
+}
+#tvSettings.tv-settings .tv-limit-presets #tvLimitPresetDelete.is-confirm:hover { filter: brightness(1.1); }
+#tvSettings.tv-settings .tv-settings-actions button.skin-ingot {
+  background: linear-gradient(180deg,#f7e6ba,var(--gold-2) 48%,var(--gold-3) 52%,#c9a25a) !important;
+  border: 1px solid var(--gold-1) !important; color: #1f1607 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.25) !important;
+  box-shadow: inset 0 1px #fffc,0 4px 0 var(--gold-4),0 8px 12px #000a !important;
+  font-weight: 800; margin-bottom: 4px; min-width: 120px;
+}
+#tvSettings.tv-settings .tv-pick-folder-btn { font-size: 16px !important; }
+#tvSettings.tv-settings .tv-settings-actions button.skin-ingot:hover:not(:disabled) {
+  color: #1f1607 !important; border-color: var(--gold-1) !important;
+  filter: brightness(1.08); transform: translateY(-1px);
+  box-shadow: inset 0 1px #fffc,0 5px 0 var(--gold-4),0 10px 16px #000a !important;
+}
+#tvSettings.tv-settings .tv-settings-actions button.skin-ingot:active:not(:disabled) {
+  transform: translateY(3px); box-shadow: inset 0 2px 4px #0006,0 1px 0 var(--gold-4) !important;
+}
+
+/* .field、.numbox、.field-underline、.field-readonly-distinct。 */
+#tvSettings.tv-settings .tv-settings-content :is(input:not([type=checkbox]):not([type=range]):not([type=color]),textarea) {
+  border: 1px solid #6b4c1d; border-radius: 0; color: var(--field-ink,var(--txt));
+  background: linear-gradient(180deg,var(--control-2),var(--pit));
+  box-shadow: inset 0 2px 8px #0007;
+  font: 500 18px/1.3 var(--field-font,var(--serif)) !important;
+}
+#tvSettings.tv-settings :is(input,textarea)::placeholder { color: rgba(244,223,164,.38); }
+#tvSettings.tv-settings .tv-settings-content :is(input:not([type=checkbox]):not([type=range]):not([type=color]),textarea):focus {
+  border-color: #c9a25a; box-shadow: 0 0 10px #d4b06a40,inset 0 2px 8px #0007;
+}
+#tvSettings.tv-settings .tv-settings-content :is(input[type=number],input[data-limit-key]) {
+  --field-font: var(--disp); --field-ink: var(--gold-1);
+}
+#tvSettings.tv-settings .tv-settings-content .tv-key-bind-row input:not([readonly]):not([type=number]):not([type=range]) {
+  border: 0; border-bottom: 2px solid var(--gold-3);
+  background: transparent; color: var(--txt); box-shadow: none;
+}
+#tvSettings.tv-settings .tv-settings-content .tv-key-bind-row input:not([readonly]):not([type=number]):not([type=range]):focus {
+  border-bottom-color: var(--gold-1); box-shadow: 0 4px 8px -4px #f4dfa466;
+}
+#tvSettings.tv-settings .tv-settings-content input[readonly] {
+  border: 1px dashed var(--gold-4) !important;
+  background: repeating-linear-gradient(-45deg,rgba(217,181,104,.05) 0 6px,transparent 6px 12px),var(--ink) !important;
+  color: var(--gold-2) !important; box-shadow: none;
+}
+#tvSettings .unit, #tvSettings .tv-size-fields label > span { color: var(--gold-2); }
+
+/* .ex-vstep，沿用原輸入欄的 min／max／step。 */
+#tvSettings .tv-delay-value { display: inline-flex; align-items: center; gap: 6px; }
+#tvSettings .ex-vstep {
+  display: inline-flex; align-items: stretch; border: 1px solid var(--gold-3);
+  background: var(--pit); border-radius: 0;
+}
+#tvSettings.tv-settings .tv-settings-content .ex-vstep #tvAutoCommitDelay {
+  width: 60px !important; height: 38px; min-height: 38px;
+  border: 0; background: transparent; color: var(--gold-1); text-align: center;
+  font: 700 17px/1 var(--disp) !important; padding: 0 5px; border-radius: 0;
+}
+#tvSettings .ex-vstep-btns {
+  display: grid; grid-template-rows: 1fr 1fr; border-left: 1px solid var(--gold-4); width: 26px;
+}
+#tvSettings .ex-vstep-btns button {
+  min-width: 0; min-height: 0; border: 0; border-radius: 0; padding: 0;
+  background: linear-gradient(180deg,var(--control-1),var(--control-2));
+  color: var(--gold-2); font: 700 9px/1 var(--serif);
+}
+#tvSettings .ex-vstep-btns button:first-child { border-bottom: 1px solid var(--gold-4); }
+#tvSettings .ex-vstep-btns button:hover:not(:disabled) {
+  background: rgba(217,181,104,.22); color: var(--gold-1);
+}
+#tvSettings .ex-vstep-btns button:focus-visible { outline-offset: -2px; z-index: 1; }
+
+/* .rule-control 與單軸滑桿。 */
+#tvSettings.tv-settings input[type=checkbox] {
+  appearance: none; width: 41px; height: 23px; min-height: 23px;
+  border: 1px solid #735827; border-radius: 999px;
+  background: linear-gradient(180deg,var(--control-2),var(--panel));
+  position: relative; cursor: pointer; transition: .2s;
+}
+#tvSettings.tv-settings input[type=checkbox]::before {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px;
+  border-radius: 50%; background: linear-gradient(135deg,#ede0b7,#a67c35);
+  box-shadow: 0 2px 5px #000a; transition: .2s;
+}
+#tvSettings.tv-settings input[type=checkbox]:checked { background: linear-gradient(90deg,#735827,#d9b568); }
+#tvSettings.tv-settings input[type=checkbox]:checked::before { left: 19px; }
+#tvSettings.tv-settings input[type=range]:not(#tvColorHue) {
+  appearance: auto; height: auto; accent-color: #d9b568; border: 0;
+  background: transparent; border-radius: 999px; box-shadow: none;
+}
+#tvSettings.tv-settings input[type=range]:not(#tvColorHue)::-webkit-slider-thumb {
+  appearance: auto; width: auto; height: auto; border: 0; background: none; box-shadow: none;
+}
+
+/* .picker-btn／.picker-list／.picker-item，保留既有選單及選取事件。 */
+#tvSettings.tv-settings :is(.tv-select-button,#tvColorTarget,#tvSkinToggle) {
+  border: 1px solid #6b4c1d !important; border-radius: 0;
+  background: linear-gradient(180deg,var(--control-1),var(--control-2)) !important;
+  color: var(--gold-1) !important; text-align: left;
+}
+#tvSettings.tv-settings :is(.tv-select-button,#tvColorTarget,#tvSkinToggle)[aria-expanded=true] {
+  border-color: var(--gold-2) !important;
+}
+#tvSettings.tv-settings :is(.tv-select-menu,#tvColorOptions,#tvSkinMenu) {
+  border: 1px solid #8a6a2f; border-radius: 0;
+  background: linear-gradient(160deg,var(--panel),var(--panel-2)) !important;
+  box-shadow: 0 12px 30px #000b; padding: 5px 0;
+}
+#tvSettings.tv-settings :is(.tv-select-menu,#tvColorOptions,#tvSkinMenu) [role=option] {
+  padding: 7px 14px 7px 19px; border: 0; border-left: 2px solid transparent; border-radius: 0;
+  background: none !important; color: var(--txt) !important; font-weight: 500;
+}
+#tvSettings.tv-settings :is(.tv-select-menu,#tvColorOptions,#tvSkinMenu) [role=option]:is(:hover,:focus) {
+  background: #d9b56822 !important; color: var(--gold-1) !important;
+}
+#tvSettings.tv-settings :is(.tv-select-menu,#tvColorOptions,#tvSkinMenu) [aria-selected=true] {
+  border-left-color: var(--gold-2); color: var(--gold-1) !important; background: #d9b56814 !important;
+}
+
+/* .table、.hint、.toast。 */
+#tvSettings.tv-settings .tv-limit-table th { color: var(--gold-2); font-weight: 600; }
+#tvSettings.tv-settings .tv-limit-table :is(th,td) { border-bottom: 1px solid #6b4c1d77; }
+#tvSettings.tv-settings .tv-limit-table tbody tr:hover td { background: #d9b56812; }
+#tvSettings :is(.tv-live-hint, .tv-audition-title) { color: var(--txt-dim); font-weight: 400; }
+#tvSettings.tv-settings #tvSettingsStatus.toast {
+  margin: 0; padding: 4px 10px; border: 1px solid var(--gold-2); border-radius: 0;
+  background: var(--panel); color: var(--txt); box-shadow: 0 8px 24px #000a;
+  font: 500 16px/1.4 var(--serif);
+}
+
+/* 面板版面，維持路單本身的視窗尺寸及縮放。 */
+#tvSettings #tvSettingsForm { gap: 12px; }
+#tvSettings .tv-settings-content {
+  padding: 4px 3px; scrollbar-width: thin;
+  scrollbar-color: var(--gold-3) var(--control-2); scrollbar-gutter: auto;
+}
+#tvSettings .tv-settings-content::-webkit-scrollbar-thumb { border-radius: 999px; }
+#tvSettings #tvBasicPanel .tv-settings-skin { margin: 0 0 12px; }
+#tvSettings #tvBasicPanel .tv-size-fields { gap: 6px 14px; }
+#tvSettings #tvBasicPanel .tv-size-fields label { font-size: 18px !important; padding: 0; }
+#tvSettings #tvBasicPanel .tv-size-fields input:not([type=checkbox]) { height: 40px; min-height: 40px; }
+#tvSettings #tvBasicPanel .tv-size-fields label > span { column-gap: 4px; grid-template-columns: 64px 20px; }
+#tvSettings #tvProposalLimitSettings { margin-top: 12px; grid-template-columns: auto minmax(0,1fr); }
+#tvSettings #tvProposalLimitSettings > .tv-settings-subhead::before { display: none; }
+#tvSettings #tvProposalLimitSettings > .tv-settings-subhead::after { min-width: 12px; }
+#tvSettings #tvProposalLimitSettings > :not(.tv-settings-subhead,.tv-limit-presets) { margin-top: 8px; }
+#tvSettings #tvProposalLimitSettings > .tv-live-hint { margin-bottom: 0; }
+#tvSettings #tvProposalLimitSettings .tv-limit-tables { gap: 24px; }
+#tvSettings #tvProposalLimitSettings .tv-limit-table { flex: 1 1 0; width: 50%; }
+#tvSettings .tv-limit-table :is(th,td) { padding-block: 3px; }
+#tvSettings .tv-settings-content .tv-limit-table input[data-limit-key] {
+  height: 36px; min-height: 36px; font-size: 20px !important;
+}
+#tvSettings .tv-keys-settings { gap: 12px; }
+#tvSettings .tv-keys-settings > .tv-keys-subgroup:nth-child(n+3) {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 22px;
+}
+#tvSettings .tv-keys-grid { gap: 7px 12px; }
+#tvSettings .tv-keys-grid .tv-key-bind-row { min-width: 0; }
+#tvSettings .tv-keys-subgroup :is(label,.tv-key-bind-row) { font-size: 17px !important; }
+#tvSettings .tv-settings-content .tv-keys-grid input { height: 39px; min-height: 39px; }
+#tvSettings.tv-settings #tvKeyConfirm { width: 132px !important; }
+#tvSettings #tvSavePanel { padding-top: 0; }
+#tvSettings #tvSavePanel .tv-save-settings { width: 100%; max-width: none; margin: 0; }
+#tvSettings .tv-save-grid { gap: 18px; }
+#tvSettings #tvSavePanel .tv-save-row {
+  display: grid; grid-template-columns: 165px minmax(0,1fr); gap: 16px;
+}
+#tvSettings #tvSavePanel .tv-save-row input[type=text] { width: 100%; text-align: left; }
+#tvSettings .tv-path-picker-row { min-width: 0; }
+
+#tvSettings.tv-settings :is(button,input):disabled {
+  cursor: not-allowed; opacity: .38; filter: grayscale(.5);
+}
+#tvSettings.tv-settings :focus-visible { outline: 2px solid var(--gold-1); outline-offset: 3px; }
+#tvSettings.tv-settings :is(input,textarea):focus-visible { outline: 2px solid var(--gold-1); }
+@media (prefers-reduced-motion: reduce) {
+  #tvSettings *, #tvSettings *::before, #tvSettings *::after {
+    animation: none !important; transition: none !important;
+  }
+}
