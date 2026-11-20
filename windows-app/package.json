@@ -1,6 +1,6 @@
 {
   "name": "jiujiu-baccarat-roadmap",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "百家樂電視路單離線版",
   "main": "main.cjs",
   "scripts": {

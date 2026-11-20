@@ -21,6 +21,14 @@ async function download(url, file) {
 }
 async function prepare() {
   let html = execFileSync('git', ['show', 'HEAD:tv.html'], { cwd: root, encoding: 'utf8' });
+  // 編輯模式還在開發，正式版自動拿掉：編輯面板、編輯鈕、共用元件與 tv-edit-mode 的引用。
+  html = html
+    .replace(/<aside id="tvEditPanel"[\s\S]*?<\/aside>\s*/, '')
+    .replace(/<button[^>]*id="tvEditToggle"[^>]*>[\s\S]*?<\/button>\s*/, '')
+    .split('\n').map(line => line
+      .replace(/<link[^>]*href="[^"]*(?:tv-edit-mode|共用元件)[^"]*"[^>]*>/g, '')
+      .replace(/<script[^>]*src="[^"]*(?:tv-edit-mode|共用元件)[^"]*"[^>]*><\/script>/g, ''))
+    .join('\n');
   if (/tv-edit-mode|共用元件|tvEditPanel/.test(html)) throw Error('The release HTML must not include the editor');
   const googleURL = html.match(/href="(https:\/\/fonts.googleapis.com\/css2[^\"]+)"/)[1].replaceAll('&amp;', '&');
   for (const match of html.matchAll(/(?:src|href)="([^"?#]+)(?:[^" ]*)"/g)) {

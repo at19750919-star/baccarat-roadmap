@@ -21,7 +21,7 @@ async function cloudRequest(url, options, ms) {
   if (!data || typeof data.success !== 'boolean') throw Error('invalid response');
   return data;
 }
-const LICENSE_TIMEOUT_MS = 8000;
+const LICENSE_TIMEOUT_MS = 20000;
 function licenseEnforced() {
   if (app.isPackaged) return true;
   return process.env.ROADMAP_LICENSE_ENFORCE === '1';
