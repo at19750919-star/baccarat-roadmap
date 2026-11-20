@@ -70,7 +70,7 @@ async function prepare() {
   // Match GitHub: only the public settings tabs are exposed, despite file:// loading.
   const tvPath = path.join(target, 'tv.js');
   let tv = fs.readFileSync(tvPath, 'utf8');
-  tv = tv.replace("const localSettings = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);", "const localSettings = false; // Same settings scope as GitHub public release.");
+  tv = tv.replace("const localSettings = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);", "const localSettings = true; // 安裝版跟本機一樣顯示基本、按鍵、儲存三個分頁，可選本機資料夾存路單。");
   fs.writeFileSync(tvPath, tv);
   let app = fs.readFileSync(path.join(target, 'app.js'), 'utf8');
   app = app.replace('請輸入路單名稱（保留本機清單與 JSON 下載，並送出 JSON＋PNG 雲端備份）：', '請輸入路單名稱：')
