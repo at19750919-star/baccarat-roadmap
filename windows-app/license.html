@@ -11,6 +11,12 @@
   p { margin: 0 0 18px; line-height: 1.5; }
   label { display: block; margin-bottom: 8px; }
   input { box-sizing: border-box; width: 100%; padding: 12px 14px; font: 24px "Microsoft JhengHei", sans-serif; background: #fff0ce; color: #3a0a0a; border: 1px solid #d4a64a; }
+  /* 密碼欄位只為了關掉中文輸入法；實際的字由上面這層顯示，欄位本身的圓點隱藏。 */
+  .code-box { position: relative; }
+  .code-box input { color: transparent; caret-color: transparent; }
+  .code-box:focus-within .code-shown::after { content: ''; display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: -0.15em; background: #3a0a0a; animation: caret 1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+  .code-shown { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; font: 24px "Microsoft JhengHei", sans-serif; letter-spacing: .06em; color: #3a0a0a; white-space: pre; }
   .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
   button { padding: 10px 22px; font: inherit; border: 1px solid #d4a64a; background: #f0cf85; color: #3a0a0a; }
   button.ghost { background: transparent; color: #fff2ce; }
@@ -23,7 +29,11 @@
   <p id="lead">請輸入業主給你的授權碼。</p>
   <form id="form">
     <label for="code">授權碼</label>
-    <input id="code" autocomplete="off" spellcheck="false">
+    <!-- 用密碼欄位讓 Windows 自動關掉中文輸入法，再用樣式讓字照常看得到。 -->
+    <div class="code-box">
+      <input id="code" type="password" autocomplete="off" spellcheck="false" aria-describedby="codeShown">
+      <span id="codeShown" class="code-shown" aria-hidden="true"></span>
+    </div>
     <p class="note" id="message"></p>
     <div class="row">
       <button type="button" id="submit">啟用</button>
@@ -65,13 +75,31 @@
     if (!result || result.ok) return;
     show(result);
   }
+  // 中文輸入法或全形字打進來時，換回鍵盤上的英數與連字號。
+  const ZHUYIN = 'ㄅ1ㄉ2ˇ3ˋ4ㄓ5ˊ6˙7ㄚ8ㄞ9ㄢ0ㄦ-ㄆQㄊWㄍEㄐRㄔTㄗYㄧUㄛIㄟOㄣPㄇAㄋSㄎDㄑFㄕGㄘHㄨJㄜKㄠLㄈZㄌXㄏCㄒVㄖBㄙNㄩM';
+  const zhuyinMap = {};
+  for (let i = 0; i < ZHUYIN.length; i += 2) zhuyinMap[ZHUYIN[i]] = ZHUYIN[i + 1];
+  function cleanCode(text) {
+    return Array.from(String(text || '')).map(ch => {
+      const code = ch.charCodeAt(0);
+      if (code >= 0xFF01 && code <= 0xFF5E) ch = String.fromCharCode(code - 0xFEE0);
+      if (ch === '－' || ch === '—' || ch === '–' || ch === '_') ch = '-';
+      return zhuyinMap[ch] || ch;
+    }).join('').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  }
+  const codeInput = document.getElementById('code');
+  codeInput.addEventListener('input', () => {
+    const clean = cleanCode(codeInput.value);
+    if (clean !== codeInput.value) codeInput.value = clean;
+    document.getElementById('codeShown').textContent = clean;
+  });
   document.getElementById('quit').onclick = () => RoadmapLicense.quit();
   document.getElementById('quitLocked').onclick = () => RoadmapLicense.quit();
   function submitLicense(event) {
     if (event) event.preventDefault();
     const button = document.getElementById('submit');
     button.disabled = true;
-    run(() => RoadmapLicense.submit(document.getElementById('code').value)).finally(() => { button.disabled = false; });
+    run(() => RoadmapLicense.submit(cleanCode(document.getElementById('code').value))).finally(() => { button.disabled = false; });
   }
   form.onsubmit = submitLicense;
   document.getElementById('submit').onclick = submitLicense;
